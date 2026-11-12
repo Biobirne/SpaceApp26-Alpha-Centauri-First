@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# tooling output
+node_modules/
+.playwright-mcp/
+playtest-screenshots/
+*.log
+
+# local agent settings
+.claude/settings.local.json

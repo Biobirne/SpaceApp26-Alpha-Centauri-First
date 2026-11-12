@@ -1,0 +1,35 @@
+{
+  "source": "NASA CCMC DONKI (Space Weather Database Of Notifications, Knowledge, Information)",
+  "sourceUrl": "https://ccmc.gsfc.nasa.gov/tools/DONKI/",
+  "apiBase": "https://ccmc.gsfc.nasa.gov/DONKI-API/get/",
+  "fetchedAt": "2026-11-12",
+  "note": "Snapshot files. Never present these as live data in the game.",
+  "snapshots": [
+    {
+      "id": "may2024-storm",
+      "label": "May 2024 solar storm (snapshot)",
+      "startDate": "2024-05-01",
+      "endDate": "2024-05-30",
+      "files": {
+        "FLR": "FLR-2024-05-01_2024-05-30.json",
+        "CME": "CME-2024-05-01_2024-05-30.json",
+        "SEP": "SEP-2024-05-01_2024-05-30.json",
+        "GST": "GST-2024-05-01_2024-05-30.json"
+      },
+      "summary": "179 flares (20 X-class, max X8.7), 143 CMEs, 14 SEP events, 5 geomagnetic storms (max Kp 9)"
+    },
+    {
+      "id": "recent",
+      "label": "Mid-Oct to mid-Nov 2026 (snapshot)",
+      "startDate": "2026-10-14",
+      "endDate": "2026-11-12",
+      "files": {
+        "FLR": "FLR-2026-10-14_2026-11-12.json",
+        "CME": "CME-2026-10-14_2026-11-12.json",
+        "SEP": "SEP-2026-10-14_2026-11-12.json",
+        "GST": "GST-2026-10-14_2026-11-12.json"
+      },
+      "summary": "13 flares (max M3.5), 83 CMEs, 0 SEP events, 1 geomagnetic storm (max Kp 6)"
+    }
+  ]
+}
