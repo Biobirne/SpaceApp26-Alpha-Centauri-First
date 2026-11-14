@@ -58,16 +58,25 @@ export function createMoonScene() {
       this.labelLayer = this.add.container(0, 0);
       this.flash = this.add.rectangle(0, 0, 10, 10, 0xfff2c4, 1).setOrigin(0).setAlpha(0);
       this.zones = {};
+      // A tap counts only if it started and ended on the same spot, and not on an HTML control.
+      // Phaser hears every press on the page, so without this a tap on a button above the base
+      // (closing a sheet, "Clean panels") also tapped the room below it.
+      const free = (el) => !el?.closest?.('button, a, input, .modal');
+      const tappable = (z, event, id) => {
+        z.on('pointerdown', (p) => { this.pressed = free(p.downElement) ? z : null; });
+        z.on('pointerup', (p) => { if (this.pressed === z && free(p.upElement)) this.game.events.emit(event, id); this.pressed = null; });
+      };
+      this.input.on('pointerup', () => { this.pressed = null; }); // released somewhere else
       for (const id of ROOM_IDS) {
         const z = this.add.zone(0, 0, 10, 10).setOrigin(0).setInteractive({ useHandCursor: true });
-        z.on('pointerup', () => this.game.events.emit('room-tap', id));
+        tappable(z, 'room-tap', id);
         this.zones[id] = z;
       }
       // Easter eggs: tapping Earth or the Sun gives a fun fact.
       this.skyZones = {};
       for (const id of ['earth', 'sun']) {
         const z = this.add.zone(0, 0, 10, 10).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        z.on('pointerup', () => this.game.events.emit('sky-tap', id));
+        tappable(z, 'sky-tap', id);
         this.skyZones[id] = z;
       }
       this.stars = Array.from({ length: 140 }, () => ({
