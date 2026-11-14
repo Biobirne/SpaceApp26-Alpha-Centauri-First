@@ -118,7 +118,7 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
       <p class="cmp-note">Times normal radiation, measured by NASA spacecraft that day.
         ${s.sameDay?.mars != null ? 'Mars has a thin atmosphere that helps a little.' : ''}
         ${s.sameDay?.iss != null ? 'The space station is inside Earth’s magnetic field, which bends the particles away.' : ''}
-        The Moon has neither, so it gets the full storm.</p>
+        The Moon has no thick air and no magnetic field, so it gets the full storm.</p>
     </section>` : ''}
     ${s.difficulty !== 'normal' ? `<p class="diff-done">Played on ${esc(DIFFICULTY[s.difficulty].label)}.</p>` : ''}
     ${s.lessons?.length ? `<section class="lessons"><h2>What went wrong, and why</h2>

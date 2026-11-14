@@ -36,6 +36,19 @@ const STEPS = [
     say: 'Now try the shield. Tap Low and watch what happens to the power bar.',
     after: 'See? The shield blocks radiation, but it uses power. Turn it up when the Sun gets stormy.',
   },
+  // The shelter is the real way to stay safe, and the trade is the lesson (RESEARCH.md, section 0):
+  // the clock waits until the kid has sent the crew in once and back out once.
+  {
+    id: 'shelter', target: '.shelterbtn', doneOn: 'shelterIn', hold: true, now: true,
+    ready: (s, g) => g.sinceLast(s) > 0.25 && calm(s) && !s.sheltered && s.rooms.shelter.status === 'ok',
+    say: 'Practice time! In a big storm, the crew hides in the shelter. Tap Shelter.',
+  },
+  {
+    id: 'shelterOut', target: '.shelterbtn', doneOn: 'shelterOut', hold: true, now: true,
+    ready: (s) => s.sheltered && !s.forcedShelter,
+    say: 'Safe inside! But nobody can do science in here. Tap Shelter again to go back to work.',
+    after: 'That’s the trade: safe or science. Use the shelter when radiation is high.',
+  },
   {
     id: 'fast', target: '.speed [data-speed="fast"]', doneOn: 'fast', maxDays: 1.2,
     ready: (s, g) => g.sinceLast(s) > 0.3 && calm(s),
@@ -53,8 +66,13 @@ const STEPS = [
   },
 ];
 
+/** The first lessons, in order. The later ones (call, data) wait for a matching moment. */
+const FIRST_STEPS = ['bars', 'leak', 'shield', 'shelter', 'shelterOut', 'fast'];
+
 /** Player actions that show a step is already learned, even without the hint. */
-const LEARNED_BY = { repairDone: 'leak', shieldUp: 'shield', fast: 'fast', call: 'call', data: 'data' };
+const LEARNED_BY = {
+  repairDone: 'leak', shieldUp: 'shield', shelterIn: 'shelter', shelterOut: 'shelterOut', fast: 'fast', call: 'call', data: 'data',
+};
 
 export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
   let on = enabled;
@@ -82,6 +100,11 @@ export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
       return Boolean(on && active?.hold);
     },
 
+    /** A first-steps lesson is running or still to come (the clock should not rush). */
+    get busy() {
+      return Boolean(on && (active || FIRST_STEPS.some((id) => !done.has(id))));
+    },
+
     onEvent(e) {
       if (e.type === 'warn' || e.type === 'setback' || e.type === 'card') g.flags.needHelp = true;
     },
@@ -97,7 +120,7 @@ export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
       curT = state.t;
       if (!on) return;
       // A lesson that holds the clock (the first leak) cuts in front of a running hint.
-      const urgent = STEPS.find((st) => st.hold && !done.has(st.id) && st.ready(state, g));
+      const urgent = STEPS.find((st) => st.hold && !done.has(st.id) && (st.id === 'leak' || prevDone(st)) && st.ready(state, g));
       if (active && urgent && active !== urgent) finish(false);
       if (active) {
         if (!shown) return;
@@ -114,6 +137,7 @@ export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
       // The glow starts together with the sentence that explains it.
       say(next.say, 'happy', {
         tag: 'guide',
+        now: Boolean(next.now),
         onShow: () => {
           if (active !== next || next.hold) return;
           shown = true;
@@ -135,9 +159,8 @@ export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
 
   // Keep the first lessons in order; the later ones (call, data) wait for a matching moment.
   function prevDone(step) {
-    const order = ['bars', 'leak', 'shield', 'fast'];
-    const i = order.indexOf(step.id);
-    return i <= 0 || order.slice(0, i).every((id) => done.has(id));
+    const i = FIRST_STEPS.indexOf(step.id);
+    return i <= 0 || FIRST_STEPS.slice(0, i).every((id) => done.has(id));
   }
 
   function finish(success) {

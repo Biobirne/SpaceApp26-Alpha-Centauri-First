@@ -7,6 +7,10 @@ export const CONFIG = {
 
   // Real seconds per in-game day.
   secondsPerDay: { normal: 15, fast: 5 },
+  // Nothing is happening (no problem, calm radiation, no storm on the way): days pass faster,
+  // so the first real event comes sooner (playtest: day 14 was too late). Normal or fast speed.
+  calmSecondsPerDay: { normal: 5, fast: 2.5 },
+  forecastDaysAhead: 1.5,  // Sam passes on the space weather forecast this long before the first storm
 
   // Near-side base, so Earth is always in the sky. Lunar day/night is computed for the
   // real storm dates at this longitude (see sky.js).
