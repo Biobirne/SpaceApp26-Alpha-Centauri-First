@@ -297,13 +297,15 @@ function createCrew(node) {
      * `tag` groups lines that replace each other (the guide's hints): a new one removes older
      * queued ones and takes over the bubble. `onShow` runs when the line actually appears.
      */
-    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null } = {}) {
+    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null, now = false } = {}) {
       if (chatter && (showing || queue.length)) return;
       // Drop stale chatter when something important comes in.
       if (!chatter) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].chatter) queue.splice(i, 1);
       if (tag) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
       if (queue.length > 5) queue.splice(0, queue.length - 5);
-      queue.push({ text, mood, chatter, word: w, tag, onShow, t: api.now() });
+      const line = { text, mood, chatter, word: w, tag, onShow, t: api.now() };
+      // `now`: a lesson that holds the clock goes first, so the glowing button and the words match.
+      if (now) { queue.unshift(line); if (!frozen) { next(); return; } } else queue.push(line);
       // Real news replaces small talk right away, and a new hint replaces an old one.
       if (!showing || (!frozen && ((showing.chatter && !chatter) || (tag && showing.tag === tag)))) next();
       else more.textContent = `${queue.length} more ›`;

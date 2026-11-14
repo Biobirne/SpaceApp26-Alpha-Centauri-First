@@ -424,7 +424,9 @@ const actions = {
     const on = !s.sheltered;
     if (setShelter(s, on)) {
       floater(run.hud.refs.shelter, on ? 'Crew safe inside, science paused' : 'Back to work: science is running', on ? 'var(--dose)' : 'var(--science)');
-      if (on) run.hud.crew.say('Everyone is in the shelter. Its thick walls block almost all radiation.', 'happy');
+      const teaching = run.guide.busy; // the guide explains the shelter itself
+      run.guide.onAction(on ? 'shelterIn' : 'shelterOut');
+      if (on && !teaching) run.hud.crew.say('Everyone is in the shelter. Its thick walls block almost all radiation.', 'happy');
     }
   },
 
