@@ -6,8 +6,9 @@ import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './rules/config.js';
 import { UPGRADES, ROOMS, FUN_FACTS } from './rules/content.js';
 import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
-  callEarthReady, callEarth, applyAdvice, radiationNow,
+  callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
+import { showHelp } from './ui/help.js';
 import { createHud } from './ui/hud.js';
 import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
@@ -178,6 +179,7 @@ function showStart() {
   renderStart(app, {
     index: data.index, progress, unlockAll: UNLOCK_ALL, next: nextLevel(progress, UNLOCK_ALL),
     onStart: (id) => startMission(id),
+    onHelp: () => showHelp(CONFIG),
   });
   syncSoundButtons();
   if (scene) { scene.view = idleView(); syncSlot(); }
@@ -388,6 +390,8 @@ const actions = {
         else voice.stop();
       },
       onResume: () => block('pause', false),
+      // Help keeps the clock stopped until the sheet is closed.
+      onHelp: () => { block('pause', true); showHelp(CONFIG, { onClose: () => block('pause', false) }); },
       onRestart: () => startMission(run.id),
       onMenu: showStart,
     });
@@ -426,13 +430,15 @@ const actions = {
     run.guide.onAction('call');
     block('call', true);
     let applied = null;
-    showCall(advice, s.cfg.callEarth.roundTripSeconds, (action) => { applied = action; }, () => {
+    const info = { ...s.cfg.callEarth, actionLabel: describeAdvice(s, advice.action) };
+    showCall(advice, info, (action) => { applied = action; }, () => {
       block('call', false);
       if (!applied) return;
       if (applied.repair) actions.repair(applied.repair);
       else {
         applyAdvice(s, applied);
-        run.hud.crew.say('Done! Mission Control’s plan is set.', 'happy');
+        // Say exactly what changed and what it costs, so the advice is understood, not just followed.
+        run.hud.crew.say(`Done! ${explainSetup(s)}`, 'happy');
       }
     });
   },

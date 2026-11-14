@@ -32,7 +32,7 @@ function badgeShelf(have) {
   </section>`;
 }
 
-export function renderStart(root, { index, progress, unlockAll, next, onStart }) {
+export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp }) {
   const byId = Object.fromEntries(index.storms.map((s) => [s.id, s]));
   const nextStorm = byId[next];
   const el = document.createElement('div');
@@ -40,7 +40,9 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart })
   el.innerHTML = `<div class="screen-tools">${soundButton(progress.sound)}</div><div class="screen-inner">
     <h1 class="title">${esc(GAME_TITLE)}</h1>
     <p class="pitch">Run a base on the Moon for 30 days. A real solar storm is on its way. Keep your crew safe, and keep the science going.</p>
+    <p class="real-note">${icon('check')}<span>The storms really happened. The radiation numbers were measured by NASA spacecraft.</span></p>
     <button type="button" class="btn primary big-start" data-id="${esc(next)}">${icon('rocket')}Start: ${esc(nextStorm?.title ?? next)}</button>
+    <button type="button" class="btn quiet howto">${icon('book')}How it works</button>
     <p class="credit">Your rank: <b>${rankFor(progress)}</b>. Each finished storm unlocks the next one.</p>
     <ul class="levels">
       ${LEVEL_ORDER.filter((id) => byId[id]).map((id, i) => {
@@ -59,6 +61,7 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart })
     <p class="credit">${SOURCES}</p>
   </div>`;
   root.appendChild(el);
+  el.querySelector('.howto').addEventListener('click', () => onHelp());
   el.addEventListener('click', (e) => {
     const b = e.target.closest('[data-id]');
     if (b && !b.disabled) onStart(b.dataset.id);
