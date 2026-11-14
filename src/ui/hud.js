@@ -24,7 +24,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
       <div class="clock" aria-live="off"><span class="clock-day"></span><span class="clock-date"></span></div>
       ${soundButton(sound)}
       <div class="speedbox"><div class="speed" role="group" aria-label="Game speed">
-        <button type="button" data-speed="pause" aria-label="Pause">${icon('pause')}</button>
+        <button type="button" data-speed="pause" aria-label="Pause and menu">${icon('pause')}</button>
         <button type="button" data-speed="normal" aria-label="Normal speed">${icon('play')}</button>
         <button type="button" data-speed="fast" aria-label="Fast forward">${icon('fast')}</button>
       </div><span class="speed-note"></span></div>
@@ -137,7 +137,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     const pNet = powerInPerDay(state) - powerUsePerDay(state);
     const pct = (state.power / state.capacity) * 100;
     meterSet(refs.meters.power, cache, 'power', state.power / state.capacity, `${Math.round(pct)}<small>%</small>`,
-      state.powerEmergency ? (pNet > 0 ? 'Recharging' : 'Waiting for sun') : rate((pNet / state.capacity) * 100, '%'), pct < cfg.power.warnBelow || state.powerEmergency, state.powerEmergency ? 'Empty' : 'Low');
+      state.powerEmergency ? (pNet > 0 ? 'Recharging' : 'Needs sun') : rate((pNet / state.capacity) * 100, '%'), pct < cfg.power.warnBelow || state.powerEmergency, state.powerEmergency ? 'Empty' : 'Low');
     // Air: the number that matters is how fast it changes; the warning pill names the cause.
     const leaking = ROOM_IDS.some((id) => state.rooms[id].status === 'leak');
     const aNet = airBreakdown(state).reduce((a, r) => a + r.perDay, 0);

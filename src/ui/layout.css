@@ -1,0 +1,60 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Layout fixes for every screen shape (phone, phone sideways, tablet, laptop): the base never hides
+   under Sam's bubble or the repair buttons. main.js reads --reserve-top / --reserve-bottom from the
+   stage and draws the base in the space between. A separate file so it never collides with styles.css. */
+
+/* Phones and tablets held upright: Sam talks at the top of the stage, repairs line up at the bottom. */
+.game .stage { --reserve-top: 124px; --reserve-bottom: 54px; }
+.tasks { left: 0; flex-direction: row; flex-wrap: wrap-reverse; justify-content: flex-end; align-items: flex-end; }
+
+@media (min-width: 720px) {
+  .game .stage { --reserve-top: 136px; }
+}
+
+/* Landscape tablets and laptops: Sam sits at the bottom of the stage, the repairs move into the
+   empty column on the right, so neither covers the base or Earth. */
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .game .stage { --reserve-top: 0px; --reserve-bottom: 150px; }
+  .tasks {
+    top: 0; bottom: auto; left: calc(100% + 12px); right: auto; width: 220px;
+    flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start;
+  }
+  .tasks .task { justify-content: flex-start; }
+}
+
+/* Phones held sideways: a smaller bubble at the top; the repairs move into the free space above
+   the controls on the right. */
+@media (max-height: 520px) and (min-aspect-ratio: 4/3) {
+  .game .stage { --reserve-top: 92px; --reserve-bottom: 0px; }
+  .tasks {
+    top: 0; bottom: auto; left: calc(100% + 8px); right: auto; width: min(300px, 34vw);
+    flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start;
+  }
+  .crew { max-width: 100%; }
+  .bubble { margin-top: 6px; }
+  .shieldctl > .sc-label { min-height: 36px; }
+}
+
+/* Small phones: the four bars stay in one row (two rows left almost no room for the base),
+   and Sam's bubble is a little smaller. */
+@media (max-width: 370px) {
+  .meters { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .meter { padding: 7px 5px 8px; }
+  .meter .m-value { font-size: 16px; }
+  .meter .m-value small { font-size: 11px; }
+  .meter .m-rate { font-size: 11px; }
+  .bubble { font-size: 15px; padding: 10px 12px; }
+  .game .stage { --reserve-top: 108px; }
+}
+
+/* Sheets: the first lines never run under the close button (48 px, 12 px from the corner). */
+.sheet h2 { min-height: 40px; display: flex; align-items: center; gap: 8px; }
+
+/* Start and end screens on a phone held sideways: smaller headings, so the buttons are in view. */
+@media (max-height: 520px) and (min-aspect-ratio: 4/3) {
+  .title { margin-top: 0; font-size: 44px; }
+  .end h1 { margin-top: 0; font-size: 34px; }
+  .pitch { font-size: 16px; }
+  .bigstars .ic { width: 40px; height: 40px; }
+  .screen-inner { gap: 12px; }
+}

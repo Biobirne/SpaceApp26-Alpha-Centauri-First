@@ -133,7 +133,7 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
     <div class="row">
       ${nextId ? `<button type="button" class="btn primary next">${icon('rocket')}Next: ${esc(nextTitle)}</button>` : ''}
       <button type="button" class="btn ${nextId ? 'quiet' : 'primary'} again">${icon('restart')}Play this storm again</button>
-      <button type="button" class="btn quiet menu">${icon('back')}All missions</button>
+      <button type="button" class="btn quiet menu">${icon('home')}Main menu</button>
     </div>
     <p class="credit">${esc(doc.displayLabel)}. ${SOURCES}</p>
   </div>`;

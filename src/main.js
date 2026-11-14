@@ -166,9 +166,19 @@ function syncSlot() {
   const stage = run?.hud.stage;
   if (stage) {
     const r = stage.getBoundingClientRect();
-    // The intro keeps room for its coach card, so the base is never hidden behind it.
-    const pad = run.guide.stagePad?.() ?? { top: 0, bottom: 0 };
-    scene.setSlot({ x: r.left, y: r.top + pad.top, w: r.width, h: Math.max(120, r.height - pad.top - pad.bottom) }, dpr);
+    // Keep the base clear of Sam's bubble and the repair buttons: layout.css reserves their space
+    // per screen shape (--reserve-top / --reserve-bottom). On a very short stage the reserves shrink.
+    const cs = getComputedStyle(stage);
+    let top = parseFloat(cs.getPropertyValue('--reserve-top')) || 0;
+    let bottom = parseFloat(cs.getPropertyValue('--reserve-bottom')) || 0;
+    // The intro has its own coach card instead of Sam's bubble, and says how much room that needs.
+    const pad = run.guide.stagePad?.();
+    if (pad) { top = pad.top; bottom = pad.bottom; }
+    const fit = Math.min(1, (r.height * (pad ? 0.72 : 0.5)) / Math.max(1, top + bottom));
+    top *= fit;
+    bottom *= fit;
+    const full = { x: r.left, y: r.top, w: r.width, h: r.height };
+    scene.setSlot(full, dpr, { x: r.left, y: r.top + top, w: r.width, h: r.height - top - bottom }, top > 0);
     document.documentElement.style.setProperty('--toast-bottom', `${Math.round(innerHeight - r.bottom + 60)}px`);
   } else {
     const h = innerHeight;
