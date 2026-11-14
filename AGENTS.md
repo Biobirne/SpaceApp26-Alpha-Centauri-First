@@ -60,7 +60,7 @@ Current state (14 Nov, evening). Change it here when the team decides otherwise.
   - `createMission(stormDoc, { seed, config, script })` returns the whole game state. `config` comes from `configFor('easy' | 'normal' | 'hard')`; `script` holds the guided first leak.
   - `tick(state, dtDays)` advances it.
   - Player actions: `setShield`, `setShelter`, `chooseOption`, `repairFor` / `completeRepair`, `buyUpgrade`, `callEarth` / `applyAdvice`.
-  - Read-only helpers for the UI: `powerBreakdown`, `airBreakdown`, `doseNow`, `describeAdvice`, `explainSetup`, `summarize` (end screen: stars, badges, lessons).
+  - Read-only helpers for the UI: `powerBreakdown`, `airBreakdown`, `doseNow`, `evaCost` (what a spacewalk costs now), `describeAdvice`, `explainSetup`, `summarize` (end screen: stars, badges, lessons).
   - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `particles`, `radiation`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
 - **Controller** (`src/main.js`):
   - Runs the clock, calls `tick`, drains the outbox, and pauses on cards and sheets.

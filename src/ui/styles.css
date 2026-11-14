@@ -544,6 +544,15 @@ body.no-phaser #scene {
 .lessons .next .ic { width: 18px; height: 18px; flex: none; margin-top: 1px; }
 .lessons-note { margin: 8px 0 0; font-size: 15px; color: var(--text-2); }
 
+/* spacewalk panel in the repair sheet */
+.eva { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 12px; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); font-size: 15px; }
+.eva .ic { width: 22px; height: 22px; flex: none; color: var(--dose); margin-top: 1px; }
+.eva p { margin: 2px 0 0 !important; font-size: 15px !important; color: var(--text-2); }
+.eva.risky { box-shadow: inset 4px 0 0 var(--dose); }
+.eva-choice { margin-bottom: 8px; }
+.board[hidden], .board[hidden] + .progress { display: none; }
+.crew .av-wrap { padding: 0; border: 0; background: none; cursor: pointer; flex: none; border-radius: 50%; }
+
 /* how it works */
 .help-sheet { max-width: 600px; }
 .help-sheet h3 { margin: 18px 0 8px; font-size: 18px; }

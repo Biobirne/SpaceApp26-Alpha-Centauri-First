@@ -2,6 +2,17 @@
 
 Every piece of feedback we got, what we decided and where it stands. Newest round on top.
 
+## Mentor who worked on Apollo (14 Nov 2026)
+
+Facts about the Moon to make the game more real, or to use as fun facts. He stressed the spacesuits and Moon dust most.
+
+| # | Feedback | What we do | Status |
+|---|----------|-----------|--------|
+| A1 | Radiation limits a stay on the Moon to about one year | Fun fact from Sam, and on the dose bar's info sheet. Checked: China's Chang'e 4 lander measured about 1.4 mSv a day on the surface, so a year is about 500 mSv; NASA's career limit is 600 mSv | Done |
+| A2 | Radiation is central for a lunar base | It already drives the game (real storms, shield, shelter, dose). New: spacewalks happen outside the shield, so in a storm they cost dose | Done |
+| A3 | Moon dust is a main danger: it gets everywhere and harms the lungs | Cleaning the solar panels is now a spacewalk. Dust carried back inside can clog the air filter a day later, and Sam says why. New upgrade "Suitports" keeps the dust outside. Facts: "lunar hay fever" (Apollo 17), dust wore through boot layers | Done |
+| A4 | Apollo suits: oxygen tanks, water for drinking and cooling, about 30 minutes of emergency oxygen | Tap Sam for spacesuit facts; the spacewalk panel names what the suit carries; Sam's chatter tells the Apollo versions | Done |
+
 ## Mentors (14 Nov 2026)
 
 | # | Feedback | What we do | Status |

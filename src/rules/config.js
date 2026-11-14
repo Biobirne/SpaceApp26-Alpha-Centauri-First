@@ -88,8 +88,18 @@ export const CONFIG = {
 
   upgrades: {
     battery: { cost: 40, capacityBonus: 40 },
+    suitport: { cost: 40 },
     walls: { cost: 60 },
     fission: { cost: 80 },
+  },
+
+  // Spacewalks (Apollo mentor feedback): cleaning the solar panels means going outside.
+  // Outside, the shield and walls don't help, so a spacewalk in a storm costs dose.
+  // Moon dust carried back inside can clog the air filter, unless suitports are built.
+  eva: {
+    hours: 4,
+    dustToFilterChance: 0.6,
+    dustToFilterDays: [0.8, 1.6],
   },
 };
 

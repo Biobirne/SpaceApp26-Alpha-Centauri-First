@@ -20,7 +20,8 @@ export const GLOSSARY = {
   lunarNight: { word: 'Lunar night', text: 'Darkness on the Moon that lasts about two weeks.' },
   micrometeoroid: { word: 'Micrometeoroid', text: 'A space rock smaller than a grain of sand, flying super fast.' },
   scrubber: { word: 'CO₂ scrubber', text: 'A filter that cleans the air the crew breathes out.' },
-  dust: { word: 'Lunar dust', text: 'Sharp, sticky Moon dust that covers everything.' },
+  dust: { word: 'Lunar dust', text: 'Sharp, sticky Moon dust. It is bad for lungs and machines.' },
+  eva: { word: 'Spacewalk', text: 'Going outside in a spacesuit, with oxygen, cooling water and spare air.' },
   magneticField: { word: 'Magnetic field', text: 'Earth’s invisible shield that bends solar particles away.' },
   atmosphere: { word: 'Atmosphere', text: 'A layer of air around a planet. Mars has a thin one.' },
   magnetShield: { word: 'Magnet shield', text: 'Test tech: strong magnets push solar particles away. No base has one yet.' },
@@ -48,6 +49,12 @@ export const CHATTER = [
   'Every kilogram sent to the Moon costs a lot. That’s why a base recycles almost everything.',
   'Dark craters near the south pole hide ice. It could give water, air and rocket fuel.',
   'Some modules could be inflatable, like a big balloon with very strong walls.',
+  // From a mentor who worked on Apollo: radiation, dust and spacesuits
+  'Without thick walls, about one year on the Moon would give an astronaut a whole career’s worth of radiation.',
+  'Moon dust is sharp like tiny bits of glass. Apollo astronauts sneezed from it. They called it “lunar hay fever”.',
+  'Moon dust wore through layers of the Apollo astronauts’ boots. It gets into everything.',
+  'Apollo spacesuits had water flowing through tubes in the underwear. It kept the astronauts cool.',
+  'If an Apollo suit’s oxygen failed, a spare tank gave about 30 minutes to get back to safety.',
 ];
 
 export const UPGRADES = {
@@ -60,6 +67,11 @@ export const UPGRADES = {
     name: 'Regolith walls',
     text: 'Pile Moon soil on the base. Less radiation gets in.',
     fact: 'NASA studies covering Moon habitats with lunar soil for protection.',
+  },
+  suitport: {
+    name: 'Suitports',
+    text: 'Spacesuits stay docked outside. The crew climbs in through the back, so no Moon dust comes in.',
+    fact: 'NASA has tested suitports on a prototype Moon rover.',
   },
   fission: {
     name: 'Fission power unit',
@@ -89,6 +101,14 @@ export const FUN_FACTS = {
     'A radio call from here to Earth takes a bit more than one second.',
     'Earth’s magnetic field bends most solar particles away. The Moon has no such shield.',
   ],
+  // Tap Sam: the spacesuit (Apollo mentor feedback)
+  suit: [
+    'My spacesuit carries oxygen in a big backpack.',
+    'Water flows through thin tubes in my underwear to keep me cool. The Sun is hot out there!',
+    'There is a drink bag in my helmet, so I can sip water while I work outside.',
+    'If my main oxygen stops, a spare tank gives me about 30 minutes to get back inside.',
+    'Before I come in, I brush off the Moon dust. It is sharp and bad for our lungs.',
+  ],
   sun: [
     'Sunlight takes about 8 minutes to reach the Moon.',
     'One day on the Moon, from sunrise to sunrise, lasts about 29 and a half Earth days.',
@@ -101,7 +121,7 @@ export const FUN_FACTS = {
 /** Info sheet for each building (tap it when nothing is broken). All facts are real. */
 export const ROOM_INFO = {
   solar: {
-    does: 'Turns sunlight into electricity. The battery stores it for the night.',
+    does: 'Turns sunlight into electricity. The battery stores it for the night. Cleaning the panels means a spacewalk.',
     real: 'Real Moon panels can turn to follow the low Sun. Near the south pole, some hills get sunlight almost all the time.',
     built: 'Silicon solar cells, glass covers and light metal frames. Moon soil contains silicon, so one day panels could be made here.',
     fact: 'There is no air on the Moon, so no clouds ever block the Sun.',

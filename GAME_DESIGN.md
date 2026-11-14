@@ -152,6 +152,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 | Lunar night of about 14 days, launch windows every 26 months, a 7-month trip to Mars | Science points and stars |
 | Magnet shields are a real research idea (NASA NIAC studies, the EU/CERN project SR2S): superconducting magnets that push solar particles away. They need constant power for cooling. | That a base has one: no base does yet. The block values (60/85/95 %) and power costs are game numbers. The game calls it test tech ("Magnet shield" word, "How it works") |
 | Real protection: Moon soil (regolith) or water walls, a storm shelter, space weather forecasts from Earth | The shelter's 90 % and the regolith upgrade's numbers |
+| Outside on a spacewalk, walls and shields don't protect. Moon dust is sharp, harms lungs and seals (Apollo reports). Apollo suits: oxygen, water cooling, a drink bag, about 30 min of emergency oxygen. Suitports are a NASA-tested idea. About one year of unshielded Moon radiation is close to NASA's career limit | A spacewalk lasts 4 hours and costs the outside dose for that time; dust comes inside with a 60 % chance and clogs the filter a day later |
 
 ## Build order (cut from the bottom)
 1. ✓ One playable Moon mission with one storm: start → 30 days → end → restart.
@@ -228,6 +229,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
 - **Making the game explain itself:**
   - **Everything is explained:** a "How it works" sheet (start screen and pause menu) covers every bar and control, what is real and what is made up, plus a "For grown-ups" note for judges. Call Earth says what Mission Control sees, the "Do it for me" button names the exact change, and afterwards the crewmate says what is set now and what it costs.
 - **Mentor feedback, round 1** (`FEEDBACK.md`): Easy/Normal/Hard (`DIFFICULTY_TUNING` in `config.js`, texts in `content.js`), a mission briefing, Sam's story and materials lines, an info sheet for every building (`ROOM_INFO`), live breakdowns behind the power, air and dose bars, and lessons: every setback says why it happened and what to try next time, and the end screen lists them.
+- **Apollo mentor facts** (`FEEDBACK.md`): cleaning the panels is a spacewalk that shows its radiation cost first (and offers to wait during a storm); Moon dust carried inside can clog the air filter; a "Suitports" upgrade stops that; tap Sam for spacesuit facts; Mission Control says when to wait with a spacewalk; Apollo facts in Sam's chatter and the dose bar's info sheet. Taps on HTML buttons no longer also tap the building underneath.
 - **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
 
 ## Still to decide (team)

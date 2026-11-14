@@ -41,7 +41,7 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     rooms: Object.fromEntries(ROOM_IDS.map((id) => [id, { status: 'ok', since: 0 }])),
     dust: false,
     filter: false,
-    upgrades: { battery: false, walls: false, fission: false },
+    upgrades: { battery: false, suitport: false, walls: false, fission: false },
     callEarth: { readyAt: 0, calls: 0 },
     pendingCard: null,
     cardQueue: [],
@@ -180,9 +180,31 @@ export function repairFor(state, roomId) {
   const room = state.rooms[roomId];
   if (room.status === 'leak') return { roomId, kind: 'leak', taps: 4 };
   if (room.status === 'lost') return { roomId, kind: 'rebuild', taps: 6, cost: 30 };
-  if (roomId === 'solar' && state.dust) return { roomId, kind: 'dust', taps: 5 };
+  if (roomId === 'solar' && state.dust) return { roomId, kind: 'dust', taps: 5, eva: evaCost(state) };
   if (roomId === 'hab' && state.filter) return { roomId, kind: 'filter', taps: 3 };
   return null;
+}
+
+/** A spacewalk outside: what it costs in radiation dose right now (no shield, no walls out there). */
+export function evaCost(state) {
+  const rad = radiationNow(state);
+  const dose = state.cfg.dose.perNormalDay * rad * (state.cfg.eva.hours / 24);
+  return { rad, dose: Math.round(dose * 10) / 10, hours: state.cfg.eva.hours };
+}
+
+/** Back from a spacewalk: add its dose, and Moon dust may come inside with the crew. */
+function afterSpacewalk(state) {
+  const eva = evaCost(state);
+  state.dose += eva.dose;
+  state.stats.totalDose += eva.dose;
+  learn(state, 'eva');
+  if (eva.dose >= 1) emit(state, 'crew', { mood: 'calm', text: `Back inside! The spacewalk added ${eva.dose} to our radiation dose. Outside, the shield can’t protect us.` });
+  const c = state.cfg.eva;
+  if (!state.upgrades.suitport && !state.filter && state.rng.next() < c.dustToFilterChance) {
+    state.script.push({ t: state.t + state.rng.range(c.dustToFilterDays[0], c.dustToFilterDays[1]), kind: 'filter', cause: 'dust' });
+    state.script.sort((a, b) => a.t - b.t);
+    emit(state, 'crew', { mood: 'calm', text: 'Oh no, we brought Moon dust inside on our suits. It is bad for our lungs, and the air filter has to catch it.' });
+  }
 }
 
 export function completeRepair(state, roomId, kind) {
@@ -202,6 +224,7 @@ export function completeRepair(state, roomId, kind) {
     state.dust = false;
     emit(state, 'room', { roomId: 'solar', status: 'ok' });
     emit(state, 'crew', { mood: 'happy', text: 'Panels are clean. Full solar power again!' });
+    afterSpacewalk(state);
   } else if (kind === 'filter' && state.filter) {
     state.filter = false;
     emit(state, 'room', { roomId: 'hab', status: 'ok' });
@@ -278,10 +301,15 @@ export function getAdvice(state) {
       'Every hour it leaks, the crew loses air.', { repair: leak });
   }
   if (state.dust && state.daylight) {
-    return advice('Clean the solar panels.', 'Moon dust is blocking most of the sunlight.', { repair: 'solar' });
+    const eva = evaCost(state);
+    if (eva.dose >= 2) {
+      return advice('Wait a little before you clean the solar panels.',
+        `Cleaning them is a spacewalk, and radiation is ${fmtTimes(rad)} normal. It would add ${eva.dose} to the dose.`);
+    }
+    return advice('Clean the solar panels.', 'Moon dust is blocking most of the sunlight. Cleaning them is a short spacewalk.', { repair: 'solar' });
   }
   if (state.filter) {
-    return advice('Change the air filter in the living quarters.', 'A clogged filter means less fresh air.', { repair: 'hab' });
+    return advice('Change the air filter in the living quarters.', `A clogged filter cleans less air. Air is at ${Math.round(state.air)}% now.`, { repair: 'hab' });
   }
   if (state.dose > state.cfg.dose.warnAbove && rad > 3) {
     return advice('Keep the crew in the shelter for now.',
@@ -380,7 +408,7 @@ function step(state, h) {
   if (state.pendingCard) return;
   while (state.script.length && state.script[0].t <= state.t) {
     const e = state.script.shift();
-    startProblem(state, e.kind, e.roomId);
+    startProblem(state, e.kind, e.roomId, e.cause);
   }
   if (state.t >= state.nextRandomAt) randomEvent(state);
 
@@ -713,7 +741,7 @@ function randomEvent(state) {
   startProblem(state, kind, kind === 'leak' ? rng.pick(leakable) : null);
 }
 
-function startProblem(state, kind, id) {
+function startProblem(state, kind, id, cause = null) {
   if (kind === 'leak') {
     if (state.rooms[id].status !== 'ok') return;
     state.rooms[id].status = 'leak';
@@ -727,10 +755,16 @@ function startProblem(state, kind, id) {
     emit(state, 'room', { roomId: 'solar', status: 'dust' });
     emit(state, 'crew', { mood: 'alert', text: 'Moon dust is covering the solar panels. Tap them to clean them!' });
   } else {
+    if (state.filter) return;
     state.filter = true;
     learn(state, 'scrubber');
     emit(state, 'room', { roomId: 'hab', status: 'filter' });
-    emit(state, 'crew', { mood: 'alert', text: 'The air filter is clogged. Tap the living quarters to swap it!' });
+    emit(state, 'crew', {
+      mood: 'alert',
+      text: cause === 'dust'
+        ? 'Moon dust from the spacewalk clogged the air filter. Tap the living quarters to swap it!'
+        : 'The air filter is clogged. Tap the living quarters to swap it!',
+    });
   }
 }
 

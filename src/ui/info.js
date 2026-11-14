@@ -69,7 +69,7 @@ export function showMeterInfo(kind, state) {
         <li class="in"><span>Your shield and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
         <li class="total"><span>Gets to the crew every day</span><b>+${(Math.round(d.perDay * 10) / 10)}</b></li>
       </ul>
-      <div class="fact">${icon('info')}<span>Earth’s air and magnetic field protect us from most space radiation. On the Moon there is neither.</span></div>`;
+      <div class="fact">${icon('info')}<span>Without thick walls, about one year on the Moon would give an astronaut a whole career’s worth of radiation. That is why a Moon base needs shielding.</span></div>`;
   }
   html += `<div class="row"><button type="button" class="btn primary ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'info-sheet' });
