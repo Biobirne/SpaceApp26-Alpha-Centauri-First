@@ -32,7 +32,7 @@
 .game.intro:not(.show-call) .callbtn { display: none; }
 
 /* While the buildings add up, the card shows the running total, so the meter's own rate waits. */
-.game.intro:not(.show-rates) .meter .m-rate { visibility: hidden; }
+.game.intro:not(.show-rates) .meter.power .m-rate { visibility: hidden; }
 
 /* ---------------------------------------------------------------- the coach card */
 .coach {
@@ -89,6 +89,18 @@
 .coach .coach-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a5a00; }
 .coach .coach-btn:focus-visible, .coach .coach-skip:focus-visible { outline: 3px solid #1d1b18; outline-offset: 3px; }
 .coach[data-kind='done'] .coach-btn { background: #8fe36b; box-shadow: 0 3px 0 #2f6d1a; }
+
+/* After "OK", the card is one line: what to tap. The base gets the room back. */
+.coach[data-mode='mini'] .coach-body {
+  display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; border-radius: 16px;
+  background: #ffe9b0; box-shadow: inset 0 0 0 2px #ffbf3c, 0 6px 18px rgb(0 0 0 / 0.45);
+}
+.coach .coach-todo { flex: 1; margin: 0; font-size: 18px; font-weight: 700; line-height: 1.25; }
+.coach .coach-more {
+  flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; cursor: pointer;
+  font: 700 20px/1 var(--font, system-ui); background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 2px #8a5a00;
+}
+.coach .coach-more:focus-visible { outline: 3px solid #1d1b18; outline-offset: 3px; }
 
 /* Landscape tablets and desktops: Sam talks from the lower left, like in a mission. */
 @media (min-width: 900px) and (min-aspect-ratio: 5/4) {

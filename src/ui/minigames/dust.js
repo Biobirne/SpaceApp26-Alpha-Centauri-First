@@ -61,6 +61,7 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
         <p class="dg-why"><b>Problem:</b> dust blocks the sunlight, so the panels make less power.</p>
         <p class="dg-why"><b>Fix:</b> rub the dust off.</p>
         ${evaLine ? `<p class="dg-eva">${evaLine}</p>` : ''}
+        <p class="dg-sam" aria-live="polite"><b>Sam</b><span>Low power! Only the air machine still runs. Rub the dust off.</span></p>
       </header>
       <div class="dg-rig">
         <div class="dg-panel" role="group" aria-label="Solar panel, ${n} squares">
@@ -76,7 +77,6 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
         </ul>
       </div>
       <div class="dg-ground" aria-hidden="true"></div>
-      <p class="dg-sam" aria-live="polite"><b>Sam</b><span>Low power! Only the air machine still runs. Rub the dust off.</span></p>
       <span class="mg-mark">SI-generated placeholder art</span>
       <div class="dg-win" hidden>
         <p class="dg-gain"></p>
