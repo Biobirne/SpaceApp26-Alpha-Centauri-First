@@ -33,6 +33,7 @@
     { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": ".claude/skills/{kids-ux,playtest,ship-task}/SKILL.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "assets/fonts/*", "kind": "font", "si": "none", "notes": "Lexend, SIL Open Font License, see CREDITS.md" },
-    { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "unknown", "notes": "Added by a team member; fill in how it was made." }
+    { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "unknown", "notes": "Added by a team member; fill in how it was made." },
+    { "path": "FEEDBACK.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Part 1: team members' own playtest notes, written down by Claude Code. Part 2: SI playtest review by Claude Code." }
   ]
 }
