@@ -54,7 +54,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     </section>
     <nav class="dock" aria-label="Controls">
       <div class="shieldctl">
-        <span class="sc-label">${icon('shield')}Shield</span>
+        <button type="button" class="sc-label" data-info="shield" aria-label="Shield: how it works, what it costs, and the real research. Tap to learn more.">${icon('shield')}Shield<span class="sc-i" aria-hidden="true">i</span></button>
         <div class="seg" role="group" aria-label="Shield level">
           ${SHIELD_LABELS.map((l, i) => `<button type="button" data-shield="${i}"><b>${l}</b><span></span></button>`).join('')}
         </div>

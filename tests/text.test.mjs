@@ -3,9 +3,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createMission, getAdvice, buyUpgrade, lifeLoop } from '../src/rules/mission.js';
+import { createMission, getAdvice, buyUpgrade, lifeLoop, shieldOptions, doseNow, setShelter } from '../src/rules/mission.js';
 import { configFor } from '../src/rules/config.js';
-import { ROOMS } from '../src/rules/content.js';
+import { ROOMS, SHIELD_INFO } from '../src/rules/content.js';
 
 const load = (id) => JSON.parse(readFileSync(new URL(`../data/storms/${id}.json`, import.meta.url)));
 
@@ -34,4 +34,20 @@ test('a leaking greenhouse shows "leak" in the loop, not "sealed"', () => {
   assert.equal(lifeLoop(s).plants, 'leak');
   s.rooms.greenhouse.status = 'lost';
   assert.equal(lifeLoop(s).plants, 'lost');
+});
+
+test('the shield sheet: every level with the real radiation of today, the current one matches the dose bar', () => {
+  const s = createMission(load('may2024'), { seed: 1 });
+  s.t = 13.5; // the storm peak
+  for (const inside of [false, true]) {
+    setShelter(s, inside);
+    const opts = shieldOptions(s);
+    assert.equal(opts.length, 4);
+    for (let i = 1; i < 4; i++) assert.ok(opts[i].perDay < opts[i - 1].perDay, 'more shield, less dose');
+    const now = opts.find((o) => o.current);
+    assert.ok(Math.abs(now.perDay - doseNow(s).perDay) < 1e-9);
+    assert.deepEqual(opts.map((o) => o.cost), s.cfg.power.shieldPerDay);
+  }
+  assert.ok(SHIELD_INFO.sources.length >= 2, 'the sheet names its sources');
+  assert.match(SHIELD_INFO.real, /No base/);
 });

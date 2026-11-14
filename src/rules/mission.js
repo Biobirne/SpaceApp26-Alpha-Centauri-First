@@ -844,6 +844,32 @@ export function lifeLoop(state) {
   };
 }
 
+/**
+ * Every shield level side by side, for the crew's current place (working or in the shelter):
+ * how much it blocks, what it costs, and how much dose would get through each day right now.
+ */
+export function shieldOptions(state) {
+  const c = state.cfg.dose;
+  const rad = radiationNow(state);
+  const inShelter = (state.sheltered || state.forcedShelter) && state.rooms.shelter.status !== 'lost';
+  return SHIELD_LABELS.map((label, level) => {
+    let through = 1 - c.shieldBlock[level];
+    if (inShelter) through *= 1 - c.shelterBlock;
+    if (state.upgrades.walls) through *= c.wallsFactor;
+    return {
+      level, label, current: level === state.shield,
+      shieldBlock: c.shieldBlock[level],
+      cost: state.cfg.power.shieldPerDay[level],
+      perDay: c.perNormalDay * rad * through,
+    };
+  });
+}
+
+/** The player opened the shield sheet: teach the word. */
+export function noteShieldSeen(state) {
+  learn(state, 'magnetShield');
+}
+
 /** Radiation dose right now: outside level, what blocks it, what gets through per day. */
 export function doseNow(state) {
   const rad = radiationNow(state);

@@ -6,6 +6,8 @@
 import { icon } from './icons.js';
 import { openSheet, esc } from './overlays.js';
 import { ROOMS, ROOM_INFO, CREWMATE_NAME } from '../rules/content.js';
+import { SHIELD_INFO } from '../rules/content.js';
+import { shieldOptions, noteShieldSeen } from '../rules/mission.js';
 import { powerBreakdown, airBreakdown, doseNow, fmtTimes } from '../rules/mission.js';
 import { loopHTML, wireLoop, lampHTML } from './loop.js';
 import { powerMeaning, airMeaning, doseMeaning } from './numbers.js';
@@ -60,9 +62,43 @@ function table(rows, unit) {
   </ul>`;
 }
 
+/** Tap "Shield": what it does, every level side by side with today's real radiation, and the real research. */
+function shieldHTML(state) {
+  const opts = shieldOptions(state);
+  const { rad } = doseNow(state);
+  const inShelter = state.sheltered || state.forcedShelter;
+  const fmt = (x) => (x >= 10 ? Math.round(x) : Math.round(x * 10) / 10);
+  const rows = opts.map((o) => `<tr class="${o.current ? 'now' : ''}">
+      <th scope="row">${esc(o.label)}${o.current ? ' <small>now</small>' : ''}</th>
+      <td>${Math.round(o.shieldBlock * 100)}%</td>
+      <td>${o.cost ? `−${o.cost} ⚡` : 'free'}</td>
+      <td>+${fmt(o.perDay)}</td>
+    </tr>`).join('');
+  return `<h2>${icon('shield')} Shield</h2>
+    <p>${esc(SHIELD_INFO.intro)}</p>
+    <h3>Every level, with today’s radiation (${fmtTimes(rad)} normal)</h3>
+    <table class="sh-table">
+      <thead><tr><th scope="col">Shield</th><th scope="col">Blocks</th><th scope="col">Power a day</th><th scope="col">Dose a day</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="sh-note">${inShelter
+      ? `The crew is in the shelter, so its walls block another ${Math.round(state.cfg.dose.shelterBlock * 100)}%. That is already in the dose numbers.`
+      : `The crew is working. In the shelter, its walls would block another ${Math.round(state.cfg.dose.shelterBlock * 100)}%.`}${state.upgrades.walls ? ' Your regolith walls help too.' : ''}</p>
+    ${part('shield', 'How it works', SHIELD_INFO.how)}
+    ${part('bolt', 'What it costs', SHIELD_INFO.cost)}
+    ${part('rocket', 'In real life', SHIELD_INFO.real)}
+    ${part('science', 'Why it needs power', SHIELD_INFO.cold)}
+    <div class="fact">${icon('info')}<span>${esc(SHIELD_INFO.today)}</span></div>
+    <p class="sh-game">${icon('check')}<span><b>Game numbers:</b> how much each level blocks and the power it uses are made up for the game. The radiation is real NASA data.</span></p>
+    <div class="sh-sources"><b>Sources</b><ul>${SHIELD_INFO.sources.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
+}
+
 export function showMeterInfo(kind, state) {
   let html;
-  if (kind === 'power') {
+  if (kind === 'shield') {
+    html = shieldHTML(state);
+    noteShieldSeen(state);
+  } else if (kind === 'power') {
     html = `<h2>${icon('bolt')} Power</h2>
       <p>The battery stores electricity from the solar panels. Everything in the base needs some.</p>
       ${powerMeaning(state)}

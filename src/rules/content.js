@@ -180,6 +180,28 @@ export const ROOM_INFO = {
   },
 };
 
+/**
+ * The shield sheet (tap "Shield"). Sources opened 14 Nov 2026:
+ * - CERN Bulletin 2015/32, "A superconducting shield to protect astronauts" (SR2S project, Jan 2013 to Dec 2015,
+ *   MgB2 superconducting test coils, "many more challenges to overcome")
+ * - NASA NIAC, S. Westover, "Radiation Protection and Architecture Utilizing High Temperature Superconducting
+ *   Magnets" (Phase I/II, NTRS 20190002579): coils 8 m wide, 1 tesla
+ * - Earth's magnetic field and the Orion storm plan: already in GLOSSARY and ROOM_INFO
+ */
+export const SHIELD_INFO = {
+  intro: 'A magnet shield around the base. It bends fast particles from the Sun away, a bit like Earth’s magnetic field does.',
+  how: 'Particles from the Sun carry an electric charge. Strong magnets push charged particles off course, so fewer of them reach the crew.',
+  cost: 'A stronger shield blocks more, but uses more power. At night no sunlight comes in, so a strong shield can empty the battery.',
+  real: 'No base and no spaceship has a magnet shield yet. Scientists are testing the idea. At CERN in Europe, they built test magnets for a project called SR2S (2013 to 2015). NASA studied giant magnet rings, 8 metres wide, for spaceships.',
+  cold: 'These magnets are superconductors: they only work when they are super cold. A real shield would need power to keep them cold.',
+  today: 'What protects astronauts today: thick walls, for example of Moon soil or water, and a small storm shelter.',
+  sources: [
+    'CERN Bulletin (2015): “A superconducting shield to protect astronauts”, SR2S project',
+    'NASA NIAC study by S. Westover: “Radiation Protection and Architecture Utilizing High Temperature Superconducting Magnets”',
+    'Radiation near the Moon: NASA OSDR RadLab (LRO CRaTER)',
+  ],
+};
+
 /** Why a setback happened and what to try next time (mentor feedback: learn from mistakes). */
 export const LESSONS = {
   power: ({ night, shield, dust }) => ({
