@@ -34,6 +34,14 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~19:00)
+- Pause menu: tapping "Hints off" opens a big menu nobody wants. A big button with an "i" at the bottom does nothing. And it is not clear how to get back to the main menu.
+
+**Status: done** (branch `fix/pause-menu`):
+- **Cause:** the hints button and the "How it works" button shared a CSS class. The code wired the wrong one, so the hint switch opened the help sheet, and the real hint button stayed empty (only its "i" icon).
+- **Now:** two clear switches, "Tips from Sam" and "Read aloud", each with On/Off. They only switch, nothing else opens. "How it works" is its own full-width button.
+- **Leaving:** "Play this storm again" and "Main menu" (house icon) sit side by side, with the note "Both end this mission." The end screen's "All missions" button is also called "Main menu" now.
+
 ### Florian (14 Nov, ~18:00)
 - The layout must work on every format (tablet, laptop, phone) and not look odd. Nothing should glitch or sit in the wrong place.
 
