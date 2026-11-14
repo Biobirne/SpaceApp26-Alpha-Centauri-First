@@ -41,7 +41,8 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     rooms: Object.fromEntries(ROOM_IDS.map((id) => [id, { status: 'ok', since: 0 }])),
     dust: false,
     filter: false,
-    upgrades: { battery: false, suitport: false, walls: false, fission: false },
+    upgrades: { battery: false, suitport: false, algae: false, walls: false, fission: false },
+    growLights: true,
     callEarth: { readyAt: 0, calls: 0 },
     pendingCard: null,
     cardQueue: [],
@@ -114,8 +115,34 @@ export function powerUsePerDay(state) {
     p.lifeSupportPerDay +
     (isWorking(state) ? p.sciencePerDay : 0) +
     p.shieldPerDay[state.shield] +
-    (state.daylight ? 0 : p.nightHeatingPerDay)
+    (state.daylight ? 0 : p.nightHeatingPerDay) +
+    (plantsLit(state) ? p.growLightsPerDay : 0) +
+    (state.upgrades.algae ? p.algaePerDay : 0)
   );
+}
+
+/** The greenhouse lamps are on and the plants are growing (they help the air). */
+export function plantsLit(state) {
+  return state.growLights && state.rooms.greenhouse.status === 'ok' && !state.powerEmergency;
+}
+
+/** Switch the greenhouse lamps: saves power, but the plants stop helping the air. */
+export function setGrowLights(state, on) {
+  if (on && state.powerEmergency) {
+    emit(state, 'crew', { mood: 'alert', text: 'Not enough power for the plant lamps right now. Let the battery recharge first.' });
+    return false;
+  }
+  state.growLights = !!on;
+  emit(state, 'crew', on
+    ? { mood: 'happy', text: 'Plant lamps on. The plants help clean the air again.' }
+    : { mood: 'calm', text: 'Plant lamps off. That saves power, but the plants stop helping the air.' });
+  return true;
+}
+
+/** The player opened the air loop: teach its words. */
+export function noteLoopSeen(state) {
+  learn(state, 'oxygenMachine');
+  learn(state, 'recycling');
 }
 
 export function powerInPerDay(state) {
@@ -171,6 +198,7 @@ export function buyUpgrade(state, key) {
   state.science -= up.cost;
   state.upgrades[key] = true;
   if (key === 'battery') state.capacity += up.capacityBonus;
+  if (key === 'algae') learn(state, 'recycling');
   emit(state, 'upgrade', { key });
   return true;
 }
@@ -420,10 +448,11 @@ function step(state, h) {
     const shieldWas = state.shield;
     state.powerEmergency = true;
     state.shield = 0;
+    state.growLights = false;
     state.stats.setbacks++;
     trouble(state);
     emit(state, 'setback', { kind: 'power' });
-    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield and the lab. Only life support runs now.' });
+    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield, the lab and the plant lamps. Only life support runs now.' });
     lesson(state, 'power', { night: !state.daylight, shield: shieldWas > 0, dust: state.dust });
   } else if (state.powerEmergency && state.power > cfg.power.recoverAbove) {
     state.powerEmergency = false;
@@ -434,10 +463,7 @@ function step(state, h) {
 
   // air
   const lifeSupportOn = state.power > 0 || inflow >= cfg.power.lifeSupportPerDay;
-  let air = lifeSupportOn ? cfg.air.regenPerDay : -cfg.air.noPowerPerDay;
-  if (lifeSupportOn && state.rooms.greenhouse.status === 'ok') air += cfg.air.greenhouseBonusPerDay;
-  for (const id of ROOM_IDS) if (state.rooms[id].status === 'leak') air -= cfg.air.leakPerDay;
-  if (state.filter) air -= cfg.air.cloggedFilterPerDay;
+  const air = airBreakdown(state).reduce((sum, r) => sum + r.perDay, 0);
   state.air = clamp(state.air + air * h, 0, cfg.air.max);
   if (state.air <= 0) {
     state.air = cfg.air.emergencyRefill;
@@ -525,6 +551,10 @@ function updateSky(state, initial) {
       else {
         learn(state, 'lunarNight');
         emit(state, 'crew', { mood: 'calm', text: 'Sunset. The lunar night lasts about two weeks, so save your power!' });
+        if (!state.lampHintGiven && plantsLit(state)) {
+          state.lampHintGiven = true;
+          emit(state, 'crew', { mood: 'calm', text: 'The plant lamps use power too. Tap the greenhouse to switch them off if the battery gets low.' });
+        }
       }
     }
   }
@@ -672,7 +702,9 @@ export function powerBreakdown(state) {
   else if (state.dust) solarLabel = 'Solar panels (dusty)';
   rows.push({ label: solarLabel, perDay: solar });
   if (fission) rows.push({ label: UPGRADES.fission.name, perDay: fission });
-  rows.push({ label: 'Air machines and lights', perDay: -p.lifeSupportPerDay });
+  rows.push({ label: 'Oxygen machine, filters and lights', perDay: -p.lifeSupportPerDay });
+  if (plantsLit(state)) rows.push({ label: 'Plant lamps in the greenhouse', perDay: -p.growLightsPerDay });
+  if (state.upgrades.algae) rows.push({ label: UPGRADES.algae.name, perDay: -p.algaePerDay });
   if (isWorking(state)) rows.push({ label: 'Lab work', perDay: -p.sciencePerDay });
   if (state.shield) rows.push({ label: `Shield on ${SHIELD_LABELS[state.shield]}`, perDay: -p.shieldPerDay[state.shield] });
   if (!state.daylight) rows.push({ label: 'Heating in the cold night', perDay: -p.nightHeatingPerDay });
@@ -684,12 +716,36 @@ export function airBreakdown(state) {
   const a = state.cfg.air;
   const on = state.power > 0 || powerInPerDay(state) >= state.cfg.power.lifeSupportPerDay;
   const rows = [on
-    ? { label: 'Air machines (they need power)', perDay: a.regenPerDay }
-    : { label: 'Air machines are off: no power!', perDay: -a.noPowerPerDay }];
-  if (on && state.rooms.greenhouse.status === 'ok') rows.push({ label: 'Plants in the greenhouse', perDay: a.greenhouseBonusPerDay });
+    ? { label: 'Oxygen machine and CO₂ filter (need power)', perDay: a.regenPerDay }
+    : { label: 'Oxygen machine is off: no power!', perDay: -a.noPowerPerDay }];
+  if (on && plantsLit(state)) rows.push({ label: 'Plants in the greenhouse', perDay: a.greenhouseBonusPerDay });
+  if (on && state.upgrades.algae) rows.push({ label: UPGRADES.algae.name, perDay: a.algaePerDay });
   for (const id of ROOM_IDS) if (state.rooms[id].status === 'leak') rows.push({ label: `Leak in the ${ROOMS[id].name.toLowerCase()}`, perDay: -a.leakPerDay });
-  if (state.filter) rows.push({ label: 'Clogged CO₂ filter', perDay: -a.cloggedFilterPerDay });
+  if (state.filter) {
+    rows.push({
+      label: state.upgrades.algae ? 'Clogged CO₂ filter (the algae help)' : 'Clogged CO₂ filter',
+      perDay: -a.cloggedFilterPerDay * (state.upgrades.algae ? a.algaeFilterFactor : 1),
+    });
+  }
   return rows;
+}
+
+/** Live status of each step of the life support loop (for the air sheet). */
+export function lifeLoop(state) {
+  const on = state.power > 0 || powerInPerDay(state) >= state.cfg.power.lifeSupportPerDay;
+  const leak = ROOM_IDS.find((id) => state.rooms[id].status === 'leak');
+  let plants = 'on';
+  if (state.rooms.greenhouse.status !== 'ok') plants = 'lost';
+  else if (!plantsLit(state)) plants = 'dark';
+  return {
+    crew: 'breathing',
+    filter: state.filter ? 'clogged' : 'ok',
+    water: on ? 'ok' : 'off',
+    oxygen: on ? 'ok' : 'off',
+    plants,
+    algae: state.upgrades.algae ? (on ? 'ok' : 'off') : 'none',
+    leak: leak ? ROOMS[leak].name : null,
+  };
 }
 
 /** Radiation dose right now: outside level, what blocks it, what gets through per day. */

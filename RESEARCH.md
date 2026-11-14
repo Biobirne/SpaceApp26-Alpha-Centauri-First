@@ -41,9 +41,7 @@ Nothing in the game is changed yet. Evidence quality is marked: **read** means t
   - The guided first steps still never show the **shelter** (`src/ui/guide.js`).
   - Cause tags still don't fly to the bars as numbers change.
   - The mini-games are still all the same.
-- Content to fix:
-  - `src/rules/content.js` still says plants make our oxygen. That is misleading (section 3).
-  - The planned life support loop (mentor M2/M3) should show plants and algae as *helpers*, with electrolysis as the main oxygen source.
+- Content fixed (mentor round 2): plants and algae are shown as *helpers* in the life support loop, and the oxygen machine (electrolysis) as the main oxygen source.
 - **Build phase (mentor M7):** "tap a free spot" is close to the "switch on the base" idea in point 9 below. It works as long as it stays short and the storm still comes early.
 
 ## 1. Summary: the 10 changes with the most impact

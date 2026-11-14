@@ -20,8 +20,8 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | # | Feedback | What we do | Status |
 |---|----------|-----------|--------|
 | M1 | Explain the materials needed to build an outpost like this | Sam explains materials and real plans in calm moments; every building's info sheet has a "Built from" part | Done (round 1) |
-| M2 | Focus on sustainability: resources in a recycling loop | A visible life support loop (crew → CO₂ → plants → oxygen, water recycling) with live status, and plants that need light and water | Round 2 |
-| M3 | Bio-based life support technologies | Part of the loop: plants and an algae bioreactor upgrade (real research, e.g. ESA MELiSSA) | Round 2 |
+| M2 | Focus on sustainability: resources in a recycling loop | The air sheet shows the life support loop with live status: crew → CO₂ filter → water recycler (98 %, like the space station) → oxygen machine (splits water with power) → crew. Tap a step to learn it. Plants need LED lamps that cost power: switch them off to save power at night, and they stop helping the air. Made honest after `RESEARCH.md` section 3: machines make most of the oxygen, plants help | Done (round 2) |
+| M3 | Bio-based life support technologies | Plants (lamps on or off) and a new upgrade, the algae bioreactor: more oxygen, a clogged filter hurts half as much, uses a little power. Real: ESA MELiSSA, spirulina on the space station in 2017 | Done (round 2) |
 | M4 | Rewarding system | Badges and stars exist; add a badge for hard mode | Done (round 1) |
 | M5 | Increasing difficulty, maybe 3 levels, explain each | Easy, Normal, Hard on the start screen, each with one sentence; adaptive difficulty stays on top | Done (round 1) |
 | M6 | Improve storytelling | Mission briefing at the start; history and "how it could look for real" lines from Sam (Project Horizon 1959, the August 1972 storm between Apollo 16 and 17, Artemis) | Done (round 1) |

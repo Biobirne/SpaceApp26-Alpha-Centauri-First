@@ -38,7 +38,8 @@ const sensible = {
   each: (s) => {
     for (const id of ['lab', 'greenhouse', 'hab', 'solar']) {
       const r = repairFor(s, id);
-      if (r && r.kind !== 'rebuild') completeRepair(s, id, r.kind);
+      // a sensible player waits with a spacewalk until the storm calms
+      if (r && r.kind !== 'rebuild' && !(r.eva && r.eva.dose >= 2)) completeRepair(s, id, r.kind);
     }
     const rad = radiationNow(s);
     if (rad < 5 && !s.forcedShelter) {

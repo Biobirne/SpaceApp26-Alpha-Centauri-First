@@ -15,7 +15,7 @@
   },
   "files": [
     { "path": "src/**/*.js", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
-    { "path": "src/ui/styles.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "src/ui/*.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
     { "path": "tests/**/*.mjs", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
     { "path": "tools/**/*.py", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
     { "path": "index.html", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "comment in head" },
