@@ -335,14 +335,41 @@ export function getAdvice(state) {
     .find((f) => f.t <= state.t && state.t - f.t < 1.5 && f.score >= flareScore('M5'));
   const night = nextNightChange(state);
 
+  const lost = ['lab', 'greenhouse', 'shelter', 'solar', 'hab'].find((id) => state.rooms[id].status === 'lost');
+  const shelterOk = state.rooms.shelter.status !== 'lost';
+  const inside = state.sheltered || state.forcedShelter;
+
   if (state.air < 35 && leak) {
     return advice(`Fix the leak in the ${ROOMS[leak].name.toLowerCase()} first.`,
       `Air is escaping, and you have ${Math.round(state.air)}% left.`, { repair: leak });
   }
+  // The crew must stay inside: say why, and that waiting is the right move (a kid can't fix this by tapping).
+  if (state.forcedShelter) {
+    return advice('Stay in the shelter and wait. You are doing it right.',
+      `The crew's dose reached the safety limit. When radiation drops below 3× normal (now ${fmtTimes(rad)}), they can go back to work.`, null);
+  }
   if (rad >= 20 && blockFraction(state) < 0.9) {
-    return advice(state.rooms.shelter.status !== 'lost' ? 'Send the crew to the shelter and set the shield to Mid.' : 'Set the shield to Max.',
+    if (state.powerEmergency) {
+      return advice(shelterOk ? 'Send the crew to the shelter.' : 'Keep the crew inside and wait for power.',
+        `Radiation is ${fmtTimes(rad)} normal, and the battery is empty, so the shield can't run.${shelterOk ? ' The shelter walls work without power.' : ''}`,
+        shelterOk && !inside ? { sheltered: true } : null);
+    }
+    return advice(shelterOk ? `${inside ? 'Keep the crew in the shelter' : 'Send the crew to the shelter'} and set the shield to Mid.` : 'Set the shield to Max.',
       `Radiation near the Moon is ${fmtTimes(rad)} normal right now.`,
-      state.rooms.shelter.status !== 'lost' ? { shield: 2, sheltered: true } : { shield: 3 });
+      shelterOk ? { shield: 2, sheltered: true } : { shield: 3 });
+  }
+  // Battery empty: say what still works and when power comes back.
+  if (state.powerEmergency) {
+    const night = nextNightChange(state);
+    if (!state.daylight) {
+      return advice('Wait for sunrise. Leave the shield off.',
+        `The battery is empty and it's night, so the panels make no power.${night?.becomesDay ? ` The Sun rises in about ${dayWord(Math.max(1, Math.round(night.inDays)))}.` : ''} The air machines keep running.`, null);
+    }
+    if (state.dust) {
+      return advice('Clean the solar panels.', 'The battery is empty, and Moon dust blocks most of the sunlight. Clean panels charge it much faster.', { repair: 'solar' });
+    }
+    return advice('Let the battery charge. Leave the shield off for now.',
+      `The battery is empty. The Sun is up, so the panels are charging it: ${batteryPct(state)}% now. The lab starts again at ${Math.round(state.cfg.power.recoverAbove / state.capacity * 100)}%.`, null);
   }
   if (recentBigFlare && state.shield < 2 && rad < 20) {
     return advice('Raise your shield to Max.',
@@ -351,6 +378,11 @@ export function getAdvice(state) {
   if (leak) {
     return advice(`Tap the ${ROOMS[leak].name.toLowerCase()} to patch the leak.`,
       'Every hour it leaks, the crew loses air.', { repair: leak });
+  }
+  // A storm is coming and the shelter can be made stronger: a good thing to do while waiting.
+  if (state.stormSoon && fortOpen(state)) {
+    return advice('Build the storm fort: tap the shelter.',
+      'A storm is coming. Heavy supplies on the shelter wall stop even more radiation.', { repair: 'shelter' });
   }
   if (state.dust && state.daylight) {
     const eva = evaCost(state);
@@ -363,6 +395,21 @@ export function getAdvice(state) {
   if (state.filter) {
     return advice('Swap the air filter in the home.', `A clogged filter cleans less air. Air is at ${Math.round(state.air)}% now.`, { repair: 'hab' });
   }
+  // A lost building: say what is missing, and how to get it back (or how to earn the points first).
+  if (lost) {
+    const name = ROOMS[lost].name.toLowerCase();
+    const job = repairFor(state, lost);
+    const missing = {
+      lab: `Until then, the lab makes only ${Math.round(state.cfg.science.labLostFactor * 100)}% of its science.`,
+      greenhouse: 'Until then, the plants can’t help the air.',
+      shelter: 'Until then, there is no shelter in a storm: use the shield.',
+    }[lost] || '';
+    if (canAfford(state, job.cost)) {
+      return advice(`Rebuild the ${name}: tap it.`, `It was sealed to save the air. Rebuilding costs ${job.cost} science points, and you have ${Math.floor(state.science)}.`, { repair: lost });
+    }
+    return advice(`Save up ${job.cost} science points to rebuild the ${name}.`,
+      `You have ${Math.floor(state.science)}. Calm days with the crew at work earn points. ${missing}`, null);
+  }
   if (state.dose > state.cfg.dose.warnAbove && rad > 3) {
     return advice(state.sheltered || state.forcedShelter ? 'Keep the crew in the shelter for now.' : 'Send the crew to the shelter for now.',
       `Their radiation dose is already ${Math.round(state.dose)} of ${state.cfg.dose.limit}.`, { sheltered: true });
@@ -370,6 +417,10 @@ export function getAdvice(state) {
   if (!state.daylight && batteryPct(state) < 40 && state.shield > 0 && rad < 5) {
     return advice('Turn the shield down to save power.',
       `It’s night, there’s no sunlight, and your battery is at ${batteryPct(state)}%. Radiation is calm.`, { shield: 0 });
+  }
+  if (state.daylight && batteryPct(state) < state.cfg.power.warnBelow && state.shield > 0 && rad < 5) {
+    return advice('Turn the shield down until the battery is fuller.',
+      `The battery is at ${batteryPct(state)}%, and radiation is calm (${fmtTimes(rad)} normal).`, { shield: 0 });
   }
   if (night && !night.becomesDay && night.inDays < 3 && batteryPct(state) < 70) {
     return advice('Charge up before dark: keep the shield low.',
@@ -404,6 +455,8 @@ export function applyAdvice(state, action) {
 /** What Mission Control's plan would change, in a few words (the button label). */
 export function describeAdvice(state, action) {
   if (!action) return null;
+  if (action.repair === 'shelter' && fortOpen(state)) return 'Build the storm fort';
+  if (action.repair && state.rooms[action.repair].status === 'lost') return `Rebuild the ${ROOMS[action.repair].name.toLowerCase()}`;
   if (action.repair) return `Fix the ${ROOMS[action.repair].name.toLowerCase()}`;
   const parts = [];
   if (action.shield !== undefined && action.shield !== state.shield) parts.push(`Shield to ${SHIELD_LABELS[action.shield]}`);
@@ -738,6 +791,9 @@ function queueCard(state, card, urgent = false) {
 }
 
 function showCard(state, card) {
+  // Build the choices now, not when the card was queued: they must match the shield the kid has set.
+  if (card.kind === 'flare') card.options = flareOptions(state);
+  else if (card.kind === 'particles') card.options = particleOptions(state);
   if (state.powerEmergency) {
     for (const o of card.options) if (o.effects.shield > 0 && !o.effects.sheltered) o.disabled = 'Battery empty';
   }
@@ -748,6 +804,67 @@ function showCard(state, card) {
 
 const shieldCost = (state, lvl) => `−${state.cfg.power.shieldPerDay[lvl]} ⚡/day`;
 
+/** "Shield up to Max", "Keep shield on Mid" or "Shield down to Low", from the shield the kid has now. */
+function shieldMove(state, lvl) {
+  const name = SHIELD_LABELS[lvl];
+  if (lvl > state.shield) return `Shield up to ${name}`;
+  if (lvl < state.shield) return `Shield down to ${name}`;
+  return `Keep shield on ${name}`;
+}
+
+/** Two choices that end in the same place are one choice: keep the first. */
+function distinct(state, options) {
+  const seen = new Set();
+  return options.filter((o) => {
+    const key = `${o.effects.shield ?? state.shield}|${o.effects.sheltered ?? (state.sheltered || state.forcedShelter)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function flareOptions(state) {
+  const cur = state.shield;
+  const inside = state.sheltered || state.forcedShelter;
+  const maxReply = cur === 3
+    ? 'The shield stays on Max. It stops almost all particles, but it eats power.'
+    : 'Shield up to Max! It stops almost all particles. It does eat power, though.';
+  const midReply = cur > 2
+    ? 'Shield down to Mid. It still stops most particles and saves power.'
+    : cur === 2 ? 'The shield stays on Mid. It stops most particles.'
+      : 'Shield up to Mid. It stops most particles and saves some power.';
+  return distinct(state, [
+    { id: 'max', label: shieldMove(state, 3), cost: shieldCost(state, 3), effects: { shield: 3 }, mood: 'happy', reply: maxReply },
+    { id: 'mid', label: shieldMove(state, 2), cost: shieldCost(state, 2), effects: { shield: 2 }, mood: 'calm', reply: midReply },
+    { id: 'wait', label: 'Wait and see', cost: 'Risky', effects: {}, mood: 'calm',
+      reply: inside ? 'Okay, the shield stays as it is. Watch the radiation level!' : 'Okay, we keep working. Watch the radiation level!' },
+  ]);
+}
+
+function particleOptions(state) {
+  const cur = state.shield;
+  const inside = state.sheltered || state.forcedShelter;
+  const options = [];
+  if (state.rooms.shelter.status !== 'lost') {
+    // The shelter is the power-saving choice: its walls do the work, so the shield goes to Low.
+    const shieldNote = cur === 1 ? '' : `, shield ${cur > 1 ? 'down' : 'up'} to Low`;
+    options.push({ id: 'shelter', label: `${inside ? 'Stay in the shelter' : 'Crew to shelter'}${shieldNote}`,
+      cost: `${shieldCost(state, 1)}, no science`, effects: { sheltered: true, shield: 1 }, mood: 'happy',
+      reply: cur > 1
+        ? `Everyone is in the shelter. Its thick walls block most of the radiation, so I turned the shield down to Low to save power. Good plan!`
+        : 'Everyone is in the shelter. Its thick walls block most of the radiation, and the shield on Low uses only a little power. Good plan!' });
+  }
+  if (!state.forcedShelter) {
+    options.push({ id: 'max', label: inside ? `${shieldMove(state, 3)}, back to work` : shieldMove(state, 3),
+      cost: shieldCost(state, 3), effects: { shield: 3, sheltered: false }, mood: 'calm',
+      reply: 'Shield at Max, and the crew is working. That costs a lot of power.' });
+    options.push({ id: 'work', label: inside ? 'Back to work' : 'Keep working', cost: cur >= 2 ? `Shield stays ${SHIELD_LABELS[cur]}` : 'Risky',
+      effects: { sheltered: false }, mood: 'calm',
+      reply: cur >= 2 ? `We work with the shield on ${SHIELD_LABELS[cur]}. Some radiation still gets through.` : 'We keep working. Our radiation dose will go up.' });
+  }
+  return distinct(state, options);
+}
+
 function flareCard(state, f) {
   const x = f.score >= flareScore('X1');
   const first = state.stats.flareCards === undefined;
@@ -757,32 +874,12 @@ function flareCard(state, f) {
     title: first ? `Solar flare: ${f.cls}!` : `New record flare: ${f.cls}!`,
     text: 'A giant flash on the Sun. Fast particles may follow within hours.',
     fact: x ? 'X flares are the biggest kind. X2 is twice as strong as X1.' : 'M flares are big. X flares are 10 times bigger.',
-    options: [
-      { id: 'max', label: 'Shield to Max', cost: shieldCost(state, 3), effects: { shield: 3 }, mood: 'happy',
-        reply: 'Shield at Max! It stops almost all particles. It does eat power, though.' },
-      { id: 'mid', label: 'Shield to Mid', cost: shieldCost(state, 2), effects: { shield: 2 }, mood: 'calm',
-        reply: 'Shield at Mid. It stops most particles and saves some power.' },
-      { id: 'wait', label: 'Wait and see', cost: 'Risky', effects: {}, mood: 'calm',
-        reply: state.sheltered || state.forcedShelter ? 'Okay, the shield stays as it is. Watch the radiation level!' : 'Okay, we keep working. Watch the radiation level!' },
-    ],
+    options: flareOptions(state),
   };
 }
 
 function particleCard(state) {
-  const shelterOk = state.rooms.shelter.status !== 'lost';
-  const options = [];
-  if (shelterOk) {
-    // The shelter is the power-saving choice: its walls do the work, so the shield goes down to Low.
-    options.push({ id: 'shelter', label: 'Crew to shelter', cost: `${shieldCost(state, 1)}, no science`,
-      effects: { sheltered: true, shield: 1 }, mood: 'happy',
-      reply: state.shield > 1
-        ? 'Everyone is in the shelter. Its thick walls block most of the radiation, so I turned the shield down to Low to save power. Good plan!'
-        : 'Everyone is in the shelter. Its thick walls block most of the radiation, and the shield on Low uses only a little power. Good plan!' });
-  }
-  options.push({ id: 'max', label: 'Shield to Max', cost: shieldCost(state, 3), effects: { shield: 3, sheltered: false }, mood: 'calm',
-    reply: 'Shield at Max, and the crew keeps working. That costs a lot of power.' });
-  options.push({ id: 'work', label: 'Keep working', cost: 'Risky', effects: { sheltered: false }, mood: 'calm',
-    reply: 'We keep working. Our radiation dose will go up.' });
+  const options = particleOptions(state);
   state.particleWaves = (state.particleWaves || 0) + 1;
   const wave = state.particleWaves;
   const rad = radiationNow(state);

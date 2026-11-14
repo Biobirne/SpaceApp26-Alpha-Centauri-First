@@ -108,7 +108,8 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 - The answer is a **concrete tip and the reason for it**, using the real numbers. The child learns the *why*, not just the *what*. For example:
   - "Raise your shield to 3, because particles from yesterday's X8 flare are arriving. Radiation near the Moon is 278× normal right now."
   - "Pause the science for 2 days, because night is coming and your batteries are only half full. Solar panels can't charge in the dark."
-- A **"Do it for me"** button under the tip names the exact change ("Shield to Mid, crew to the shelter") and applies it. Afterwards the crewmate says what is set now and what it costs. For a repair the button says "Fix it now" and opens the repair, because the repair stays the kid's job.
+- A **"Do it for me"** button under the tip names the exact change ("Shield to Mid, crew to the shelter") and applies it. Afterwards the crewmate says what is set now and what it costs. For a repair the button says "Start now" with the job underneath ("Rebuild the science lab", "Build the storm fort") and opens it, because the repair stays the kid's job.
+- **Help when things went wrong:** Mission Control also covers a sealed building (rebuild it, or how many science points are still missing and what the base lacks until then), an empty battery (wait for sunrise, clean the panels, or let it charge), the forced stay in the shelter ("wait, you are doing it right") and the storm fort before a storm. "Everything looks great" only comes when nothing is wrong.
 - **Cooldown:** after a call, the button recharges over a few in-game days. The game shows this as a filling ring. The text "Mission Control is working out the next plan" makes clear that this is a game rule, not a physics limit.
 - If the player is in trouble (a resource in the warning zone, or several bad choices in a row), the button gently pulses. No forced pop-ups.
 
@@ -202,7 +203,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
 - **Call Earth.**
   - The real 1.3 s each way is animated.
   - The tip always comes with a "Why?" and real numbers.
-  - "Do it for me" or "Fix it now" applies the tip.
+  - "Do it for me" or "Start now" applies the tip.
   - 3-day cooldown.
 - **Time.**
   - 1 day = 15 s, or 5 s when fast.

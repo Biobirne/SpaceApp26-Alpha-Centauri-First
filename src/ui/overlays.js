@@ -264,8 +264,9 @@ export function showCall(advice, { roundTripSeconds, cooldownDays, actionLabel }
     const row = box.querySelector('.row');
     if (advice.action && actionLabel) {
       // A repair is still the kid's job: the button opens it. Shield and shelter are set for them.
-      const label = advice.action.repair ? 'Fix it now' : 'Do it for me';
-      const sub = advice.action.repair ? 'Opens the repair' : actionLabel;
+      // The small line names the real job ("Build the storm fort", "Rebuild the science lab").
+      const label = advice.action.repair ? 'Start now' : 'Do it for me';
+      const sub = actionLabel;
       row.insertAdjacentHTML('beforeend', `<button type="button" class="btn earth apply">${icon('check')}<span>${label}<small class="sub">${esc(sub)}</small></span></button>`);
       row.querySelector('.apply').addEventListener('click', () => { onApply(advice.action); sheet.close(); });
     }
