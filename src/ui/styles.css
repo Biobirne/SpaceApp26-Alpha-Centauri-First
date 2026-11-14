@@ -438,7 +438,7 @@ body.no-phaser #scene {
 
 /* call Earth */
 .call-sheet .link {
-  position: relative; height: 92px; margin: 6px 0 14px;
+  position: relative; height: 100px; margin: 6px 0 14px;
   border-radius: var(--r-m); background: #0b1024; overflow: hidden;
 }
 .link .end { position: absolute; top: 50%; width: 46px; height: 46px; margin-top: -23px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; }
@@ -446,7 +446,7 @@ body.no-phaser #scene {
 .link .earth { right: 14px; background: radial-gradient(circle at 35% 35%, #7cc0ff, #2662c9 70%); color: #fff; }
 .link .wire { position: absolute; left: 66px; right: 66px; top: 50%; height: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px); }
 .link .pulse { position: absolute; top: 50%; left: 66px; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--air); box-shadow: 0 0 14px var(--air); opacity: 0; }
-.link .timer { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.link .timer { position: absolute; left: 66px; right: 66px; bottom: 6px; line-height: 1.2; text-align: center; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .advice .a-text { font-size: 20px; font-weight: 600; }
 .advice .a-why { display: flex; gap: 8px; margin: 10px 0 16px; padding: 12px 14px; border-radius: var(--r-m); background: var(--panel-2); font-size: 16px; }
 .advice .a-why b { color: var(--air); }
@@ -502,6 +502,29 @@ body.no-phaser #scene {
 .badges li.got { color: var(--text); background: var(--panel-2); }
 .badges li.got .ic { color: var(--power); }
 .badges li.new { box-shadow: inset 0 0 0 2px var(--power); }
+
+/* how it works */
+.help-sheet { max-width: 600px; }
+.help-sheet h3 { margin: 18px 0 8px; font-size: 18px; }
+.hw-lead { color: var(--text); }
+.hw-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.hw-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); }
+.hw-row .ic { width: 24px; height: 24px; flex: none; margin-top: 2px; }
+.hw-row.power .ic { color: var(--power); }
+.hw-row.air .ic { color: var(--air); }
+.hw-row.dose .ic { color: var(--dose); }
+.hw-row.science .ic { color: var(--science); }
+.hw-row b { display: block; font-size: 17px; }
+.help-sheet .hw-row p { margin: 2px 0 0; font-size: 15px; line-height: 1.4; color: var(--text-2); }
+.hw-grown { margin: 16px 0 4px; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); font-size: 15px; }
+.hw-grown summary { cursor: pointer; font-weight: 600; min-height: 28px; }
+.help-sheet .hw-grown p { margin: 8px 0 0; font-size: 15px; color: var(--text-2); }
+.help-sheet .row { margin-top: 14px; }
+.call-intro { color: var(--text-2); font-size: 16px !important; }
+.call-sheet .apply .sub { display: block; font-size: 13px; font-weight: 500; opacity: 0.85; }
+.real-note { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-size: 15px; color: var(--text-2); max-width: 44ch; }
+.real-note .ic { width: 20px; height: 20px; flex: none; color: var(--science); margin-top: 1px; }
+.start .howto { align-self: flex-start; }
 
 /* pause */
 .pause-sheet { text-align: center; }
