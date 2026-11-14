@@ -160,6 +160,11 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - "I still don't get the storm fort." It is now called storm wall, and says why it works: every particle bumps into the stuff in its way, so more stuff stops more particles.
 - The first version of the filter mini-game could not be finished: the pulled-out filter sat invisibly on top of a button. Fixed, and both new mini-games now lead step by step (numbered steps, a "Tap" pointer on the next thing, the instruction in bold before the reason).
 
+### Florian (14 Nov, ~18:25, on the phone)
+- Mini-games started with something already pressed: the old filter fell out by itself, a wall panel was already tested in the leak game, the water bag was already chosen in the storm wall test.
+- Cause (very likely, not seen on a real phone here): a touch on a building opens the mini-game, and the browser then sends a late click for the same spot, which pressed whatever lay there. Home is on the left and the shelter on the right, which matches what was pressed.
+- Fix: every sheet ignores clicks for 0.45 s after it opens.
+
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.
