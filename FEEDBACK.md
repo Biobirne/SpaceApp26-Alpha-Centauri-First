@@ -34,6 +34,11 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~22:30)
+- The light in the greenhouse info sheet looks a bit random. Remove it or place it better.
+
+**Status: done** (branch `fix/greenhouse-lamp`): kept, because the plant lamps are a real trade-off (power against air, mentor round 2), but placed better. The lamp is now a switch right under "Working fine.", the first thing in the sheet, and it looks like the switches in the pause menu (sun icon, On/Off). It flips in place, so the sheet stays open and the line under it shows the new cost ("Saves 1 ⚡ a day, but the plants don't help the air"). No extra pop-up covers the sheet. With an empty battery the switch shows "Off: the battery is empty."
+
 ### Florian (14 Nov, ~22:00)
 - When radiation comes, the card offers options as if the shield were off. With the shield already high, "Shield to Mid" or the shelter's "Low" really turn it *down*. The wording should fit.
 - Call Earth doesn't help with everything. With a building completely lost, Earth said everything is fine. It must really support confused kids who lost control, and maybe lost a building.

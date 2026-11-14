@@ -61,14 +61,22 @@ export function wireLoop(root) {
 }
 
 /** The lamp switch in the greenhouse sheet: what it gives and what it costs, before the tap. */
+/**
+ * The plant lamp switch at the top of the greenhouse sheet: the one thing the kid can change here,
+ * so it comes first, and it looks like the switches in the pause menu. It flips in place.
+ */
 export function lampHTML(state) {
   if (state.rooms.greenhouse.status !== 'ok') return '';
   const on = state.growLights && !state.powerEmergency;
   const cost = state.cfg.power.growLightsPerDay;
   const help = state.cfg.air.greenhouseBonusPerDay;
-  return `<div class="lamp ${on ? 'on' : ''}">
-    <div><b>Plant lamps: ${on ? 'on' : 'off'}</b>
-    <p>${on ? `Plants help the air (+${help}%/day). The lamps use ${cost} ⚡/day.` : 'Saves power, but the plants don’t help the air.'}</p></div>
-    <button type="button" class="btn ${on ? 'quiet' : 'go'} lamp-btn">${icon(on ? 'moon' : 'sun')}${on ? 'Switch off' : 'Switch on'}</button>
-  </div>`;
+  const text = state.powerEmergency
+    ? 'Off: the battery is empty.'
+    : on ? `Plants help the air: +${help}% a day. The lamps use ${cost} ⚡ a day.`
+      : `Saves ${cost} ⚡ a day, but the plants don’t help the air.`;
+  return `<button type="button" class="pz-toggle lamp-toggle" role="switch" aria-checked="${on}" ${state.powerEmergency ? 'disabled' : ''}>
+    ${icon('sun')}
+    <span class="pz-text"><b>Plant lamps</b><small>${esc(text)}</small></span>
+    <span class="pz-switch" aria-hidden="true"><span class="pz-knob"></span><span class="pz-state">${on ? 'On' : 'Off'}</span></span>
+  </button>`;
 }
