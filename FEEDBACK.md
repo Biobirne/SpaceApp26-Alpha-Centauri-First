@@ -34,6 +34,15 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~17:00)
+- The shield needs a lot of explaining. Tapping the shield icon should open an explanation, with sources and everything.
+
+**Status: done** (branch `feat/numbers-explained`): "Shield" in the dock is now a button with an "i".
+- The sheet shows every level side by side with today's real radiation: how much it blocks, the power it costs, and the dose it lets through each day.
+- It explains how a magnet shield works (charged particles get pushed off course, like by Earth's magnetic field), why it needs power, and that no base has one yet.
+- Real research: CERN test magnets for the SR2S project (2013–2015), and a NASA NIAC study of 8 m magnet rings.
+- What protects astronauts today: walls and a storm shelter. The block and power numbers are named as game numbers, and the sources are listed.
+
 ### Florian (14 Nov, ~16:00)
 - What does "10× radiation" mean? Which real number is behind it? The same for power, air and everything else. Numbers and percentages should be visible all the time, but never forced on you, and a tap should always give a short, friendly explanation.
 - Small logic errors in the texts. The buildings have other names on the base than in their sheet, e.g. "Plants" vs "Greenhouse".
