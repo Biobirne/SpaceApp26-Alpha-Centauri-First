@@ -15,8 +15,8 @@ export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 const BLOCK = ['Blocks nothing', 'Blocks about half', 'Blocks most', 'Blocks almost all'];
 
-/** How long a freshly opened sheet ignores clicks (see openSheet). Longer than any late click, shorter than a second tap. */
-const GHOST_TAP_MS = 450;
+/** How long a freshly opened sheet ignores every press (see openSheet). Shorter than a deliberate second tap. */
+const GHOST_TAP_MS = 350;
 
 /** A modal sheet. Returns { el, close }. `onClose` runs once, however it was closed. */
 export function openSheet(html, { className = '', closable = true, onClose } = {}) {
@@ -27,12 +27,21 @@ export function openSheet(html, { className = '', closable = true, onClose } = {
     ${html}</div>`;
   document.body.appendChild(modal);
   // On a phone, one touch can count twice: the touch itself opens this sheet (a tap on a building
-  // in the scene), and a moment later the browser sends a "click" for the same finger position.
-  // That late click would press whatever now lies under the finger, e.g. the first button of a
-  // mini-game. So the sheet ignores clicks for a short moment after it opens.
+  // in the scene), and then the browser sends a "click" for the same finger position. That click
+  // would press whatever now lies under the finger, e.g. the first button of a mini-game.
+  // So a click only counts when the finger went down on this sheet first: the sheet has to see its
+  // own pointerdown. The late click of the opening touch never has one. A short pause after opening
+  // covers browsers that report things differently, and keyboard clicks (Enter, Space) always count.
   const openedAt = performance.now();
+  let pressedHere = false;
+  modal.addEventListener('pointerdown', () => {
+    if (performance.now() - openedAt >= GHOST_TAP_MS) pressedHere = true;
+  }, true);
   modal.addEventListener('click', (e) => {
-    if (performance.now() - openedAt < GHOST_TAP_MS) { e.stopPropagation(); e.preventDefault(); }
+    const keyboard = e.detail === 0;
+    if (keyboard || pressedHere) return;
+    e.stopPropagation();
+    e.preventDefault();
   }, true);
   let closed = false;
   const close = () => {
