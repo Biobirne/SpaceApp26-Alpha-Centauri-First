@@ -1,0 +1,56 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* The life support loop in the air sheet, and the lamp switch in the greenhouse sheet (src/ui/loop.js).
+   A separate file so it never collides with changes to styles.css. */
+
+.ls { margin: 4px 0 8px; }
+.ls-intro { margin: 0 0 10px; }
+
+/* Four steps in a square; arrows sit in the gaps and show the direction of the flow. */
+.ls-ring { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 56px; padding: 4px 2px; }
+.ls-helpers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--line); }
+
+.ls-node {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  min-height: 74px; padding: 10px 12px; border: 0; border-radius: var(--r-m);
+  background: var(--panel-2); color: var(--text); font: inherit; text-align: left; cursor: pointer;
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+.ls-node .ic { width: 22px; height: 22px; color: var(--air); }
+.ls-node b { font-size: 15px; line-height: 1.2; }
+.ls-st { font-size: 14px; font-weight: 600; }
+.ls-node.good .ls-st { color: var(--science); }
+.ls-node.bad { box-shadow: inset 0 0 0 2px var(--alert); }
+.ls-node.bad .ls-st { color: var(--alert); }
+.ls-node.bad .ic { color: var(--alert); }
+.ls-node.idle .ls-st { color: var(--text-2); }
+.ls-node.idle .ic { color: var(--text-2); }
+.ls-node.sel { box-shadow: inset 0 0 0 3px var(--air); }
+
+.ls-arrow {
+  position: absolute; z-index: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: var(--air); white-space: nowrap; pointer-events: none;
+}
+.ls-arrow::after { font-size: 16px; line-height: 1; }
+.ls-arrow.right { left: 100%; top: 50%; width: 56px; transform: translateY(-50%); flex-direction: column; }
+.ls-arrow.right::after { content: '→'; }
+.ls-arrow.left { right: 100%; top: 50%; width: 56px; transform: translateY(-50%); flex-direction: column-reverse; }
+.ls-arrow.left::after { content: '←'; }
+.ls-arrow.down { top: 100%; left: 0; right: 0; height: 30px; gap: 4px; }
+.ls-arrow.down::after { content: '↓'; }
+.ls-arrow.up { bottom: 100%; left: 0; right: 0; height: 30px; gap: 4px; flex-direction: row-reverse; }
+.ls-arrow.up::after { content: '↑'; }
+.ls-arrow.right, .ls-arrow.left { white-space: normal; text-align: center; line-height: 1.1; font-size: 11px; }
+
+.ls-leak { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); box-shadow: inset 4px 0 0 var(--alert); font-size: 15px; }
+.ls-leak span, .ls-leak b { font-size: 15px; line-height: 1.4; }
+.ls-leak .ic { width: 20px; height: 20px; flex: none; color: var(--alert); }
+.ls-detail { min-height: 2.8em; margin: 12px 0 0; font-size: 15px; color: var(--text-2); }
+
+/* Greenhouse: plant lamps on or off */
+.lamp { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin: 8px 0; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); box-shadow: inset 4px 0 0 var(--line); }
+.lamp.on { box-shadow: inset 4px 0 0 var(--science); }
+.lamp b { font-size: 16px; }
+.lamp p { margin: 2px 0 0 !important; font-size: 15px !important; color: var(--text-2); }
+.lamp .btn { flex: none; min-height: var(--tap); }
+
+@media (prefers-reduced-motion: reduce) { .ls-node { transition: none; } }

@@ -14,6 +14,7 @@ A browser game for kids aged 7–12. You run a small base on the Moon for 30 day
 - **Choices with a cost:** the shield (a magnet shield, labelled as test tech), the storm shelter, repairs, spacewalks (no shield outside, and Moon dust comes back in), upgrades, fast-forward.
 - **Call Earth:** Mission Control gives one tip with the reason behind it, after a real 2.6 s radio round trip.
 - **Sam, the crewmate:** guided first steps, the story, lessons after mistakes, and read-aloud with the device's voice.
+- **Life support loop:** air and water are recycled. The oxygen machine needs power, plants need lamps, and an algae bioreactor can help.
 - **Learn more on tap:** every building, every bar, Sam (spacesuit facts from Apollo), a "How it works" sheet, and a panel with the real NASA numbers.
 - **Rewards:** stars, ranks and badges. Sound effects are synthesized in the browser.
 

@@ -8,8 +8,9 @@ import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
+import { setGrowLights, noteLoopSeen } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
-import { showRoomInfo, showMeterInfo, showBriefing } from './ui/info.js';
+import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
 import { createHud } from './ui/hud.js';
 import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
@@ -494,6 +495,17 @@ const actions = {
     watchClose(sheet, 'shop');
   },
 
+  /** Greenhouse lamps on or off (life support loop). */
+  growLights(on) {
+    if (!run) return;
+    sfx.play('tap');
+    if (!setGrowLights(run.state, on)) return;
+    const c = run.state.cfg;
+    toast(`${icon(on ? 'plant' : 'moon')}<span>${on
+      ? `Plant lamps on: +${c.air.greenhouseBonusPerDay}% air, −${c.power.growLightsPerDay} ⚡ per day`
+      : `Plant lamps off: saves ${c.power.growLightsPerDay} ⚡ per day, no help from plants`}</span>`, 'lamps', 2600);
+  },
+
   data() {
     const s = run?.state;
     if (!s || run.blockers.size) return;
@@ -502,6 +514,12 @@ const actions = {
     watchClose(showData(s, run.doc), 'data');
   },
 };
+
+// The learn-more sheets can switch the plant lamps and teach the loop words.
+setInfoActions({
+  growLights: (on) => actions.growLights(on),
+  loopSeen: () => run && noteLoopSeen(run.state),
+});
 
 /** Unblock when a sheet's modal disappears, however it was closed. */
 function watchClose(sheet, key) {

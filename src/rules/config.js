@@ -22,6 +22,8 @@ export const CONFIG = {
     nightHeatingPerDay: 1,    // keeping the base warm in the lunar night
     shieldPerDay: [0, 1.5, 3.5, 6], // shield level 0..3
     fissionPerDay: 5,         // upgrade
+    growLightsPerDay: 1,      // LED lamps in the greenhouse (the player can switch them off)
+    algaePerDay: 0.5,         // upgrade: pumps and lights of the algae bioreactor
     warnBelow: 25,
     recoverAbove: 15,         // after a power emergency, science restarts above this
   },
@@ -29,8 +31,10 @@ export const CONFIG = {
   air: {
     start: 100,
     max: 100,
-    regenPerDay: 12,          // life support, needs power
-    greenhouseBonusPerDay: 4,
+    regenPerDay: 12,          // oxygen machine (splits water) and CO₂ filter, needs power
+    greenhouseBonusPerDay: 4, // only while the grow lights are on
+    algaePerDay: 3,           // upgrade: algae turn CO₂ into oxygen
+    algaeFilterFactor: 0.5,   // upgrade: a clogged filter hurts half as much, the algae take some CO₂
     leakPerDay: 28,
     cloggedFilterPerDay: 15,
     noPowerPerDay: 18,
@@ -89,6 +93,7 @@ export const CONFIG = {
   upgrades: {
     battery: { cost: 40, capacityBonus: 40 },
     suitport: { cost: 40 },
+    algae: { cost: 50 },
     walls: { cost: 60 },
     fission: { cost: 80 },
   },

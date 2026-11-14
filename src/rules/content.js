@@ -20,6 +20,8 @@ export const GLOSSARY = {
   lunarNight: { word: 'Lunar night', text: 'Darkness on the Moon that lasts about two weeks.' },
   micrometeoroid: { word: 'Micrometeoroid', text: 'A space rock smaller than a grain of sand, flying super fast.' },
   scrubber: { word: 'CO₂ scrubber', text: 'A filter that cleans the air the crew breathes out.' },
+  oxygenMachine: { word: 'Oxygen machine', text: 'It splits water into oxygen and hydrogen, using electricity.' },
+  recycling: { word: 'Recycling loop', text: 'Used air and water get cleaned and used again and again.' },
   dust: { word: 'Lunar dust', text: 'Sharp, sticky Moon dust. It is bad for lungs and machines.' },
   eva: { word: 'Spacewalk', text: 'Going outside in a spacesuit, with oxygen, cooling water and spare air.' },
   magneticField: { word: 'Magnetic field', text: 'Earth’s invisible shield that bends solar particles away.' },
@@ -38,7 +40,10 @@ export const CHATTER = [
   'You weigh about one sixth of your Earth weight here. Great for jumping!',
   'Earth never sets in our sky. From this side of the Moon it is always up there.',
   'Radio signals to Earth take about 1.3 seconds. That’s how far away home is.',
-  'Plants in our greenhouse make fresh oxygen for us to breathe.',
+  'Our oxygen machine makes most of our air from water. Plants help a little and grow food.',
+  'One astronaut would need about 200 space-station salad gardens just to breathe.',
+  'The space station gets back 98 of every 100 drops of water. Even sweat gets cleaned.',
+  'In 2017, tiny algae flew to the space station. They turned CO₂ into oxygen.',
   // Story and history (mentor feedback: storytelling)
   'Apollo 11 landed near here in 1969. Their footprints are probably still there.',
   'In 1959, the US Army planned a Moon base called Project Horizon. It was never built.',
@@ -67,6 +72,11 @@ export const UPGRADES = {
     name: 'Regolith walls',
     text: 'Pile Moon soil on the base. Less radiation gets in.',
     fact: 'NASA studies covering Moon habitats with lunar soil for protection.',
+  },
+  algae: {
+    name: 'Algae bioreactor',
+    text: 'Tanks of tiny green algae eat CO₂ and make oxygen. A clogged filter hurts less. Uses a little power.',
+    fact: 'ESA’s MELiSSA project grows spirulina algae for this. On the space station they made oxygen as fast as on Earth.',
   },
   suitport: {
     name: 'Suitports',
@@ -118,6 +128,22 @@ export const FUN_FACTS = {
   ],
 };
 
+/**
+ * The life support loop (mentor feedback: recycling, bio-based life support), shown in the air sheet.
+ * Real: ISS oxygen generator (electrolysis), ISS water recovery 98% (NASA, June 2023),
+ * spirulina on the ISS 2017 (ESA ArtemISS / MELiSSA). Plants and algae are helpers, not the main source.
+ */
+export const LIFE_LOOP = {
+  intro: 'Air and water go round in a loop and get used again. Almost nothing is wasted.',
+  crew: { name: 'Crew', text: 'Breathes in oxygen, breathes out CO₂ and wet air.' },
+  filter: { name: 'CO₂ filter', text: 'Catches the CO₂ the crew breathes out.' },
+  water: { name: 'Water recycler', text: 'Cleans used water, even sweat. 98 of every 100 drops come back.' },
+  oxygen: { name: 'Oxygen machine', text: 'Splits water into oxygen with electricity. Most of our air comes from here.' },
+  plants: { name: 'Plants', text: 'Help a little with oxygen, and grow fresh food. They need light.' },
+  algae: { name: 'Algae', text: 'Eat CO₂ and make oxygen. Build the algae bioreactor to add them.' },
+  leak: 'Air escaping through a leak is lost to space. The loop can’t get it back.',
+};
+
 /** Info sheet for each building (tap it when nothing is broken). All facts are real. */
 export const ROOM_INFO = {
   solar: {
@@ -127,10 +153,10 @@ export const ROOM_INFO = {
     fact: 'There is no air on the Moon, so no clouds ever block the Sun.',
   },
   greenhouse: {
-    does: 'Plants turn the CO₂ the crew breathes out into fresh oxygen. They also grow food.',
+    does: 'Plants grow fresh food and help clean the air a little. They need light, so LED lamps use power.',
     real: 'Astronauts on the space station have grown lettuce, radishes and chili peppers.',
     built: 'A sealed module with LED grow lights, water pipes, and trays where roots grow in water or soil.',
-    fact: 'Plants also “sweat” clean water vapour, which machines can collect and reuse.',
+    fact: 'One astronaut would need about 200 space-station salad gardens to make enough oxygen. That is why machines do most of it.',
   },
   hab: {
     does: 'The crew lives, sleeps and eats here. The air and water machines are here too.',

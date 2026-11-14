@@ -1,0 +1,73 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
+// The life support loop (mentor feedback M2/M3): air and water go round in a circle, and the kid sees
+// which step works right now. Plants and algae are helpers next to the loop, because machines make
+// most of the oxygen (RESEARCH.md, section 3). Plain DOM, reads state through lifeLoop().
+
+import { icon } from './icons.js';
+import { esc } from './overlays.js';
+import { LIFE_LOOP } from '../rules/content.js';
+import { lifeLoop } from '../rules/mission.js';
+
+// What each status looks like: a word for the kid, and good or bad (colour is never the only signal).
+const STATUS = {
+  ok: ['Working', 'good'],
+  breathing: ['Breathing', 'good'],
+  clogged: ['Clogged!', 'bad'],
+  off: ['No power!', 'bad'],
+  on: ['Lamps on', 'good'],
+  dark: ['Lamps off', 'idle'],
+  lost: ['Sealed', 'bad'],
+  none: ['Not built', 'idle'],
+};
+
+function node(key, ic, status, arrow) {
+  const [word, tone] = STATUS[status];
+  return `<button type="button" class="ls-node ${tone}" data-key="${key}">
+    ${icon(ic)}<b>${esc(LIFE_LOOP[key].name)}</b><span class="ls-st">${word}</span>
+    ${arrow ? `<span class="ls-arrow ${arrow.dir}" aria-hidden="true">${esc(arrow.label)}</span>` : ''}
+  </button>`;
+}
+
+/** HTML for the loop. Call wireLoop() on the sheet after it opens. */
+export function loopHTML(state) {
+  const l = lifeLoop(state);
+  return `<div class="ls">
+    <p class="ls-intro">${esc(LIFE_LOOP.intro)}</p>
+    <div class="ls-ring" role="group" aria-label="Life support loop">
+      ${node('crew', 'air', l.crew, { dir: 'right', label: 'used air' })}
+      ${node('filter', 'filter', l.filter, { dir: 'down', label: 'water' })}
+      ${node('oxygen', 'bolt', l.oxygen, { dir: 'up', label: 'O₂' })}
+      ${node('water', 'drop', l.water, { dir: 'left', label: 'clean water' })}
+    </div>
+    <div class="ls-helpers">
+      ${node('plants', 'plant', l.plants)}
+      ${node('algae', 'science', l.algae)}
+    </div>
+    ${l.leak ? `<p class="ls-leak">${icon('drop')}<span><b>Leak in the ${esc(l.leak.toLowerCase())}!</b> ${esc(LIFE_LOOP.leak)}</span></p>` : ''}
+    <p class="ls-detail" aria-live="polite">Tap a step to learn what it does.</p>
+  </div>`;
+}
+
+/** Tap a step: its sentence appears below the loop. */
+export function wireLoop(root) {
+  const detail = root.querySelector('.ls-detail');
+  root.querySelectorAll('.ls-node').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('.ls-node.sel').forEach((x) => x.classList.remove('sel'));
+    b.classList.add('sel');
+    const e = LIFE_LOOP[b.dataset.key];
+    detail.innerHTML = `<b>${esc(e.name)}:</b> ${esc(e.text)}`;
+  }));
+}
+
+/** The lamp switch in the greenhouse sheet: what it gives and what it costs, before the tap. */
+export function lampHTML(state) {
+  if (state.rooms.greenhouse.status !== 'ok') return '';
+  const on = state.growLights && !state.powerEmergency;
+  const cost = state.cfg.power.growLightsPerDay;
+  const help = state.cfg.air.greenhouseBonusPerDay;
+  return `<div class="lamp ${on ? 'on' : ''}">
+    <div><b>Plant lamps: ${on ? 'on' : 'off'}</b>
+    <p>${on ? `Plants help the air (+${help}%/day). The lamps use ${cost} ⚡/day.` : 'Saves power, but the plants don’t help the air.'}</p></div>
+    <button type="button" class="btn ${on ? 'quiet' : 'go'} lamp-btn">${icon(on ? 'moon' : 'sun')}${on ? 'Switch off' : 'Switch on'}</button>
+  </div>`;
+}

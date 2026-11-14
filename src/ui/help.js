@@ -26,6 +26,7 @@ export function showHelp(cfg, { onClose } = {}) {
       ${row('shield', 'power', 'Shield', `Blocks part of the radiation (Low ${block(cfg.dose.shieldBlock[1])}, Mid ${block(cfg.dose.shieldBlock[2])}, Max ${block(cfg.dose.shieldBlock[3])}), but uses power every day. It is a magnet shield: scientists are testing this idea, but no base has one yet.`)}
       ${row('shelter', 'dose', 'Shelter', `A small room with thick walls. It blocks ${block(cfg.dose.shelterBlock)} of the radiation, but the crew can’t do science in there.`)}
       ${row('dish', 'air', 'Call Earth', `Mission Control looks at the real space weather and at your base. They tell you the most important thing to do now and why. The radio signal needs ${cfg.callEarth.roundTripSeconds} seconds there and back. Then they need ${cfg.callEarth.cooldownDays} days before the next call.`)}
+      ${row('air', 'air', 'The air loop', 'Air and water get cleaned and used again. The oxygen machine makes most of the oxygen from water, with power. Plants and algae help a little. Tap the air bar to see the loop.')}
       ${row('rocket', 'dose', 'Spacewalks', 'Cleaning the solar panels means going outside in a spacesuit. Out there the shield can’t help, so during a storm it costs radiation. Moon dust you bring back in can clog the air filter, unless you build suitports.')}
       ${row('fast', 'power', 'Time', `One day of the mission passes in ${cfg.secondsPerDay.normal} seconds. Fast-forward on calm days. The game slows down by itself when something happens.`)}
     </ul>

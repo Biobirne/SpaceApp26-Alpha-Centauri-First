@@ -7,6 +7,11 @@ import { icon } from './icons.js';
 import { openSheet, esc } from './overlays.js';
 import { ROOMS, ROOM_INFO, CREWMATE_NAME } from '../rules/content.js';
 import { powerBreakdown, airBreakdown, doseNow, fmtTimes } from '../rules/mission.js';
+import { loopHTML, wireLoop, lampHTML } from './loop.js';
+
+// Controller actions the sheets can call. main.js sets them once (keeps showRoomInfo's signature stable).
+let infoActions = {};
+export function setInfoActions(actions) { infoActions = actions; }
 
 const ROOM_ICON = { solar: 'sun', greenhouse: 'plant', hab: 'moon', lab: 'science', shelter: 'shelter' };
 
@@ -25,12 +30,17 @@ export function showRoomInfo(roomId, state) {
     <h2>${icon(ROOM_ICON[roomId])} ${esc(ROOMS[roomId].name)}</h2>
     <p class="info-status">${esc(status)}</p>
     ${part('check', 'What it does', info.does)}
+    ${roomId === 'greenhouse' ? lampHTML(state) : ''}
     ${part('rocket', 'In real life', info.real)}
     ${part('wrench', 'Built from', info.built)}
     <div class="fact">${icon('info')}<span>${esc(info.fact)}</span></div>
     <div class="row"><button type="button" class="btn primary ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'info-sheet' });
   sheet.el.querySelector('.ok').addEventListener('click', () => sheet.close());
+  sheet.el.querySelector('.lamp-btn')?.addEventListener('click', () => {
+    infoActions.growLights?.(!(state.growLights && !state.powerEmergency));
+    sheet.close();
+  });
   return sheet;
 }
 
@@ -56,9 +66,10 @@ export function showMeterInfo(kind, state) {
       <div class="fact">${icon('info')}<span>A night on the Moon lasts about 2 weeks. Real bases need big batteries, or a small nuclear power unit.</span></div>`;
   } else if (kind === 'air') {
     html = `<h2>${icon('air')} Air</h2>
-      <p>Machines clean the air: they remove the CO₂ the crew breathes out and add oxygen. Plants help too.</p>
+      ${loopHTML(state)}
       <h3>Right now</h3>${table(airBreakdown(state), '%')}
       <div class="fact">${icon('info')}<span>On the space station, oxygen is made from water: electricity splits it into hydrogen and oxygen.</span></div>`;
+    infoActions.loopSeen?.();
   } else {
     const d = doseNow(state);
     html = `<h2>${icon('radiation')} Crew dose</h2>
@@ -74,6 +85,8 @@ export function showMeterInfo(kind, state) {
   html += `<div class="row"><button type="button" class="btn primary ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'info-sheet' });
   sheet.el.querySelector('.ok').addEventListener('click', () => sheet.close());
+  const ls = sheet.el.querySelector('.ls');
+  if (ls) wireLoop(ls);
   return sheet;
 }
 
