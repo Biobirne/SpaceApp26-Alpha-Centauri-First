@@ -63,6 +63,17 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 
 **Look:** the UI colours feel generic, like the cheap SI style. This shows most in the bars and on the end/results screen. We should stand out from that.
 
+### Florian (14 Nov, ~15:30)
+- Device / build: laptop, Brave, `main` after the mentor rounds 1 and 2 (#13–#17), plus the first dust mini-game (#19).
+
+**P1: The game stresses me out instead of teaching me.**
+- I nearly lost the base before I even got to the solar panel task.
+- It feels like a website with more tabs and a cleaner look. I can't see where the learning happens.
+- There is too much to read, and I don't read it all. I doubt any kid will.
+- Idea: when Sam gives a tip, pause the game until the player has done it.
+
+**P1: Testing must be quick.** Open a mini-game directly, without playing a whole mission first. Done: `minigame.html?game=dust`.
+
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.

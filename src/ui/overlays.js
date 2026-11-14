@@ -80,7 +80,7 @@ function blockText(fx) {
 
 const TASKS = {
   leak: { title: 'Patch the leak', goal: (n) => `Tap the ${n} cracks to seal them.`, icon: 'drop', spot: 'wrench' },
-  dust: { title: 'Clean the solar panels', goal: () => 'Moon dust blocks the sunlight. Less light means less power.', icon: 'sun', game: mountDust },
+  dust: { title: 'Clean the solar panels', icon: 'sun', game: mountDust },
   filter: { title: 'Swap the air filter', goal: () => 'Do the steps in order.', icon: 'filter', steps: ['Pull out old filter', 'Put in new filter', 'Lock it'] },
   rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
 };
@@ -104,25 +104,30 @@ function evaPanel(eva) {
 export function showRepair(job, onDone, onCancel) {
   const t = TASKS[job.kind];
   const room = ROOMS[job.roomId];
+  let finished = false;
+  if (t.game) {
+    // Full-screen mini-games with their own rules and styles live in src/ui/minigames/.
+    const sheet = openSheet('<div class="mg-root"></div>', {
+      className: 'game-sheet',
+      onClose: () => { if (!finished) onCancel?.(); },
+    });
+    t.game(sheet.el.querySelector('.mg-root'), {
+      eva: job.eva,
+      dustyFactor: CONFIG.power.dustySolarFactor,
+      reducedMotion: reducedMotion(),
+      onFinish: () => { finished = true; sheet.close(); onDone(); },
+      onWait: () => sheet.close(),
+    });
+    return sheet;
+  }
   const html = `
     <h2>${icon(t.icon)}${esc(t.title)}</h2>
     <p class="tgoal">${esc(room.name)}: ${esc(t.goal(job.taps))}</p>
     ${job.eva ? evaPanel(job.eva) : ''}
     <div class="board" data-kind="${job.kind}" ${job.eva && job.eva.dose >= 2 ? 'hidden' : ''}></div>
-    ${t.game ? '<div class="game-ui"></div>' : `<div class="progress">${'<i></i>'.repeat(job.taps)}</div>`}`;
-  let finished = false;
+    <div class="progress">${'<i></i>'.repeat(job.taps)}</div>`;
   const sheet = openSheet(html, { className: 'task-sheet', onClose: () => { if (!finished) onCancel?.(); } });
   const board = sheet.el.querySelector('.board');
-  if (t.game) {
-    // Mini-games with their own rules live in src/ui/minigames/.
-    t.game(board, sheet.el.querySelector('.game-ui'), {
-      dustyFactor: CONFIG.power.dustySolarFactor,
-      reducedMotion: reducedMotion(),
-      onFinish: () => { finished = true; sheet.close(); onDone(); },
-    });
-    wireEva(sheet, board);
-    return sheet;
-  }
   const bars = [...sheet.el.querySelectorAll('.progress i')];
   const ordered = Boolean(t.steps) || job.kind === 'rebuild';
   const spots = layoutSpots(job.kind, job.taps);

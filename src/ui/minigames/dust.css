@@ -1,0 +1,188 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Dust mini-game (dust.js). Palette from the scene itself: black lunar sky, sunlight gold,
+   cobalt solar cells, grey regolith. One bold thing: sunlight that only clean squares let through. */
+
+.modal:has(> .game-sheet) { padding: 0; background: #000; }
+.sheet.game-sheet {
+  max-width: none; width: 100%; height: 100%; max-height: none;
+  padding: 0; border-radius: 0; background: #000; box-shadow: none; overflow: hidden;
+}
+.sheet.game-sheet > .close {
+  top: calc(var(--safe-t) + 12px); right: calc(var(--safe-r) + 12px); z-index: 6;
+  background: rgb(0 0 0 / 0.55); color: #f5f1e8; box-shadow: inset 0 0 0 2px rgb(245 241 232 / 0.5);
+}
+.game-sheet .mg-root { height: 100%; }
+
+.dg {
+  --sun: #ffc94a;
+  --sun-hot: #fff3c4;
+  --cell: #2456c8;
+  --cell-deep: #11306f;
+  --regolith: #9d927d;
+  --ground: #4a463f;
+  --ink: #f5f1e8;
+  --ink-2: #c9c2b4;
+  position: relative; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  padding: calc(var(--safe-t) + 18px) calc(var(--safe-r) + 18px) calc(var(--safe-b) + 18px) calc(var(--safe-l) + 18px);
+  color: var(--ink); overflow: hidden;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 9%, #fff6 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 24%, #fff5 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 38%, #fff4 50%, transparent 51%),
+    linear-gradient(to bottom, transparent 74%, var(--ground) 74%, #2e2b26 100%),
+    #000;
+}
+/* The ground has a soft horizon and two craters. */
+.dg-ground {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 26%; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60px 14px at 22% 40%, rgb(0 0 0 / 0.35), transparent 70%),
+    radial-gradient(ellipse 90px 18px at 78% 70%, rgb(0 0 0 / 0.3), transparent 70%),
+    linear-gradient(to bottom, #6a645a, transparent 30%);
+  opacity: 0.8;
+}
+
+/* The Sun and its light, top right. */
+.dg-sun {
+  position: absolute; top: -70px; right: -70px; width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, var(--sun-hot) 0 28%, var(--sun) 40%, rgb(255 201 74 / 0.25) 56%, transparent 70%);
+  pointer-events: none;
+}
+.dg-rays { position: absolute; inset: 0; pointer-events: none; }
+.dg-rays i {
+  position: absolute; top: 0; right: 40px; width: 70px; height: 75%;
+  background: linear-gradient(to bottom, rgb(255 214 110 / 0.22), rgb(255 214 110 / 0.04) 80%, transparent);
+  transform-origin: top center; filter: blur(2px);
+}
+.dg-rays i:nth-child(1) { transform: rotate(28deg); }
+.dg-rays i:nth-child(2) { transform: rotate(40deg); width: 90px; }
+.dg-rays i:nth-child(3) { transform: rotate(52deg); }
+
+.dg-head { position: relative; z-index: 2; width: 100%; max-width: 520px; padding-right: 64px; }
+.dg-head h2 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+.dg-head p { margin: 6px 0 0; font-size: 18px; color: var(--ink-2); }
+.dg-head .dg-eva { display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 99px; font-size: 14px; background: rgb(255 255 255 / 0.1); color: var(--ink); }
+
+/* Panel, cable and battery. */
+.dg-rig {
+  position: relative; z-index: 2; flex: 1; width: 100%; max-width: 460px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+}
+.dg-panel {
+  width: 100%; aspect-ratio: 4 / 3; max-height: 42vh;
+  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px;
+  padding: 8px; border-radius: 8px;
+  background: #c9c4b8; box-shadow: 0 0 0 3px #77736a, 0 18px 30px rgb(0 0 0 / 0.6);
+  transform: perspective(800px) rotateX(12deg);
+  touch-action: none;
+}
+.dg-cell {
+  position: relative; min-width: 44px; min-height: 44px; border: 0; padding: 0; border-radius: 3px; cursor: pointer;
+  background:
+    linear-gradient(90deg, transparent 49%, rgb(255 255 255 / 0.18) 49% 51%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgb(255 255 255 / 0.18) 49% 51%, transparent 51%),
+    linear-gradient(150deg, var(--cell-deep), #0b1f4a);
+  transition: background 300ms, box-shadow 300ms;
+}
+/* Clean squares catch the sunlight. */
+.dg-cell[data-dust='0'] {
+  background:
+    linear-gradient(90deg, transparent 49%, rgb(255 255 255 / 0.3) 49% 51%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgb(255 255 255 / 0.3) 49% 51%, transparent 51%),
+    linear-gradient(135deg, rgb(255 243 196 / 0.75), transparent 38%),
+    linear-gradient(150deg, var(--cell), var(--cell-deep));
+  box-shadow: 0 0 14px rgb(255 201 74 / 0.45);
+}
+.dg-cell::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background:
+    radial-gradient(rgb(40 34 26 / 0.4) 1px, transparent 1.6px) 0 0 / 5px 5px,
+    radial-gradient(rgb(255 250 235 / 0.35) 1px, transparent 1.6px) 2px 3px / 7px 7px,
+    var(--regolith);
+  opacity: 0; transition: opacity 260ms;
+}
+.dg-cell[data-dust='2']::after { opacity: 0.97; }
+.dg-cell[data-dust='1']::after { opacity: 0.55; }
+.dg-cell.landed::after { animation: dg-land 520ms ease-out; }
+.dg-cell:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.dg-puff {
+  position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--regolith); pointer-events: none; z-index: 3;
+  animation: dg-puff 1.4s ease-out forwards;
+}
+
+.dg-cable { position: relative; width: 6px; height: 34px; background: #3b3832; border-radius: 3px; overflow: visible; }
+.dg-pulse {
+  position: absolute; left: 50%; top: 0; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%;
+  background: var(--sun-hot); box-shadow: 0 0 12px var(--sun);
+  animation: dg-pulse 800ms ease-in forwards;
+}
+.dg-battery {
+  position: relative; width: min(200px, 52%); height: 54px; margin-right: 70px; border-radius: 12px;
+  border: 3px solid #d8d2c4; background: #1d1b18;
+}
+.dg-battery::after { content: ''; position: absolute; right: -3px; top: 50%; width: 0; height: 0; }
+.dg-fill {
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--p) * 1%); border-radius: 8px;
+  background: linear-gradient(to bottom, var(--sun-hot), var(--sun));
+  transition: width 320ms var(--ease-out, ease-out);
+}
+.dg-pct { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); font-size: 26px; font-weight: 700; color: var(--sun); white-space: nowrap; }
+
+/* Sam speaks from the ground. */
+.dg-sam {
+  position: relative; z-index: 2; width: 100%; max-width: 460px; margin: 14px 0 0;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 16px; border-radius: 18px 18px 18px 4px;
+  background: var(--ink); color: #1d1b18; font-size: 18px; line-height: 1.35;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+}
+.dg-sam b { font-size: 14px; color: #8a5a00; }
+
+/* Win: what the kid achieved, one real fact, one button. */
+.dg-win {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  padding: 22px calc(var(--safe-r) + 20px) calc(var(--safe-b) + 20px) calc(var(--safe-l) + 20px);
+  background: #1d1b18; border-radius: 26px 26px 0 0; box-shadow: 0 -10px 30px rgb(0 0 0 / 0.5);
+  display: flex; flex-direction: column; gap: 10px; align-items: stretch;
+  animation: dg-rise 420ms var(--ease-pop, ease-out) both;
+}
+.dg-win[hidden] { display: none; }
+.dg .dg-gain { margin: 0; font-size: 40px; font-weight: 700; color: var(--sun); line-height: 1; }
+.dg .dg-fact { margin: 0; font-size: 17px; color: var(--ink-2); max-width: 46ch; }
+.dg.won .dg-panel { box-shadow: 0 0 0 3px var(--sun), 0 0 40px rgb(255 201 74 / 0.5), 0 18px 30px rgb(0 0 0 / 0.6); }
+
+.dg-btn {
+  min-height: 56px; border: 0; border-radius: 14px; cursor: pointer;
+  font: 700 20px/1 var(--font, system-ui); background: var(--sun); color: #1d1b18;
+}
+.dg-btn.quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px #d8d2c4; font-weight: 600; font-size: 18px; }
+.dg-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* High radiation: decide before going outside. */
+.dg-gate {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; justify-content: center; gap: 12px;
+  padding: 24px calc(var(--safe-r) + 24px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 24px);
+  background: rgb(0 0 0 / 0.86); font-size: 18px;
+}
+.dg .dg-gate p { margin: 0; max-width: 40ch; }
+.dg .dg-gate-big { font-size: 26px; font-weight: 700; color: var(--sun); }
+.dg-gate .dg-btn { width: 100%; max-width: 420px; }
+
+@keyframes dg-puff { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+@keyframes dg-land { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes dg-pulse { to { top: 100%; opacity: 0.4; } }
+@keyframes dg-rise { from { transform: translateY(100%); } }
+
+@media (min-width: 700px) {
+  .dg-head h2 { font-size: 34px; }
+}
+@media (max-height: 640px) {
+  .dg-panel { max-height: 34vh; }
+  .dg-head p:not(.dg-eva) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dg *, .dg *::after { animation: none !important; transition: none !important; }
+}

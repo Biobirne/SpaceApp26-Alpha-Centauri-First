@@ -421,6 +421,7 @@ body.no-phaser #scene {
   overflow: hidden;
   touch-action: none;
 }
+.board[data-kind='dust'] { background: linear-gradient(160deg, #1e3a7a, #142a5a); }
 .spot {
   position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px;
   display: grid; place-items: center;
@@ -431,6 +432,8 @@ body.no-phaser #scene {
 }
 .spot .ic { width: 22px; height: 22px; }
 .spot.done { animation: spot-done 420ms var(--ease-pop) forwards; pointer-events: none; }
+.board[data-kind='dust'] .spot { border-radius: 10px; width: 72px; height: 54px; margin: -27px 0 0 -36px; background: #8c7b5e; color: #2d2414; animation: none; box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.2); }
+.board[data-kind='dust'] .spot.done { background: #2f6fd6; animation: spot-done 420ms var(--ease-pop) forwards; }
 .board[data-kind='filter'] .spot, .board[data-kind='rebuild'] .spot { border-radius: 14px; background: var(--panel-3); color: var(--text); box-shadow: inset 0 0 0 2px var(--air); animation: none; }
 .board[data-kind='filter'] .spot.next, .board[data-kind='rebuild'] .spot.next { animation: spot-pulse 1.2s ease-in-out infinite; }
 .spot.done::after { content: ''; }
@@ -439,50 +442,6 @@ body.no-phaser #scene {
 .progress { display: flex; gap: 6px; justify-content: center; }
 .progress i { width: 26px; height: 8px; border-radius: 99px; background: var(--panel-3); transition: background-color 200ms; }
 .progress i.on { background: var(--science); }
-
-/* mini-game: brush Moon dust off the panels (src/ui/minigames/dust.js) */
-.board.dust-board {
-  display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(3, 1fr); gap: 6px; padding: 10px;
-  background: linear-gradient(160deg, #3d3a35, #24221f);
-}
-.dust-board .cell {
-  position: relative; min-width: 44px; min-height: 44px; border: 0; border-radius: 6px; padding: 0; cursor: pointer;
-  background:
-    linear-gradient(90deg, transparent 48%, rgb(255 255 255 / 0.12) 48% 52%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, rgb(255 255 255 / 0.12) 48% 52%, transparent 52%),
-    linear-gradient(150deg, #2f6fd6, #173f8f);
-  box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.35);
-  overflow: visible;
-}
-.dust-board .cell::after {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background:
-    radial-gradient(rgb(40 34 26 / 0.35) 1px, transparent 1.6px) 0 0 / 5px 5px,
-    radial-gradient(rgb(255 250 235 / 0.35) 1px, transparent 1.6px) 2px 3px / 7px 7px,
-    radial-gradient(ellipse at 30% 25%, rgb(255 255 255 / 0.18), transparent 60%),
-    #9d927d;
-  opacity: 0; transition: opacity 260ms;
-}
-.dust-board .cell[data-dust='2']::after { opacity: 0.95; }
-.dust-board .cell[data-dust='1']::after { opacity: 0.55; }
-.dust-board .cell[data-dust='0'] { box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.35), 0 0 12px rgb(94 220 240 / 0.35); }
-.dust-board .cell.landed::after { animation: dust-land 500ms ease-out; }
-.dust-board.all-clean .cell { box-shadow: inset 0 0 0 2px var(--power), 0 0 16px rgb(255 191 60 / 0.45); }
-.dust-board .puff {
-  position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--regolith); pointer-events: none; z-index: 2;
-  animation: dust-puff 1.3s ease-out forwards;
-}
-@keyframes dust-puff { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
-@keyframes dust-land { from { opacity: 0; transform: translateY(-8px); } }
-.dust-meter { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; font-size: 15px; color: var(--text-2); }
-.dust-meter .dm-track { height: 14px; border-radius: 99px; background: var(--panel-3); overflow: hidden; }
-.dust-meter .dm-fill { display: block; height: 100%; background: var(--power); border-radius: inherit; transition: width 260ms var(--ease-out); }
-.dust-meter .dm-value { color: var(--power); font-size: 17px; min-width: 3.2em; text-align: right; }
-.dust-status { margin: 10px 0 0; font-size: 17px; min-height: 2.6em; }
-.dust-done .fact { margin-top: 6px; }
-.dust-done .btn { width: 100%; }
-.board[hidden] ~ .game-ui { display: none; }
-@media (max-width: 380px) { .dust-meter .dm-label { font-size: 13px; } }
 
 /* call Earth */
 .call-sheet .link {
