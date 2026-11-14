@@ -64,7 +64,7 @@ _To be defined Saturday morning before any code is written:_
 
 ## Tech stack
 Decided Saturday 14 Nov: **Phaser 3.90.0 via CDN**, plus our own code as plain ES modules. There is no build step.
-- Load it with one pinned script tag: `<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>`. That exposes the global `Phaser`. Do not use npm or a bundler, and do not upgrade to Phaser 4 without asking the team.
+- Load it with one pinned script tag: `<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw==" crossorigin="anonymous"></script>` (SRI hash verified against the file 2026-11-14). That exposes the global `Phaser`. Do not use npm or a bundler, and do not upgrade to Phaser 4 without asking the team.
 - Game rules (state, resources, clock, events, scoring) live in plain modules with **no Phaser import**. Scenes only draw state and send actions back.
 - The `phaser-core` skill targets Phaser 4 with npm. Use its scene lifecycle and architecture advice, and ignore its npm/`import Phaser` setup and Phaser 4-only APIs.
 - Design reference: `GAME_DESIGN.md`. Data reference: `data/README.md`.
