@@ -1,0 +1,91 @@
+{
+ "dataKind": "archived",
+ "storms": [
+  {
+   "id": "sep2017",
+   "title": "September 2017 storm",
+   "file": "sep2017.json",
+   "sites": [
+    "moonOrbit",
+    "marsSurface"
+   ],
+   "peakTimesNormal": {
+    "moonOrbit": 1778.3,
+    "marsSurface": 2.4
+   }
+  },
+  {
+   "id": "oct2021",
+   "title": "October 2021 storm",
+   "file": "oct2021.json",
+   "sites": [
+    "moonOrbit",
+    "marsSurface"
+   ],
+   "peakTimesNormal": {
+    "moonOrbit": 41.7,
+    "marsSurface": 2.1
+   }
+  },
+  {
+   "id": "feb2022",
+   "title": "February 2022 far-side storm",
+   "file": "feb2022.json",
+   "sites": [
+    "iss",
+    "moonOrbit",
+    "marsSurface"
+   ],
+   "peakTimesNormal": {
+    "iss": 1.3,
+    "moonOrbit": 1.7,
+    "marsSurface": 2.9
+   }
+  },
+  {
+   "id": "mar2024",
+   "title": "March 2024 storm",
+   "file": "mar2024.json",
+   "sites": [
+    "iss",
+    "deepSpace",
+    "moonOrbit",
+    "marsSurface"
+   ],
+   "peakTimesNormal": {
+    "iss": 1.4,
+    "deepSpace": 185.5,
+    "moonOrbit": 935.1,
+    "marsSurface": 1.2
+   }
+  },
+  {
+   "id": "may2024",
+   "title": "May 2024 storm",
+   "file": "may2024.json",
+   "sites": [
+    "iss",
+    "deepSpace",
+    "moonOrbit",
+    "marsSurface"
+   ],
+   "peakTimesNormal": {
+    "iss": 1.3,
+    "deepSpace": 58.9,
+    "moonOrbit": 278.4,
+    "marsSurface": 15.4
+   }
+  },
+  {
+   "id": "nov2025",
+   "title": "November 2025 storm",
+   "file": "nov2025.json",
+   "sites": [
+    "deepSpace"
+   ],
+   "peakTimesNormal": {
+    "deepSpace": 304.0
+   }
+  }
+ ]
+}
