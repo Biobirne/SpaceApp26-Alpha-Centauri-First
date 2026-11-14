@@ -53,6 +53,7 @@ npm test
 | [GAME_DESIGN.md](GAME_DESIGN.md) | The game design, what is real and what is made up, and the build status |
 | [RESEARCH.md](RESEARCH.md) | How the game should teach kids aged 7–12: learning goals, the teaching test, a realism check |
 | [FEEDBACK.md](FEEDBACK.md) | Feedback from mentors, playtests and SI review, with our decisions |
+| [PITCH.md](PITCH.md) | The final pitch: our 3 main selling points, a 90-second script, slides and jury questions |
 | [data/README.md](data/README.md) | The NASA data, how the storm library was built, and the wording rules (archived, not live) |
 | [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
 | [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |

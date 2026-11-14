@@ -35,6 +35,10 @@ const data = { index: null, docs: {}, art: { rooms: {}, background: null } };
 // ------------------------------------------------------------------ sound and read-aloud
 const sfx = createSfx({ enabled: loadProgress().sound });
 let readAloud = loadProgress().readAloud && voice.available;
+// The Listen button lights up while a line is read, also when "Read aloud" reads by itself.
+voice.onState = (on) => {
+  for (const b of document.querySelectorAll('.crew .speak')) b.setAttribute('aria-pressed', String(on));
+};
 const funIdx = { earth: 0, sun: 0, suit: 0 };
 
 /** Easter eggs: tap Earth, the Sun or Sam for the next true fact. */
@@ -58,6 +62,8 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('.crew .speak')) {
+    // A second tap while it reads stops it.
+    if (voice.busy) { voice.stop(); return; }
     const line = run?.hud.crew.current();
     if (line) voice.speak(line);
     return;

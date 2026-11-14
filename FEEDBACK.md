@@ -34,6 +34,14 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~21:00)
+- Next to Sam's bubble there is a small button at the bottom right that seems to do nothing.
+- When more lines wait, "1 more" / "2 more" at the bottom right of the bubble overlaps the text.
+
+**Status: done** (branch `fix/sam-bubble`):
+- **The button** is read-aloud: it reads Sam's line with the device's voice (for kids who are still learning to read). It worked, but its icon looked like a chat icon and nothing showed that it was reading. Now it is a speaker with the word "Listen", it lights up while it reads (also when "Read aloud" in the pause menu reads by itself), and a second tap stops it.
+- **"1 more"** no longer sits on top of the text. It goes into the last line when there is room, otherwise onto its own line. Checked at 360, 390, 844×390 and 1280 wide, with and without a "New word" box.
+
 ### Florian (14 Nov, ~20:00)
 - We mix microgray and microsievert. Using one or the other can make sense, but it should be explained somewhere.
 

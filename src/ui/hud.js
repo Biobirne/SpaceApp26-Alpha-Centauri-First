@@ -40,7 +40,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
       <div class="crew" aria-live="polite">
         <button type="button" class="av-wrap" aria-label="Ask ${CREWMATE_NAME} about the spacesuit"></button>
         <button type="button" class="bubble"><span class="who">${CREWMATE_NAME}</span><span class="say"></span><span class="word" hidden>${icon('book')}<span>New word: <b></b><br><span class="w-text"></span></span></span><span class="more"></span></button>
-        ${canSpeak ? `<button type="button" class="speak" aria-label="Read aloud">${icon('speak')}</button>` : ''}
+        ${canSpeak ? `<button type="button" class="speak" aria-pressed="false" aria-label="Listen: ${CREWMATE_NAME} reads this line out loud">${icon('sound')}<span class="speak-word" aria-hidden="true">Listen</span></button>` : ''}
       </div>
     </div>
     <section class="meters" aria-label="Base status">
