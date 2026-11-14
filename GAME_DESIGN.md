@@ -52,6 +52,8 @@ Mars appears as the **end goal** (see "Rocket to Mars") and in the end-screen co
 | 💨 | **Air** | Life support. It needs power every day. |
 | 🛡️ | **Shield** | Radiation protection. A stronger shield costs power. The crew can also go to a shelter, which stops science. |
 
+As built, the shield is a **control** (Off / Low / Mid / Max, each with its power cost shown on the button), and the third bar is the **crew dose** it protects: radiation the crew has taken in, out of a safety limit of 100. The dose bar is what makes the shield choice visible.
+
 **Science** is the score. The crew earns it on days with no emergency. It is not a resource to manage.
 
 Food is mentioned in the challenge. It can appear as an event or end-screen fact. It does not get a fourth bar. (The challenge itself advises 2–3 core resources.)
@@ -149,7 +151,44 @@ Architecture rule (from the `phaser-core` skill):
 - Phaser scenes only draw the state and send player actions back.
 - This keeps the rules testable without a browser and makes a restart just a fresh state.
 
+## What the foundation build has (14 Nov)
+Everything below runs on placeholder art. The real art replaces it via `assets/art/manifest.json` (see `assets/art/README.md`).
+- **Real sky.** Lunar day and night are computed for the real storm dates at a base in the Sea of Tranquility, near the Apollo 11 site (mean synodic month, so about ±1 day). Earth's phase is computed too.
+- **Decision cards** (game pauses until the player picks):
+  - The first X-class flare, then only new record flares. Smaller big flares are a flash plus a crew line.
+  - Every particle storm onset (merged within 1 day).
+  - Options show their cost and how much they block before the tap. The crew says what happened after.
+- **Among Us-style repairs.** These are random but realistic:
+  - A micrometeoroid leak (tap 4 cracks).
+  - Dust on the panels (wipe 5 panels).
+  - A clogged CO₂ filter (3 steps in order).
+  - A leaking lab or greenhouse is sealed after 2.5 days and can be rebuilt for 30 science.
+  - A to-do list shows open repairs; rooms can also be tapped in the scene.
+- **Safe failure.**
+  - Battery at 0: the shield and lab switch off until it recharges.
+  - Air at 0: emergency oxygen tanks, minus 10 science.
+  - Dose at 100 during a storm: everyone goes to the shelter until it calms.
+  - Warnings come first.
+- **Call Earth.**
+  - The real 1.3 s each way is animated.
+  - The tip always comes with a "Why?" and real numbers.
+  - "Do it for me" or "Fix it now" applies the tip.
+  - 3-day cooldown.
+- **Time.**
+  - 1 day = 15 s, or 5 s when fast.
+  - The scale is shown under the speed buttons.
+  - Fast-forward drops back to normal when something happens.
+  - The game pauses on cards, repairs, calls, menus and when the tab is hidden.
+- **New science words** appear in the crewmate's bubble next to the sentence that uses them, and are collected on the end screen.
+- **Stars:**
+  - 1 for finishing.
+  - 2 for a safe crew with at least half the science goal.
+  - 3 for the full goal (120) with no room lost.
+  - Hiding in the shelter all month is safe but earns one star.
+- **Progress** is saved in `localStorage` only. Levels unlock in order. `?all=1` unlocks everything for judges. `?storm=<id>` starts a storm directly. `?debug=1` exposes a skip helper for playtests.
+
 ## Still to decide today (team)
-- Interfaces: game state shape, event format, module functions (see `AGENTS.md`).
+- Interfaces: a first version is in `AGENTS.md` (from the foundation build). Change it there if the team wants something else.
+- Game title: "Moon Base Commander" is a placeholder (`GAME_TITLE` in `src/ui/screens.js`). The crewmate's name "Sam" is a placeholder too (`CREWMATE_NAME`).
 - Art style and who draws (no AI images; `CREDITS.md` for everything).
 - Exact numbers: costs, cooldown length, shield levels. Tune them by playtesting, not on paper.
