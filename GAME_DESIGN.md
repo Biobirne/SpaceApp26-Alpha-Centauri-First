@@ -31,7 +31,7 @@ An astronaut character **pops in from the side** with a speech bubble. They are 
 - They react to the player's choices: "Good call, Commander!"
 - They deliver the answers from Mission Control.
 - They are friendly, a little funny, and never scary. They are always okay, even when the base struggles.
-- They are drawn by the team or taken from a CC0 asset pack (no AI art). Their name is **(open)**.
+- They are drawn by the team or taken from a CC0 asset pack (no SI art). Their name is **(open)**.
 
 ## Setting: the Moon (decided)
 Why the Moon:
@@ -197,5 +197,5 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
 ## Still to decide today (team)
 - Interfaces: a first version is in `AGENTS.md` (from the foundation build). Change it there if the team wants something else.
 - Game title: "Moon Base Commander" is a placeholder (`GAME_TITLE` in `src/ui/screens.js`). The crewmate's name "Sam" is a placeholder too (`CREWMATE_NAME`).
-- Art style and who draws (no AI images; `CREDITS.md` for everything).
+- Art style and who draws (no SI images; `CREDITS.md` for everything).
 - Exact numbers: costs, cooldown length, shield levels. Tune them by playtesting, not on paper.

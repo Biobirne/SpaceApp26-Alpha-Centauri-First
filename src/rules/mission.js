@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // The mission simulation. Plain JS: no Phaser, no DOM. The controller calls tick() with
 // elapsed game days and drains state.outbox to update the screen.
 

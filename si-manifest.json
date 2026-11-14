@@ -1,0 +1,38 @@
+{
+  "about": "Machine-readable record of Super Intelligence (SI) tool use in this repo, as the NASA Space Apps submission guide asks. Human-readable log: SI_USAGE.md. Rules and labels: SI_DISCLOSURE.md.",
+  "updated": "2026-11-14",
+  "tools": {
+    "claude-code": { "name": "Claude Code", "model": "Claude Opus 5.5", "maker": "Anthropic", "kind": "large language model coding agent" }
+  },
+  "values": {
+    "si": {
+      "assisted": "written or edited with an SI tool, reviewed and merged by the team",
+      "generated": "the content itself was produced by an SI tool (images and video need a visible watermark)",
+      "none": "made by people without SI tools",
+      "unknown": "not recorded yet; the team member who added it fills it in"
+    }
+  },
+  "files": [
+    { "path": "src/**/*.js", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "src/ui/styles.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "tests/**/*.mjs", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "tools/**/*.py", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "index.html", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "comment in head" },
+    { "path": "package.json", "kind": "code", "si": "assisted", "tool": "claude-code" },
+    { "path": "data/donki/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Unchanged NASA DONKI responses, downloaded by an SI tool. The values are NASA's, not SI-made." },
+    { "path": "data/storms/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Built from NASA DONKI and NASA OSDR RadLab data by tools/build_storm_library.py (SI-assisted script). Kid-facing summaries written with SI help." },
+    { "path": "data/README.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "assets/art/manifest.json", "kind": "data", "si": "assisted", "tool": "claude-code" },
+    { "path": "src/ui/icons.js", "kind": "image", "si": "generated", "tool": "claude-code", "notes": "SVG icons and crewmate avatar drawn in code. Placeholder until team art replaces it.", "label": "in-game watermark 'SI-generated placeholder art' while assets/art/manifest.json has siPlaceholders: true" },
+    { "path": "src/scene/MoonScene.js", "kind": "image", "si": "generated", "tool": "claude-code", "notes": "Placeholder Moon base, Earth, Sun and sky drawn in code.", "label": "in-game watermark 'SI-generated placeholder art' while assets/art/manifest.json has siPlaceholders: true" },
+    { "path": "AGENTS.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "GAME_DESIGN.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Written down from the team's discussion. The game idea is the team's." },
+    { "path": "README.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "CREDITS.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "SI_USAGE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": ".claude/skills/{kids-ux,playtest,ship-task}/SKILL.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "assets/fonts/*", "kind": "font", "si": "none", "notes": "Lexend, SIL Open Font License, see CREDITS.md" },
+    { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "unknown", "notes": "Added by a team member; fill in how it was made." }
+  ]
+}

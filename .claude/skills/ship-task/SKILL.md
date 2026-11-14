@@ -1,6 +1,6 @@
 ---
 name: ship-task
-description: Finish a task the team way. Branch, small commit, AI_USAGE.md line, CREDITS.md check, push, and PR into main. Use when a task is done and should be merged, or when asked to commit, push, open a PR or "ship" something.
+description: Finish a task the team way. Branch, small commit, SI_USAGE.md line, CREDITS.md check, push, and PR into main. Use when a task is done and should be merged, or when asked to commit, push, open a PR or "ship" something.
 ---
 
 # Ship a task
@@ -16,8 +16,8 @@ description: Finish a task the team way. Branch, small commit, AI_USAGE.md line,
 - Only change files in your own module, unless the task says otherwise (see AGENTS.md, "Module ownership").
 
 ## 3. Bookkeeping
-- Append one line to `AI_USAGE.md`: date, tool, what it did.
-- Any new asset or data file needs a row in `CREDITS.md` with source and license. No AI-generated images. No NASA logos.
+- Append one line to `SI_USAGE.md`: date, SI tool, what it did. Add new files to `si-manifest.json`. Write "SI" (Super Intelligence, the Space Apps term), never "AI".
+- Any new asset or data file needs a row in `CREDITS.md` with source and license. No SI-generated images. No NASA logos.
 - New dependency or CDN script? Stop and ask the team first.
 
 ## 4. Commit

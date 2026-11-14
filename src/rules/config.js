@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Game tuning. These numbers are GAME RULES, not NASA data. Tune them by playtesting.
 // Real data (radiation, flares, particle events, dates) comes from data/storms/*.json.
 

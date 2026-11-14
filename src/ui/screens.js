@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Start screen (mission select) and end screen (debrief). Plain DOM, no game rules.
 
 import { icon } from './icons.js';
@@ -9,7 +10,8 @@ export const GAME_TITLE = 'Moon Base Commander'; // (open) final name decided by
 
 const SOURCES = `Real data: space weather from <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener">NASA DONKI</a>,
   radiation from <a href="https://visualization.osdr.nasa.gov/radlab/" target="_blank" rel="noopener">NASA OSDR RadLab</a>
-  (archived measurements, not live). Made for the NASA Space Apps Challenge 2026 by team Alpha Centauri First. Not made or endorsed by NASA.`;
+  (archived measurements, not live). Made for the NASA Space Apps Challenge 2026 by team Alpha Centauri First. Not made or endorsed by NASA.
+  Code written with help from SI tools (Claude Code). The placeholder pictures are SI-generated and marked in the game. No SI-generated audio.`;
 
 function strength(peak) {
   const n = peak < 20 ? 1 : peak < 120 ? 2 : peak < 1000 ? 3 : 4;

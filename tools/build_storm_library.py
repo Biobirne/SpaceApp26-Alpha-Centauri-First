@@ -1,3 +1,4 @@
+# SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 """Build the storm library: real historical solar storms, each as one compact JSON file.
 
 For every storm in STORMS this script fetches:

@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Lunar day/night and Earth phase for real dates, from the mean synodic month.
 // Accurate to within about half a day, which is fine for a 30-day mission.
 // Ignores libration and assumes a low-latitude near-side site.

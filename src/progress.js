@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Which storms the player has finished. Stored only in this browser (localStorage), nothing else.
 // The storage can be missing (private mode, blocked site data), so every access is guarded.
 

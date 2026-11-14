@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // The Moon base, drawn with Phaser. This scene only DRAWS: it reads `scene.view` (set by the
 // controller every frame) and reports room taps through game.events ('room-tap', roomId).
 // Everything here is placeholder art made from shapes. When the team's art lands, list the images
@@ -151,6 +152,17 @@ export function createMoonScene() {
         if (!this.reduced) {
           this.tweens.add({ targets: badge, scale: 1.15, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
         }
+      }
+      // Space Apps rule: SI-generated images carry a visible watermark. The placeholder visuals
+      // are drawn by SI-written code, so they are marked until the team's own art replaces them.
+      if (this.art.siPlaceholders !== false) {
+        const s = this.slot;
+        const wfs = Math.round(11 * this.dpr);
+        const mark = this.add.text(s.x + 8 * this.dpr, s.y + s.h - 6 * this.dpr, 'SI-generated placeholder art', {
+          fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${wfs}px`, fontStyle: '600', color: '#c9d3f2',
+          backgroundColor: 'rgba(7,11,24,0.55)', padding: { x: 5 * this.dpr, y: 2 * this.dpr },
+        }).setOrigin(0, 1).setAlpha(0.85);
+        this.labelLayer.add(mark);
       }
     }
 

@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Sheets that open over the game: decision cards, repair mini-games, Call Earth, upgrades,
 // real data and pause. They never change state themselves; they call back into the controller.
 

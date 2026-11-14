@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Small seeded random generator (mulberry32) so a mission can be replayed exactly.
 export function createRng(seed) {
   let a = seed >>> 0;

@@ -1,3 +1,4 @@
+# SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 """Local dev server for the game: like `python -m http.server`, but tells the browser not to
 cache anything, so every reload picks up the latest JS modules.
 
