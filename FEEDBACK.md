@@ -34,6 +34,11 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~20:00)
+- We mix microgray and microsievert. Using one or the other can make sense, but it should be explained somewhere.
+
+**Status: done** (branch `fix/gray-sievert`): the Data sheet (µGy/h) and the Crew dose sheet (mSv) both have a "Gy or Sv?" line. Gray counts the energy the radiation leaves behind, sievert counts the harm to a body, and some kinds of radiation do more harm with the same energy. Each sheet says why it uses its unit: NASA's detector measures gray, NASA's limits for astronauts are in sieverts. Sources opened: Wikipedia "Sievert" (SI definition, dose equivalent = absorbed dose × factor), US NRC glossary "sievert (Sv)".
+
 ### Florian (14 Nov, ~19:00)
 - Pause menu: tapping "Hints off" opens a big menu nobody wants. A big button with an "i" at the bottom does nothing. And it is not clear how to get back to the main menu.
 
