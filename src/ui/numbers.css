@@ -1,0 +1,36 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* "What the numbers mean" blocks in the info sheets (src/ui/numbers.js).
+   A separate file so it never collides with changes to styles.css. */
+
+.nm { margin: 10px 0 14px; padding: 12px 14px; border-radius: var(--r-m); background: var(--panel-2); }
+.nm h3 { display: flex; gap: 8px; align-items: center; margin: 0 0 8px !important; font-size: 16px !important; }
+.nm h3 .ic { width: 18px; height: 18px; color: var(--air); }
+.nm dl { display: grid; gap: 8px; margin: 0; }
+.nm-row { display: grid; grid-template-columns: minmax(64px, auto) 1fr; gap: 12px; align-items: baseline; }
+.nm dt { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nm dd { margin: 0; font-size: 15px; line-height: 1.4; color: var(--text-2); }
+.sheet .nm-real { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; padding-top: 10px; border-top: 2px dashed var(--line); font-size: 15px !important; line-height: 1.4; color: var(--text-2); }
+.nm-real .ic { flex: none; width: 18px; height: 18px; color: var(--science); }
+.nm-real b { color: var(--text); }
+
+/* The "Shield" label in the dock is a button: tap it for the shield sheet (src/ui/info.js). */
+.shieldctl > button.sc-label { position: relative; min-width: 48px; min-height: 48px; border: 0; border-radius: var(--r-s); background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+.shieldctl > button.sc-label:hover, .shieldctl > button.sc-label:focus-visible { background: var(--panel-2); color: var(--text); }
+.sc-label .sc-i { position: absolute; top: -2px; right: -4px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 99px; background: var(--panel-2); color: var(--air); font-size: 11px; font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--air); }
+
+/* Shield sheet: every level side by side */
+.sh-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.sh-table th, .sh-table td { padding: 8px 8px; text-align: right; white-space: nowrap; }
+.sh-table thead th { padding-top: 0; padding-bottom: 2px; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.sh-table th:first-child { text-align: left; }
+.sh-table tbody th, .sh-table tbody td { background: var(--panel-2); }
+.sh-table tbody th { border-radius: var(--r-s) 0 0 var(--r-s); font-weight: 700; }
+.sh-table tbody td:last-child { border-radius: 0 var(--r-s) var(--r-s) 0; font-weight: 700; color: var(--dose); }
+.sh-table tr.now th, .sh-table tr.now td { background: color-mix(in srgb, var(--air) 24%, var(--panel-2)); }
+.sh-table small { font-size: 11px; font-weight: 600; color: var(--air); }
+.sheet .sh-note { margin: 6px 0 12px; font-size: 15px !important; color: var(--text-2); }
+.sheet .sh-game { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0 12px; font-size: 15px !important; color: var(--text-2); }
+.sh-game .ic { flex: none; width: 18px; height: 18px; color: var(--science); }
+.sh-sources { margin: 8px 0 4px; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); font-size: 13px; color: var(--text-2); }
+.sh-sources b { color: var(--text); }
+.sh-sources ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }

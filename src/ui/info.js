@@ -6,8 +6,11 @@
 import { icon } from './icons.js';
 import { openSheet, esc } from './overlays.js';
 import { ROOMS, ROOM_INFO, CREWMATE_NAME } from '../rules/content.js';
+import { SHIELD_INFO } from '../rules/content.js';
+import { shieldOptions, noteShieldSeen } from '../rules/mission.js';
 import { powerBreakdown, airBreakdown, doseNow, fmtTimes } from '../rules/mission.js';
 import { loopHTML, wireLoop, lampHTML } from './loop.js';
+import { powerMeaning, airMeaning, doseMeaning } from './numbers.js';
 
 // Controller actions the sheets can call. main.js sets them once (keeps showRoomInfo's signature stable).
 let infoActions = {};
@@ -26,6 +29,8 @@ export function showRoomInfo(roomId, state) {
   if (room.status === 'lost') status = 'Sealed after a leak. Tap it again to rebuild it with science points.';
   else if (roomId === 'shelter' && (state.sheltered || state.forcedShelter)) status = 'The crew is inside right now.';
   else if (roomId === 'lab' && state.powerEmergency) status = 'Paused: the battery is empty.';
+  else if (roomId === 'lab' && (state.sheltered || state.forcedShelter)) status = 'Paused: the crew is in the shelter.';
+  else if (room.status === 'leak') status = 'Leaking! Tap the red ! to fix it.';
   const html = `
     <h2>${icon(ROOM_ICON[roomId])} ${esc(ROOMS[roomId].name)}</h2>
     <p class="info-status">${esc(status)}</p>
@@ -57,27 +62,64 @@ function table(rows, unit) {
   </ul>`;
 }
 
+/** Tap "Shield": what it does, every level side by side with today's real radiation, and the real research. */
+function shieldHTML(state) {
+  const opts = shieldOptions(state);
+  const { rad } = doseNow(state);
+  const inShelter = state.sheltered || state.forcedShelter;
+  const fmt = (x) => (x >= 10 ? Math.round(x) : Math.round(x * 10) / 10);
+  const rows = opts.map((o) => `<tr class="${o.current ? 'now' : ''}">
+      <th scope="row">${esc(o.label)}${o.current ? ' <small>now</small>' : ''}</th>
+      <td>${Math.round(o.shieldBlock * 100)}%</td>
+      <td>${o.cost ? `−${o.cost} ⚡` : 'free'}</td>
+      <td>+${fmt(o.perDay)}</td>
+    </tr>`).join('');
+  return `<h2>${icon('shield')} Shield</h2>
+    <p>${esc(SHIELD_INFO.intro)}</p>
+    <h3>Every level, with today’s radiation (${fmtTimes(rad)} normal)</h3>
+    <table class="sh-table">
+      <thead><tr><th scope="col">Shield</th><th scope="col">Blocks</th><th scope="col">Power a day</th><th scope="col">Dose a day</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="sh-note">${inShelter
+      ? `The crew is in the shelter, so its walls block another ${Math.round(state.cfg.dose.shelterBlock * 100)}%. That is already in the dose numbers.`
+      : `The crew is working. In the shelter, its walls would block another ${Math.round(state.cfg.dose.shelterBlock * 100)}%.`}${state.upgrades.walls ? ' Your regolith walls help too.' : ''}</p>
+    ${part('shield', 'How it works', SHIELD_INFO.how)}
+    ${part('bolt', 'What it costs', SHIELD_INFO.cost)}
+    ${part('rocket', 'In real life', SHIELD_INFO.real)}
+    ${part('science', 'Why it needs power', SHIELD_INFO.cold)}
+    <div class="fact">${icon('info')}<span>${esc(SHIELD_INFO.today)}</span></div>
+    <p class="sh-game">${icon('check')}<span><b>Game numbers:</b> how much each level blocks and the power it uses are made up for the game. The radiation is real NASA data.</span></p>
+    <div class="sh-sources"><b>Sources</b><ul>${SHIELD_INFO.sources.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
+}
+
 export function showMeterInfo(kind, state) {
   let html;
-  if (kind === 'power') {
+  if (kind === 'shield') {
+    html = shieldHTML(state);
+    noteShieldSeen(state);
+  } else if (kind === 'power') {
     html = `<h2>${icon('bolt')} Power</h2>
       <p>The battery stores electricity from the solar panels. Everything in the base needs some.</p>
-      <h3>Right now</h3>${table(powerBreakdown(state), '⚡')}
+      ${powerMeaning(state)}
+      <h3>Where it goes, every day</h3>${table(powerBreakdown(state), '⚡')}
       <div class="fact">${icon('info')}<span>A night on the Moon lasts about 2 weeks. Real bases need big batteries, or a small nuclear power unit.</span></div>`;
   } else if (kind === 'air') {
     html = `<h2>${icon('air')} Air</h2>
+      ${airMeaning(state)}
       ${loopHTML(state)}
-      <h3>Right now</h3>${table(airBreakdown(state), '%')}
+      <h3>Where it goes, every day</h3>${table(airBreakdown(state), '%')}
       <div class="fact">${icon('info')}<span>On the space station, oxygen is made from water: electricity splits it into hydrogen and oxygen.</span></div>`;
     infoActions.loopSeen?.();
   } else {
     const d = doseNow(state);
     html = `<h2>${icon('radiation')} Crew dose</h2>
       <p>All the radiation your crew has taken on this mission. If it reaches ${state.cfg.dose.limit}, ${esc(CREWMATE_NAME)} sends everyone into the shelter.</p>
+      ${doseMeaning(state)}
       <h3>Right now</h3>
       <ul class="flow">
         <li><span>Radiation outside (real NASA data)</span><b>${fmtTimes(d.rad)} normal</b></li>
-        <li class="in"><span>Your shield and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
+        <li class="in"><span>Shield, shelter and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
         <li class="total"><span>Gets to the crew every day</span><b>+${(Math.round(d.perDay * 10) / 10)}</b></li>
       </ul>
       <div class="fact">${icon('info')}<span>Without thick walls, about one year on the Moon would give an astronaut a whole career’s worth of radiation. That is why a Moon base needs shielding.</span></div>`;

@@ -11,8 +11,9 @@ import {
 import { setGrowLights, noteLoopSeen, isCalm } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
 import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
+import { showData, scienceMeaning } from './ui/numbers.js';
 import { createHud } from './ui/hud.js';
-import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
+import { showCard, showRepair, showRebuild, showCall, showShop, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
 import { icon } from './ui/icons.js';
 import {
@@ -26,7 +27,7 @@ import { createMoonScene } from './scene/MoonScene.js';
 const params = new URLSearchParams(location.search);
 const UNLOCK_ALL = params.get('all') === '1';
 const app = document.getElementById('app');
-const BLOCK_SHORT = ['blocks nothing', 'blocks half', 'blocks most', 'blocks almost all'];
+const BLOCK_SHORT = ['blocks nothing', 'blocks more than half', 'blocks most', 'blocks almost all'];
 
 const data = { index: null, docs: {}, art: { rooms: {}, background: null } };
 
@@ -417,19 +418,19 @@ const actions = {
     if (setShield(s, level)) {
       if (level > 0) run.guide.onAction('shieldUp');
       const cost = s.cfg.power.shieldPerDay[level];
-      floater(anchor, `${SHIELD_LABELS[level]}: ${BLOCK_SHORT[level]}${cost ? `, −${cost} power/day` : ''}`, 'var(--air)');
+      floater(anchor, `${SHIELD_LABELS[level]}: ${BLOCK_SHORT[level]}${cost ? `, −${cost} ⚡/day` : ''}`, 'var(--air)');
     }
   },
 
   shelter() {
     const s = run?.state;
     if (!s) return;
-    const on = !s.sheltered;
+    const on = !(s.sheltered || s.forcedShelter);
     if (setShelter(s, on)) {
       floater(run.hud.refs.shelter, on ? 'Crew safe inside, science paused' : 'Back to work: science is running', on ? 'var(--dose)' : 'var(--science)');
       const teaching = run.guide.busy; // the guide explains the shelter itself
       run.guide.onAction(on ? 'shelterIn' : 'shelterOut');
-      if (on && !teaching) run.hud.crew.say('Everyone is in the shelter. Its thick walls block almost all radiation.', 'happy');
+      if (on && !teaching) run.hud.crew.say('Everyone is in the shelter. Its thick walls block most of the radiation.', 'happy');
     }
   },
 
@@ -497,6 +498,7 @@ const actions = {
     if (!s || run.blockers.size) return;
     block('shop', true);
     const sheet = showShop(s, (key) => buyUpgrade(s, key));
+    sheet.el.querySelector('h2 + p')?.insertAdjacentHTML('afterend', scienceMeaning(s));
     watchClose(sheet, 'shop');
   },
 

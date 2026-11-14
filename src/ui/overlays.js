@@ -303,48 +303,6 @@ export function showShop(state, onBuy) {
   return sheet;
 }
 
-// ------------------------------------------------------------------ real data
-
-export function showData(state, doc) {
-  const tl = state.timeline;
-  const today = currentDayIndex(state);
-  const moon = doc.radiation.moonOrbit;
-  const vals = tl.days.map((d) => d.radiation.moonOrbit?.times ?? null);
-  const max = Math.max(10, ...vals.filter((v, i) => v != null && i <= today));
-  const W = 320;
-  const H = 120;
-  const bw = W / vals.length;
-  const y = (v) => H - 14 - (Math.log10(Math.max(1, v)) / Math.log10(max)) * (H - 30);
-  const bars = vals.map((v, i) => {
-    if (v == null) return '';
-    const future = i > today;
-    const h = future ? 6 : H - 14 - y(v);
-    return `<rect class="bar ${future ? 'future' : i === today ? 'today' : ''}" x="${(i * bw + 1).toFixed(1)}" y="${(H - 14 - Math.max(2, h)).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${Math.max(2, h).toFixed(1)}" rx="1.5"/>`;
-  }).join('');
-  const todayV = vals[today];
-  const todayMean = tl.days[today].radiation.moonOrbit?.mean;
-  const flares = tl.flares.filter((f) => f.t <= state.t && f.score >= 300).sort((a, b) => b.score - a.score).slice(0, 4);
-  const fdate = (t) => new Date(tl.startMs + t * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-  const html = `
-    <h2>Real NASA data</h2>
-    <p>Radiation near the Moon, day by day. Today is the bright bar.</p>
-    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Radiation near the Moon for each mission day">
-      <line class="axis" x1="0" x2="${W}" y1="${H - 13}" y2="${H - 13}"/>
-      ${bars}
-      <text x="0" y="${H - 1}">Day 1</text><text x="${W}" y="${H - 1}" text-anchor="end">Day ${vals.length}</text>
-      <text x="0" y="10">${fmtTimes(max)} normal</text>
-    </svg>
-    <ul class="datalist">
-      <li><span>Today (${esc(tl.days[today].iso)})</span><span>${todayV != null ? `${fmtTimes(todayV)} normal` : 'no reading'}${todayMean != null ? `, ${todayMean} µGy/h` : ''}</span></li>
-      <li><span>Measured by</span><span>${esc(moon.where)}</span></li>
-      <li><span>Normal level</span><span>${moon.normal} µGy/h</span></li>
-      ${flares.length ? `<li><span>Biggest flares so far</span><span>${flares.map((f) => `${esc(f.cls)} (${fdate(f.t)})`).join(', ')}</span></li>` : ''}
-    </ul>
-    <p class="source">Measured in orbit around the Moon. On the surface it is about half, because the Moon blocks half the sky.
-    ${esc(doc.displayLabel)}: radiation from NASA OSDR RadLab, flares and particle storms from NASA DONKI.</p>`;
-  return openSheet(html);
-}
-
 // ------------------------------------------------------------------ pause
 
 export function showPause({ onResume, onRestart, onMenu, onHelp, hints, onHints, readAloud = null, onReadAloud }) {

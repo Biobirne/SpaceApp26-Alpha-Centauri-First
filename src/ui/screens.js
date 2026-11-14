@@ -102,7 +102,7 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
   const maxLog = Math.log10(Math.max(10, ...rows.map((r) => r[1])));
   const peakDate = s.moonPeak ? new Date(`${s.moonPeak.iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
   el.innerHTML = `<div class="screen-tools">${soundButton(sound)}</div><div class="screen-inner">
-    <h1>${HEADLINES[s.stars]}</h1>
+    <h1>${s.stars === 3 && s.setbacks > 0 ? HEADLINES[2] : HEADLINES[s.stars]}</h1>
     <div class="bigstars" aria-label="${s.stars} of 3 stars">${[1, 2, 3].map((i) => icon('star', i <= s.stars ? '' : 'off')).join('')}</div>
     ${rankAfter !== rankBefore ? `<p class="pitch">New rank: <b>${esc(rankAfter)}</b>!</p>` : ''}
     ${s.praise ? `<p class="praise">${esc(s.praise)}</p>` : ''}

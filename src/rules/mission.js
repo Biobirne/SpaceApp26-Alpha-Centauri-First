@@ -11,7 +11,9 @@ import { createRng } from './rng.js';
 const DAY_MS = 86400000;
 const STEP = 0.02; // max simulation step in days (~29 minutes of mission time)
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-const BLOCK_WORDS = ['nothing', 'about half', 'most', 'almost all'];
+const BLOCK_WORDS = ['nothing', 'more than half', 'most', 'almost all'];
+const dayWord = (n) => `${n} ${n === 1 ? 'day' : 'days'}`;
+const batteryPct = (state) => Math.round((state.power / state.capacity) * 100);
 
 /**
  * @param script Optional scripted problems for guided first steps, e.g. [{ t: 0.7, kind: 'leak', roomId: 'hab' }].
@@ -200,7 +202,7 @@ export function buyUpgrade(state, key) {
   if (!up || state.upgrades[key] || !canAfford(state, up.cost)) return false;
   state.science -= up.cost;
   state.upgrades[key] = true;
-  if (key === 'battery') state.capacity += up.capacityBonus;
+  if (key === 'battery') { state.capacity += up.capacityBonus; state.power += up.capacityBonus; }
   if (key === 'algae') learn(state, 'recycling');
   emit(state, 'upgrade', { key });
   return true;
@@ -340,29 +342,34 @@ export function getAdvice(state) {
     return advice('Clean the solar panels.', 'Moon dust is blocking most of the sunlight. Cleaning them is a short spacewalk.', { repair: 'solar' });
   }
   if (state.filter) {
-    return advice('Change the air filter in the living quarters.', `A clogged filter cleans less air. Air is at ${Math.round(state.air)}% now.`, { repair: 'hab' });
+    return advice('Swap the air filter in the home.', `A clogged filter cleans less air. Air is at ${Math.round(state.air)}% now.`, { repair: 'hab' });
   }
   if (state.dose > state.cfg.dose.warnAbove && rad > 3) {
-    return advice('Keep the crew in the shelter for now.',
+    return advice(state.sheltered || state.forcedShelter ? 'Keep the crew in the shelter for now.' : 'Send the crew to the shelter for now.',
       `Their radiation dose is already ${Math.round(state.dose)} of ${state.cfg.dose.limit}.`, { sheltered: true });
   }
-  if (!state.daylight && state.power < 40 && state.shield > 0 && rad < 5) {
+  if (!state.daylight && batteryPct(state) < 40 && state.shield > 0 && rad < 5) {
     return advice('Turn the shield down to save power.',
-      `It’s night, there’s no sunlight, and your battery is at ${Math.round(state.power)}%. Radiation is calm.`, { shield: 0 });
+      `It’s night, there’s no sunlight, and your battery is at ${batteryPct(state)}%. Radiation is calm.`, { shield: 0 });
   }
-  if (night && !night.becomesDay && night.inDays < 3 && state.power < 70) {
+  if (night && !night.becomesDay && night.inDays < 3 && batteryPct(state) < 70) {
     return advice('Charge up before dark: keep the shield low.',
-      `The Sun sets in about ${Math.max(1, Math.round(night.inDays))} days. Then the night lasts about 2 weeks.`, { shield: Math.min(state.shield, 1) });
+      `The Sun sets in about ${dayWord(Math.max(1, Math.round(night.inDays)))}. Then the night lasts about 2 weeks.`, { shield: Math.min(state.shield, 1) });
   }
-  if (rad < 5 && (state.sheltered || state.shield >= 2)) {
+  // 18: only "back to work" when the crew is really in the shelter
+  if (rad < 5 && state.sheltered && !state.forcedShelter) {
     return advice('It’s safe to get back to work.', `Radiation is down to ${fmtTimes(rad)} normal. Science needs the crew in the lab.`,
-      { sheltered: false, shield: 1 });
+      { sheltered: false, shield: Math.min(state.shield, 1) });
+  }
+  if (rad < 5 && state.shield >= 2) {
+    return advice('Radiation is calm: turn the shield down.', `Radiation is down to ${fmtTimes(rad)} normal. Shield on Low saves power.`,
+      { shield: 1 });
   }
   if (nextSep && nextSep.t - state.t < 3) {
     return advice('Stay alert: keep your shield ready.', 'Our space weather team sees an active Sun. More particles may come soon.', null);
   }
   return advice('Everything looks great. Keep the science going!',
-    `Radiation is ${fmtTimes(rad)} normal, power ${Math.round(state.power)}%, air ${Math.round(state.air)}%.`, null);
+    `Radiation is ${fmtTimes(rad)} normal, battery ${batteryPct(state)}%, air ${Math.round(state.air)}%.`, null);
 }
 
 function advice(text, reason, action) {
@@ -394,7 +401,7 @@ export function explainSetup(state) {
   const lvl = state.shield;
   const shield = lvl === 0
     ? 'The shield is off, so it uses no power.'
-    : `The shield is on ${SHIELD_LABELS[lvl]}: it blocks ${BLOCK_WORDS[lvl]} of the radiation and uses ${cfg.power.shieldPerDay[lvl]} power a day.`;
+    : `The shield is on ${SHIELD_LABELS[lvl]}: it blocks ${BLOCK_WORDS[lvl]} of the radiation and uses ${cfg.power.shieldPerDay[lvl]} ⚡ a day.`;
   const shelter = state.sheltered
     ? ' The crew is in the shelter: very safe, but no science.'
     : ' The crew is working, so science goes on.';
@@ -456,14 +463,18 @@ function step(state, h) {
     state.stats.setbacks++;
     trouble(state);
     emit(state, 'setback', { kind: 'power' });
-    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield, the lab and the plant lamps. Only life support runs now.' });
+    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield, the lab and the plant lamps. Only the air machines and the heating run now.' });
     lesson(state, 'power', { night: !state.daylight, shield: shieldWas > 0, dust: state.dust });
   } else if (state.powerEmergency && state.power > cfg.power.recoverAbove) {
     state.powerEmergency = false;
-    emit(state, 'crew', { mood: 'happy', text: 'Power is back. The lab is running again.' });
+    emit(state, 'crew', { mood: 'happy', text: isWorking(state)
+      ? 'Power is back. The lab is running again. The shield and plant lamps are still off: turn them on when you need them.'
+      : 'Power is back. The shield and plant lamps are still off: turn them on when you need them.' });
   }
   threshold(state, 'power', state.power / state.capacity * 100 < cfg.power.warnBelow,
-    () => (state.daylight ? 'Battery is low! Turn the shield down a bit.' : 'Battery is low and it’s night. Turn off what you can.'));
+    () => (state.daylight && state.shield > 0 ? 'Battery is low! Turn the shield down a bit.'
+      : state.daylight ? 'Battery is low! Switch off the plant lamps, or the shelter pauses the lab.'
+        : 'Battery is low and it’s night. Turn off what you can.'));
 
   // air
   const lifeSupportOn = state.power > 0 || inflow >= cfg.power.lifeSupportPerDay;
@@ -507,6 +518,7 @@ function step(state, h) {
     const shelterOk = state.rooms.shelter.status !== 'lost';
     const through = (1 - c.shieldBlock[state.shield]) * (shelterOk ? 1 - c.shelterBlock : 1) * (state.upgrades.walls ? c.wallsFactor : 1);
     state.stormDose.taken += got;
+    if (state.sheltered || state.forcedShelter || state.shield > 0) state.stormDose.protected = true;
     state.stormDose.inShelter += Math.min(got, unshielded * through);
   }
   if (state.dose >= cfg.dose.limit && rad > 3 && !state.forcedShelter && state.rooms.shelter.status !== 'lost') {
@@ -608,7 +620,9 @@ function stormReport(state) {
   if (r.taken >= 3 && r.taken > r.inShelter * 2) {
     text = `Storm report: the crew got +${took} dose. In the shelter it would have been about +${shelter}. Working costs safety.`;
   } else if (r.taken < 3) {
-    text = `Storm report: only +${Math.max(0, took)} dose for the crew. The shelter and shield did their job!`;
+    text = r.protected
+      ? `Storm report: only +${Math.max(0, took)} dose for the crew. The shelter and shield did their job!`
+      : `Storm report: only +${Math.max(0, took)} dose for the crew. That storm was mild.`;
   } else {
     // most of it came in the shelter: a really strong storm (or the dose limit sent everyone inside)
     text = `Storm report: the crew got +${took} dose, even with the shelter. That was a really strong storm!`
@@ -675,7 +689,8 @@ function processDataEvents(state) {
       state.lastFlareCardT = state.t;
       queueCard(state, flareCard(state, f));
     } else if (f.score >= flareScore('M5')) {
-      mention(state, `Another ${f.cls} flare on the Sun! Keep an eye on the radiation.`);
+      mention(state, `${state.flareMentioned ? 'Another' : 'A big'} ${f.cls} flare on the Sun! Keep an eye on the radiation.`);
+      state.flareMentioned = true;
     }
   }
   while (state.sepIdx < tl.seps.length && tl.seps[state.sepIdx].t <= state.t) {
@@ -729,7 +744,7 @@ function flareCard(state, f) {
       { id: 'mid', label: 'Shield to Mid', cost: shieldCost(state, 2), effects: { shield: 2 }, mood: 'calm',
         reply: 'Shield at Mid. It stops most particles and saves some power.' },
       { id: 'wait', label: 'Wait and see', cost: 'Risky', effects: {}, mood: 'calm',
-        reply: 'Okay, we keep working. Watch the radiation level!' },
+        reply: state.sheltered || state.forcedShelter ? 'Okay, the shield stays as it is. Watch the radiation level!' : 'Okay, we keep working. Watch the radiation level!' },
     ],
   };
 }
@@ -738,9 +753,12 @@ function particleCard(state) {
   const shelterOk = state.rooms.shelter.status !== 'lost';
   const options = [];
   if (shelterOk) {
+    // The shelter is the power-saving choice: its walls do the work, so the shield goes down to Low.
     options.push({ id: 'shelter', label: 'Crew to shelter', cost: `${shieldCost(state, 1)}, no science`,
       effects: { sheltered: true, shield: 1 }, mood: 'happy',
-      reply: 'Everyone is in the shelter. Its thick walls block almost everything, and it costs no extra power. Good plan!' });
+      reply: state.shield > 1
+        ? 'Everyone is in the shelter. Its thick walls block most of the radiation, so I turned the shield down to Low to save power. Good plan!'
+        : 'Everyone is in the shelter. Its thick walls block most of the radiation, and the shield on Low uses only a little power. Good plan!' });
   }
   options.push({ id: 'max', label: 'Shield to Max', cost: shieldCost(state, 3), effects: { shield: 3, sheltered: false }, mood: 'calm',
     reply: 'Shield at Max, and the crew keeps working. That costs a lot of power.' });
@@ -812,7 +830,8 @@ export function lifeLoop(state) {
   const on = state.power > 0 || powerInPerDay(state) >= state.cfg.power.lifeSupportPerDay;
   const leak = ROOM_IDS.find((id) => state.rooms[id].status === 'leak');
   let plants = 'on';
-  if (state.rooms.greenhouse.status !== 'ok') plants = 'lost';
+  if (state.rooms.greenhouse.status === 'lost') plants = 'lost';
+  else if (state.rooms.greenhouse.status === 'leak') plants = 'leak';
   else if (!plantsLit(state)) plants = 'dark';
   return {
     crew: 'breathing',
@@ -823,6 +842,32 @@ export function lifeLoop(state) {
     algae: state.upgrades.algae ? (on ? 'ok' : 'off') : 'none',
     leak: leak ? ROOMS[leak].name : null,
   };
+}
+
+/**
+ * Every shield level side by side, for the crew's current place (working or in the shelter):
+ * how much it blocks, what it costs, and how much dose would get through each day right now.
+ */
+export function shieldOptions(state) {
+  const c = state.cfg.dose;
+  const rad = radiationNow(state);
+  const inShelter = (state.sheltered || state.forcedShelter) && state.rooms.shelter.status !== 'lost';
+  return SHIELD_LABELS.map((label, level) => {
+    let through = 1 - c.shieldBlock[level];
+    if (inShelter) through *= 1 - c.shelterBlock;
+    if (state.upgrades.walls) through *= c.wallsFactor;
+    return {
+      level, label, current: level === state.shield,
+      shieldBlock: c.shieldBlock[level],
+      cost: state.cfg.power.shieldPerDay[level],
+      perDay: c.perNormalDay * rad * through,
+    };
+  });
+}
+
+/** The player opened the shield sheet: teach the word. */
+export function noteShieldSeen(state) {
+  learn(state, 'magnetShield');
 }
 
 /** Radiation dose right now: outside level, what blocks it, what gets through per day. */
@@ -895,8 +940,8 @@ function startProblem(state, kind, id, cause = null) {
     emit(state, 'crew', {
       mood: 'alert',
       text: cause === 'dust'
-        ? 'Moon dust from the spacewalk clogged the air filter. Tap the living quarters to swap it!'
-        : 'The air filter is clogged. Tap the living quarters to swap it!',
+        ? 'Moon dust from the spacewalk clogged the air filter. Tap Home to swap it!'
+        : 'The air filter is clogged. Tap Home to swap it!',
     });
   }
 }

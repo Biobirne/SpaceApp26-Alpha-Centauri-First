@@ -4,12 +4,14 @@
 
 export const CREWMATE_NAME = 'Sam'; // (open) final name decided with the art
 
+// One name per room: the label on the base, the info sheet and every sentence use the same word
+// (playtest: "Plants" on the base opened a sheet called "Greenhouse"). `short` stays for older callers.
 export const ROOMS = {
-  solar: { name: 'Solar panels', short: 'Solar' },
-  lab: { name: 'Science lab', short: 'Lab' },
-  hab: { name: 'Living quarters', short: 'Home' },
-  greenhouse: { name: 'Greenhouse', short: 'Plants' },
-  shelter: { name: 'Storm shelter', short: 'Shelter' },
+  solar: { name: 'Solar panels', short: 'Solar panels' },
+  lab: { name: 'Science lab', short: 'Science lab' },
+  hab: { name: 'Home', short: 'Home' },
+  greenhouse: { name: 'Greenhouse', short: 'Greenhouse' },
+  shelter: { name: 'Shelter', short: 'Shelter' },
 };
 
 /** Science words the player can earn. Each explanation stays under 15 words. */
@@ -65,7 +67,7 @@ export const CHATTER = [
 export const UPGRADES = {
   battery: {
     name: 'Bigger battery',
-    text: 'Store more power for the long lunar night.',
+    text: 'Store more power for the long lunar night. The new cells arrive fully charged.',
     fact: 'Real Moon bases must survive about 14 days of darkness.',
   },
   walls: {
@@ -159,7 +161,7 @@ export const ROOM_INFO = {
     fact: 'One astronaut would need about 200 space-station salad gardens to make enough oxygen. That is why machines do most of it.',
   },
   hab: {
-    does: 'The crew lives, sleeps and eats here. The air and water machines are here too.',
+    does: 'The crew lives, sleeps and eats here. The air and water machines are here too, with the CO₂ filter.',
     real: 'On the space station, machines recycle about 98% of the water, even sweat.',
     built: 'Metal modules launched from Earth, or inflatable ones. An inflatable test room has been on the space station since 2016.',
     fact: 'Water is heavy to launch, so every drop gets cleaned and used again.',
@@ -176,6 +178,28 @@ export const ROOM_INFO = {
     built: 'Moon soil piled on top, or water tanks in the walls. Using Moon soil means less to launch from Earth.',
     fact: 'Water is great against radiation because it is full of light hydrogen atoms.',
   },
+};
+
+/**
+ * The shield sheet (tap "Shield"). Sources opened 14 Nov 2026:
+ * - CERN Bulletin 2015/32, "A superconducting shield to protect astronauts" (SR2S project, Jan 2013 to Dec 2015,
+ *   MgB2 superconducting test coils, "many more challenges to overcome")
+ * - NASA NIAC, S. Westover, "Radiation Protection and Architecture Utilizing High Temperature Superconducting
+ *   Magnets" (Phase I/II, NTRS 20190002579): coils 8 m wide, 1 tesla
+ * - Earth's magnetic field and the Orion storm plan: already in GLOSSARY and ROOM_INFO
+ */
+export const SHIELD_INFO = {
+  intro: 'A magnet shield around the base. It bends fast particles from the Sun away, a bit like Earth’s magnetic field does.',
+  how: 'Particles from the Sun carry an electric charge. Strong magnets push charged particles off course, so fewer of them reach the crew.',
+  cost: 'A stronger shield blocks more, but uses more power. At night no sunlight comes in, so a strong shield can empty the battery.',
+  real: 'No base and no spaceship has a magnet shield yet. Scientists are testing the idea. At CERN in Europe, they built test magnets for a project called SR2S (2013 to 2015). NASA studied giant magnet rings, 8 metres wide, for spaceships.',
+  cold: 'These magnets are superconductors: they only work when they are super cold. A real shield would need power to keep them cold.',
+  today: 'What protects astronauts today: thick walls, for example of Moon soil or water, and a small storm shelter.',
+  sources: [
+    'CERN Bulletin (2015): “A superconducting shield to protect astronauts”, SR2S project',
+    'NASA NIAC study by S. Westover: “Radiation Protection and Architecture Utilizing High Temperature Superconducting Magnets”',
+    'Radiation near the Moon: NASA OSDR RadLab (LRO CRaTER)',
+  ],
 };
 
 /** Why a setback happened and what to try next time (mentor feedback: learn from mistakes). */
@@ -203,7 +227,8 @@ export const LESSONS = {
     title: 'The crew got too much radiation',
     why: sheltered ? 'The crew had already taken a lot of radiation earlier in the storm.'
       : shieldLabel === 'Off' ? 'A strong storm hit while the shield was off and the crew was outside the shelter.'
-        : `A strong storm hit while the shield was only on ${shieldLabel}.`,
+        : shieldLabel === 'Max' ? 'A very strong storm hit while the crew was outside the shelter. Even the Max shield lets a little through.'
+          : `A strong storm hit while the shield was only on ${shieldLabel}.`,
     next: 'When a big flare or particle storm is announced, raise the shield or go to the shelter right away.',
   }),
   roomLost: ({ room, days }) => ({

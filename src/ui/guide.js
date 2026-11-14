@@ -8,7 +8,7 @@
 import { callEarthReady, radiationNow } from '../rules/mission.js';
 import { ROOM_IDS } from '../rules/config.js';
 
-/** The first problem in a guided mission: a leak in the living quarters (it can never be lost). */
+/** The first problem in a guided mission: a leak in the home (it can never be lost). */
 export const GUIDED_LEAK = { t: 0.75, kind: 'leak', roomId: 'hab' };
 
 const calm = (s) => radiationNow(s) < 3 && !s.pendingCard && !s.powerEmergency
@@ -33,7 +33,7 @@ const STEPS = [
   {
     id: 'shield', target: '.seg', doneOn: 'shieldUp', maxDays: 2,
     ready: (s, g) => g.sinceLast(s) > 0.25 && calm(s),
-    say: 'Now try the shield. Tap Low and watch what happens to the power bar.',
+    say: 'Now try the shield. Tap Low and watch the number under Power go down.',
     after: 'See? The shield blocks radiation, but it uses power. Turn it up when the Sun gets stormy.',
   },
   // The shelter is the real way to stay safe, and the trade is the lesson (RESEARCH.md, section 0):

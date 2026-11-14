@@ -17,6 +17,7 @@ const STATUS = {
   on: ['Lamps on', 'good'],
   dark: ['Lamps off', 'idle'],
   lost: ['Sealed', 'bad'],
+  leak: ['Leaking!', 'bad'],
   none: ['Not built', 'idle'],
 };
 

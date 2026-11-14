@@ -9,11 +9,12 @@ import {
   dateMsAt, currentDayIndex, radiationNow, fmtTimes, powerInPerDay, powerUsePerDay, sciencePerDay,
   repairFor, callEarthReady, blockFraction,
 } from '../rules/mission.js';
+import { airBreakdown } from '../rules/mission.js';
 import { nextTerminatorCrossing } from '../rules/sky.js';
 
 const DAY_MS = 86400000;
 const fmtDate = (ms) => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-const BLOCK_SHORT = ['none', 'half', 'most', 'all'];
+const BLOCK_SHORT = ['none', 'more than half', 'most', 'almost all'];
 
 export function createHud(root, actions, { sound = true, canSpeak = false } = {}) {
   const el = document.createElement('div');
@@ -53,7 +54,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     </section>
     <nav class="dock" aria-label="Controls">
       <div class="shieldctl">
-        <span class="sc-label">${icon('shield')}Shield</span>
+        <button type="button" class="sc-label" data-info="shield" aria-label="Shield: how it works, what it costs, and the real research. Tap to learn more.">${icon('shield')}Shield<span class="sc-i" aria-hidden="true">i</span></button>
         <div class="seg" role="group" aria-label="Shield level">
           ${SHIELD_LABELS.map((l, i) => `<button type="button" data-shield="${i}"><b>${l}</b><span></span></button>`).join('')}
         </div>
@@ -136,15 +137,17 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     const pNet = powerInPerDay(state) - powerUsePerDay(state);
     const pct = (state.power / state.capacity) * 100;
     meterSet(refs.meters.power, cache, 'power', state.power / state.capacity, `${Math.round(pct)}<small>%</small>`,
-      state.powerEmergency ? 'Recharging' : rate(pNet, ''), pct < cfg.power.warnBelow || state.powerEmergency, state.powerEmergency ? 'Empty' : 'Low');
+      state.powerEmergency ? (pNet > 0 ? 'Recharging' : 'Waiting for sun') : rate((pNet / state.capacity) * 100, '%'), pct < cfg.power.warnBelow || state.powerEmergency, state.powerEmergency ? 'Empty' : 'Low');
+    // Air: the number that matters is how fast it changes; the warning pill names the cause.
     const leaking = ROOM_IDS.some((id) => state.rooms[id].status === 'leak');
+    const aNet = airBreakdown(state).reduce((a, r) => a + r.perDay, 0);
     meterSet(refs.meters.air, cache, 'air', state.air / cfg.air.max, `${Math.round(state.air)}<small>%</small>`,
-      leaking ? 'Leaking!' : state.filter ? 'Clogged' : state.air >= cfg.air.max - 0.5 ? 'Full' : 'Refilling',
-      state.air < cfg.air.warnBelow, 'Low');
+      state.air >= cfg.air.max - 0.5 && aNet >= 0 ? 'Full' : rate(aNet, '%'),
+      state.air < cfg.air.warnBelow || leaking || state.filter, leaking ? 'Leak!' : state.filter ? 'Clogged' : 'Low');
     const block = blockFraction(state);
     const doseRate = cfg.dose.perNormalDay * rad * (1 - block);
     meterSet(refs.meters.dose, cache, 'dose', state.dose / cfg.dose.limit, `${Math.round(state.dose)}<small>/${cfg.dose.limit}</small>`,
-      state.forcedShelter ? 'At the limit' : doseRate >= 0.5 ? `+${Math.round(doseRate)}/day` : 'Safe',
+      state.forcedShelter ? 'At the limit' : doseRate >= 0.5 ? `+${Math.round(doseRate)}/day` : 'Calm now',
       state.dose > cfg.dose.warnAbove, 'High');
 
     // science / upgrades
@@ -168,8 +171,8 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     const inShelter = state.sheltered || state.forcedShelter;
     refs.shelter.setAttribute('aria-pressed', String(inShelter));
     refs.shelter.disabled = state.rooms.shelter.status === 'lost';
-    set('shelterSub', refs.shelter.querySelector('.sub'), `${inShelter}|${state.rooms.shelter.status}`, (n) => {
-      n.textContent = state.rooms.shelter.status === 'lost' ? 'Sealed' : inShelter ? 'Tap: back to work' : 'Stops science';
+    set('shelterSub', refs.shelter.querySelector('.sub'), `${inShelter}|${state.forcedShelter}|${state.rooms.shelter.status}`, (n) => {
+      n.textContent = state.rooms.shelter.status === 'lost' ? 'Sealed' : state.forcedShelter ? 'Must stay inside' : inShelter ? 'Tap: back to work' : 'Stops science';
     });
 
     // Call Earth: cooldown ring

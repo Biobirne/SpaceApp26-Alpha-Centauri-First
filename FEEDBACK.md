@@ -34,6 +34,25 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~17:00)
+- The shield needs a lot of explaining. Tapping the shield icon should open an explanation, with sources and everything.
+
+**Status: done** (branch `feat/numbers-explained`): "Shield" in the dock is now a button with an "i".
+- The sheet shows every level side by side with today's real radiation: how much it blocks, the power it costs, and the dose it lets through each day.
+- It explains how a magnet shield works (charged particles get pushed off course, like by Earth's magnetic field), why it needs power, and that no base has one yet.
+- Real research: CERN test magnets for the SR2S project (2013–2015), and a NASA NIAC study of 8 m magnet rings.
+- What protects astronauts today: walls and a storm shelter. The block and power numbers are named as game numbers, and the sources are listed.
+
+### Florian (14 Nov, ~16:00)
+- What does "10× radiation" mean? Which real number is behind it? The same for power, air and everything else. Numbers and percentages should be visible all the time, but never forced on you, and a tap should always give a short, friendly explanation.
+- Small logic errors in the texts. The buildings have other names on the base than in their sheet, e.g. "Plants" vs "Greenhouse".
+
+**Status: done** (branch `feat/numbers-explained`):
+- Every bar and the radiation chip open a "What the numbers mean" box: what the number counts, what the rate means for the next days ("empty in about 4 days"), and how it is measured for real.
+- Radiation: "278×" = today's NASA reading (1528 µGy/h) divided by a calm day (5.5 µGy/h), with µGy/h explained. Power and air bars now show their rate in %/day. Dose points are called a game number (1 point = about 4 calm days with the shield off), next to NASA's real career limit of 600 mSv.
+- One name per building, the same on the base, in the sheets and in Sam's lines: Solar panels, Greenhouse, Home, Science lab, Shelter.
+- An SI text audit (see below) found 24 more small errors. Fixed: battery in % also with a bigger battery, "Perfect mission" only without setbacks, block words that match the numbers, "1 days", the Shelter button during a forced stay, and more.
+
 ### Florian (14 Nov, ~13:00)
 - Device / build: laptop, Brave, `main` @ `d1d04ee` (after PR #9).
 
@@ -67,6 +86,15 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.
+
+### SI text audit (Claude Code, 14 Nov, ~16:00)
+Claude Code (SI) read every player-facing text and checked it against the rules and `config.js`. 24 findings. Fixed in `feat/numbers-explained`:
+- **Wrong numbers:** "battery 130%" on Easy, "only on Max", "1 days", "blocks all" for 95 %, "half" for 60 %.
+- **Wrong state:** a leaking greenhouse shown as "Sealed", "Recharging" at night, "Tap: back to work" while the crew must stay inside, "Safe" next to "High", the lab "Working fine" while the crew is in the shelter.
+- **Wrong advice:** "Keep the crew in the shelter" when they are not in it, "get back to work" when they already work, "turn the shield down" when it is already off, "Another flare" for the first one.
+- **Honest wording:** the shelter option says it turns the shield down to Low to save power, the storm report only praises the shelter when it was used, the bigger battery arrives charged.
+
+Left open: three lines inside `overlays.js` next to the mini-game code (shield words on the cards, "Start this storm again" vs "Play this storm again"), to avoid merge conflicts with the dust mini-game.
 
 ### SI playtest 1 (Claude Code, 14 Nov, ~12:00)
 - Build: `main` @ `8ddf880` (after PRs #6–#8).
