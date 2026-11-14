@@ -117,7 +117,7 @@ export function createHud(root, actions) {
     for (const b of refs.speed) b.setAttribute('aria-pressed', String(b.dataset.speed === speed));
     // Say openly how fast time runs (GAME_DESIGN.md: never pretend it is real time).
     set('speedNote', refs.speedNote, speed, (n, v) => {
-      n.textContent = v === 'pause' ? 'Paused' : `1 day = ${cfg.secondsPerDay[v]} s`;
+      n.textContent = v === 'pause' ? 'Paused' : v === 'wait' ? 'Clock waits for you' : `1 day = ${cfg.secondsPerDay[v]} s`;
     });
 
     // radiation chip
@@ -251,7 +251,7 @@ function createCrew(node) {
   function next() {
     clearTimeout(timer);
     // News older than half a game day is out of date: skip it (warnings are re-sent by the rules).
-    while (queue.length && queue[0].t != null && api.now() - queue[0].t > 0.5) queue.shift();
+    while (queue.length && !queue[0].tag && queue[0].t != null && api.now() - queue[0].t > 0.5) queue.shift();
     showing = queue.shift() || null;
     if (!showing) { node.classList.remove('show'); return; }
     avWrap.innerHTML = crewAvatar(showing.mood);
@@ -265,6 +265,7 @@ function createCrew(node) {
     more.textContent = queue.length ? `${queue.length} more ›` : '';
     node.classList.add('show');
     schedule();
+    showing.onShow?.();
   }
 
   function schedule() {
@@ -279,14 +280,19 @@ function createCrew(node) {
 
   const api = {
     now: () => null,
-    say(text, mood = 'calm', { chatter = false, word: w = null } = {}) {
+    /**
+     * `tag` groups lines that replace each other (the guide's hints): a new one removes older
+     * queued ones and takes over the bubble. `onShow` runs when the line actually appears.
+     */
+    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null } = {}) {
       if (chatter && (showing || queue.length)) return;
       // Drop stale chatter when something important comes in.
       if (!chatter) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].chatter) queue.splice(i, 1);
+      if (tag) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
       if (queue.length > 5) queue.splice(0, queue.length - 5);
-      queue.push({ text, mood, chatter, word: w, t: api.now() });
-      // Real news replaces small talk right away.
-      if (!showing || (showing.chatter && !chatter && !frozen)) next();
+      queue.push({ text, mood, chatter, word: w, tag, onShow, t: api.now() });
+      // Real news replaces small talk right away, and a new hint replaces an old one.
+      if (!showing || (!frozen && ((showing.chatter && !chatter) || (tag && showing.tag === tag)))) next();
       else more.textContent = `${queue.length} more ›`;
     },
     /** Keep the current line on screen while the game is paused (cards, repairs, calls). */
@@ -294,6 +300,15 @@ function createCrew(node) {
       frozen = on;
       if (on) clearTimeout(timer);
       else schedule();
+    },
+    /** The problem this alert was about is solved: move on instead of showing old news. */
+    dismissAlert() {
+      if (showing?.mood === 'alert' && !frozen) next();
+    },
+    /** Remove lines with this tag (a hint that is no longer needed). */
+    drop(tag) {
+      for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
+      if (showing?.tag === tag && !frozen) next();
     },
     clear() { queue.length = 0; showing = null; clearTimeout(timer); node.classList.remove('show'); },
   };

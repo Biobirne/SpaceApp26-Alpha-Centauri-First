@@ -179,6 +179,13 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
   - The scale is shown under the speed buttons.
   - Fast-forward drops back to normal when something happens.
   - The game pauses on cards, repairs, calls, menus and when the tab is hidden.
+- **Guided first steps** (scaffolding and fading, from `Guide_Gamedesign_Attention.md` 3.2 and 3.3):
+  - A new player meets one thing at a time: the bars, then a safe first leak (the clock waits until it is fixed), then the shield, then fast-forward.
+  - Later, when it fits: Call Earth after the first hard moment, and the real-data chip when radiation is high.
+  - The control to try glows together with the crewmate's sentence about it.
+  - Each hint shows once, and a hint is skipped if the kid already did the thing.
+  - Hints can be switched off and on again in the pause menu (help on demand).
+  - Code: `src/ui/guide.js`. The scripted first leak is a `script` option of `createMission`.
 - **New science words** appear in the crewmate's bubble next to the sentence that uses them, and are collected on the end screen.
 - **Stars:**
   - 1 for finishing.

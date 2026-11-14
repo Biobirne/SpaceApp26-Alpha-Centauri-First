@@ -316,13 +316,14 @@ export function showData(state, doc) {
 
 // ------------------------------------------------------------------ pause
 
-export function showPause({ onResume, onRestart, onMenu }) {
+export function showPause({ onResume, onRestart, onMenu, hints, onHints }) {
   const html = `
     <h2>Paused</h2>
     <p>The Moon base waits for you.</p>
     <div class="row">
       <button type="button" class="btn primary resume">${icon('play')}Keep playing</button>
     </div>
+    <button type="button" class="btn quiet small hints" aria-pressed="${hints}">${icon('info')}<span></span></button>
     <div class="row">
       <button type="button" class="btn quiet small restart">${icon('restart')}Start this storm again</button>
       <button type="button" class="btn quiet small menu">${icon('back')}All missions</button>
@@ -330,6 +331,18 @@ export function showPause({ onResume, onRestart, onMenu }) {
   let picked = null;
   const sheet = openSheet(html, { className: 'pause-sheet', onClose: () => (picked || onResume)() });
   sheet.el.querySelector('.resume').addEventListener('click', () => { picked = onResume; sheet.close(); });
+  // Help on demand: the kid decides whether the step-by-step hints show.
+  const hintBtn = sheet.el.querySelector('.hints');
+  const renderHints = (on) => {
+    hintBtn.setAttribute('aria-pressed', String(on));
+    hintBtn.querySelector('span').textContent = on ? 'Hints are on. Tap to turn them off.' : 'Hints are off. Tap to show them again.';
+  };
+  renderHints(hints);
+  hintBtn.addEventListener('click', () => {
+    const on = hintBtn.getAttribute('aria-pressed') !== 'true';
+    onHints(on);
+    renderHints(on);
+  });
   sheet.el.querySelector('.restart').addEventListener('click', () => { picked = onRestart; sheet.close(); });
   sheet.el.querySelector('.menu').addEventListener('click', () => { picked = onMenu; sheet.close(); });
   return sheet;

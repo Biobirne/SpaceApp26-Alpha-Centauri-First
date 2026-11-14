@@ -474,6 +474,16 @@ body.no-phaser #scene {
 
 /* pause */
 .pause-sheet { text-align: center; }
+.pause-sheet .hints { margin-top: 14px; width: 100%; }
+.pause-sheet .hints[aria-pressed='true'] { box-shadow: 0 4px 0 #0d1226, inset 0 0 0 2px var(--science-deep); }
+
+/* guided first steps: the control to try next glows */
+.spot-on { position: relative; z-index: 3; animation: spot-glow 1.4s ease-in-out infinite; }
+@keyframes spot-glow {
+  0%, 100% { box-shadow: 0 0 0 3px var(--power), 0 0 0 8px rgb(255 191 60 / 0.25); }
+  50% { box-shadow: 0 0 0 3px var(--power), 0 0 0 14px rgb(255 191 60 / 0); }
+}
+.task.spot-on { animation: task-in 380ms var(--ease-pop) both, spot-glow 1.4s ease-in-out 380ms infinite; }
 .pause-sheet .row { margin-top: 14px; }
 
 /* ------------------------------------------------------------------ start and end screens */
@@ -620,6 +630,7 @@ body.no-phaser #scene {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .spot-on, .task.spot-on { animation: none !important; box-shadow: 0 0 0 3px var(--power), 0 0 0 8px rgb(255 191 60 / 0.3) !important; }
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
   .crew, .crew.show { transition: none; }
 }

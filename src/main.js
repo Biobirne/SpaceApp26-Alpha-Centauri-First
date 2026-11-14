@@ -11,7 +11,8 @@ import { createHud } from './ui/hud.js';
 import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
 import { icon } from './ui/icons.js';
-import { loadProgress, saveResult, nextLevel, isUnlocked, LEVEL_ORDER, rankFor } from './progress.js';
+import { loadProgress, saveResult, nextLevel, isUnlocked, LEVEL_ORDER, rankFor, markHintSeen, setHints } from './progress.js';
+import { createGuide } from './ui/guide.js';
 import { createMoonScene } from './scene/MoonScene.js';
 
 const params = new URLSearchParams(location.search);
@@ -162,16 +163,21 @@ function startMission(id) {
   clearApp();
   const doc = data.docs[id];
   const seed = Number(params.get('seed')) || (Date.now() % 1e9);
-  const state = createMission(doc, { seed, config: CONFIG });
   const hud = createHud(app, actions);
+  const progress = loadProgress();
+  const guide = createGuide({
+    root: hud.el, enabled: progress.hints, seen: progress.seen, markSeen: markHintSeen,
+    say: (text, mood, opts) => hud.crew.say(text, mood, opts),
+    unsay: (tag) => hud.crew.drop(tag),
+  });
+  const state = createMission(doc, { seed, config: CONFIG, script: guide.script() });
   run = {
-    id, doc, state, hud,
+    id, doc, state, hud, guide,
     speed: 'normal',
     lastSpeed: 'normal',
     blockers: new Set(),
     raf: 0,
     lastMs: performance.now(),
-    hinted: false,
   };
   const ro = new ResizeObserver(syncSlot);
   ro.observe(hud.stage);
@@ -185,6 +191,7 @@ function stopRun() {
   if (!run) return;
   cancelAnimationFrame(run.raf);
   run.ro?.disconnect();
+  run.guide.stop();
   run.hud.crew.clear();
   run = null;
 }
@@ -195,16 +202,14 @@ function loop(now) {
   const dtSec = Math.min(0.25, (now - r.lastMs) / 1000);
   r.lastMs = now;
   const s = r.state;
-  const blocked = r.blockers.size > 0 || r.speed === 'pause' || s.pendingCard || s.ended;
+  // The guide can hold the clock (not the controls) while a kid learns something new.
+  const blocked = r.blockers.size > 0 || r.speed === 'pause' || r.guide.hold || s.pendingCard || s.ended;
   if (!blocked) tick(s, dtSec / s.cfg.secondsPerDay[r.speed]);
   drain();
   if (run !== r) return; // the mission ended inside drain()
-  r.hud.update(s, r.blockers.has('pause') ? 'pause' : r.speed);
+  r.guide.update(s);
+  r.hud.update(s, r.blockers.has('pause') ? 'pause' : r.guide.hold ? 'wait' : r.speed);
   if (scene) scene.view = viewOf(s);
-  if (!r.hinted && s.t > 1.3 && r.speed === 'normal' && radiationNow(s) < 3) {
-    r.hinted = true;
-    r.hud.crew.say('Tip: when things are calm, tap the fast-forward button to speed up time.', 'happy');
-  }
   r.raf = requestAnimationFrame(loop);
 }
 
@@ -249,6 +254,7 @@ function drain() {
   const events = s.outbox.splice(0);
   let word = null; // a new science word rides along with the crew line that uses it
   for (const e of events) {
+    r.guide.onEvent(e);
     switch (e.type) {
       case 'crew':
         r.hud.crew.say(e.text, e.mood, { chatter: e.chatter, word });
@@ -277,6 +283,7 @@ function drain() {
         break;
       case 'room':
         if (e.status === 'leak' || e.status === 'lost') slowDown();
+        if (e.status === 'ok') r.hud.crew.dismissAlert();
         break;
       case 'setback':
         r.hud.hitMeter(e.kind);
@@ -307,12 +314,15 @@ const actions = {
     if (!run) return;
     if (next === 'pause') return actions.pause();
     run.speed = next;
+    if (next === 'fast') run.guide.onAction('fast');
   },
 
   pause() {
     if (!run || run.blockers.size) return;
     block('pause', true);
     showPause({
+      hints: loadProgress().hints,
+      onHints: (on) => { setHints(on); run?.guide.setEnabled(on); },
       onResume: () => block('pause', false),
       onRestart: () => startMission(run.id),
       onMenu: showStart,
@@ -323,6 +333,7 @@ const actions = {
     const s = run?.state;
     if (!s || s.shield === level) return;
     if (setShield(s, level)) {
+      if (level > 0) run.guide.onAction('shieldUp');
       const cost = s.cfg.power.shieldPerDay[level];
       floater(anchor, `${SHIELD_LABELS[level]}: ${BLOCK_SHORT[level]}${cost ? `, −${cost} power/day` : ''}`, 'var(--air)');
     }
@@ -347,6 +358,7 @@ const actions = {
       return;
     }
     const advice = callEarth(s);
+    run.guide.onAction('call');
     block('call', true);
     let applied = null;
     showCall(advice, s.cfg.callEarth.roundTripSeconds, (action) => { applied = action; }, () => {
@@ -373,6 +385,7 @@ const actions = {
       showRepair(job, () => {
         block('repair', false);
         completeRepair(s, roomId, job.kind);
+        run?.guide.onAction('repairDone');
       }, () => block('repair', false));
     };
     if (job.kind === 'rebuild') {
@@ -393,6 +406,7 @@ const actions = {
     const s = run?.state;
     if (!s || run.blockers.size) return;
     block('data', true);
+    run.guide.onAction('data');
     watchClose(showData(s, run.doc), 'data');
   },
 };
@@ -420,7 +434,7 @@ addEventListener('keydown', (e) => {
   else if (['1', '2', '3', '4'].includes(k)) actions.shield(Number(k) - 1, run.hud.refs.seg[Number(k) - 1]);
   else if (k === 's') actions.shelter();
   else if (k === 'c') actions.call();
-  else if (k === 'f') run.speed = run.speed === 'fast' ? 'normal' : 'fast';
+  else if (k === 'f') actions.speed(run.speed === 'fast' ? 'normal' : 'fast');
 });
 
 document.addEventListener('visibilitychange', () => {
