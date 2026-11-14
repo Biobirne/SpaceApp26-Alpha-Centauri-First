@@ -51,3 +51,4 @@ One line per task: date, SI tool, what it did. The team reviewed and merged ever
 | 2026-11-14 | Claude Code (Claude Opus 5.5) | Storm cards fit the current shield (up/keep/down, no twin choices); Call Earth helps with sealed buildings, an empty battery, the forced shelter and the storm fort; tests; playtested on phone. |
 | 2026-11-14 | Claude Code (Claude Fable 5.2) | Fixed double taps on phones: a freshly opened sheet ignores clicks for 0.45 s, so the late click of the touch that opened it no longer presses the first button of a mini-game. |
 | 2026-11-14 | Claude Code (Claude Opus 5.5) | Greenhouse sheet: the plant lamp control became an On/Off switch at the top that flips in place, without a pop-up over the sheet; playtested on phone and desktop. |
+| 2026-11-14 | Claude Code (Claude Fable 5.2) | Double taps on phones, second fix: a sheet counts a click only after its own press (pointerdown), so the late click of the opening touch is ignored at any delay. |

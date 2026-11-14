@@ -169,6 +169,7 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Mini-games started with something already pressed: the old filter fell out by itself, a wall panel was already tested in the leak game, the water bag was already chosen in the storm wall test.
 - Cause (very likely, not seen on a real phone here): a touch on a building opens the mini-game, and the browser then sends a late click for the same spot, which pressed whatever lay there. Home is on the left and the shelter on the right, which matches what was pressed.
 - Fix: every sheet ignores clicks for 0.45 s after it opens.
+- Still there after that fix (18:35): a tap even hit the leak panel and jumped to the patch. Second fix: a sheet counts a click only when the finger went down on the sheet first. Also possible: the phone still ran the old files, because GitHub Pages lets browsers keep them for 10 minutes.
 
 ## Automatic SI review
 
