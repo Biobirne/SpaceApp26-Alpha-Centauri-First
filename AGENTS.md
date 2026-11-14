@@ -95,3 +95,24 @@ Decided Saturday 14 Nov: **Phaser 3.90.0 via CDN**, plus our own code as plain E
 - Game rules (state, resources, clock, events, scoring) live in plain modules with **no Phaser import**. Scenes only draw state and send actions back.
 - The `phaser-core` skill targets Phaser 4 with npm. Use its scene lifecycle and architecture advice, and ignore its npm/`import Phaser` setup and Phaser 4-only APIs.
 - Design reference: `GAME_DESIGN.md`. Data reference: `data/README.md`.
+
+## Skills
+Project skills live in `.claude/skills/`. Claude Code loads them by itself. Other agents can read each `SKILL.md` as plain instructions. **If a skill conflicts with this file, this file wins** (no npm, no new dependencies, Phaser 3.90, "SI" not "AI").
+
+Our own skills. Use them every time they fit:
+| Skill | Use it when |
+|-------|-------------|
+| `kids-ux` | You write game text, design a screen or a choice, add feedback or a failure state, or review before a merge |
+| `playtest` | You changed `index.html`, `src/`, `assets/` or `data/`, or before you say something works |
+| `ship-task` | A task is done: tests, bookkeeping, merge `origin/main`, push, PR |
+
+Third-party skills (license in each folder). Use them for advice, not for their setup steps:
+| Skill | Use it for | Watch out |
+|-------|-----------|-----------|
+| `phaser-core` | Scene lifecycle, the loader, a black screen | Targets Phaser 4 and npm (see Tech stack) |
+| `game-ui-ux` | HUD and menu layout, safe areas, scaling on phones and tablets | Our layout system: `src/ui/layout.css` and `syncSlot` in `main.js` |
+| `game-feel` | Juice for a working mechanic: tweens, bounce, sound on tap | `kids-ux` first: no strobe, respect reduced motion |
+| `frontend-design` | Visual direction for screens and the pitch slides | No SI-generated images |
+| `survival-crafting` | Resource loops: power, air, recycling | At most 3 bars (`GAME_DESIGN.md`) |
+| `game-jam` | Cutting scope against the deadline | – |
+| `prototype-fast` | A throwaway test of one mechanic | Never on `main` |
