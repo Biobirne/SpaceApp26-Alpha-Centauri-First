@@ -34,18 +34,21 @@ export function showRoomInfo(roomId, state) {
   const html = `
     <h2>${icon(ROOM_ICON[roomId])} ${esc(ROOMS[roomId].name)}</h2>
     <p class="info-status">${esc(status)}</p>
-    ${part('check', 'What it does', info.does)}
     ${roomId === 'greenhouse' ? lampHTML(state) : ''}
+    ${part('check', 'What it does', info.does)}
     ${part('rocket', 'In real life', info.real)}
     ${part('wrench', 'Built from', info.built)}
     <div class="fact">${icon('info')}<span>${esc(info.fact)}</span></div>
     <div class="row"><button type="button" class="btn primary ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'info-sheet' });
   sheet.el.querySelector('.ok').addEventListener('click', () => sheet.close());
-  sheet.el.querySelector('.lamp-btn')?.addEventListener('click', () => {
+  // The lamp switch flips in place, so the kid sees the new state and the cost right there.
+  const wireLamp = () => sheet.el.querySelector('.lamp-toggle')?.addEventListener('click', (e) => {
     infoActions.growLights?.(!(state.growLights && !state.powerEmergency));
-    sheet.close();
+    e.currentTarget.outerHTML = lampHTML(state);
+    wireLamp();
   });
+  wireLamp();
   return sheet;
 }
 

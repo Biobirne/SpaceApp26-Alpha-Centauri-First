@@ -46,11 +46,10 @@
 .ls-leak .ic { width: 20px; height: 20px; flex: none; color: var(--alert); }
 .ls-detail { min-height: 2.8em; margin: 12px 0 0; font-size: 15px; color: var(--text-2); }
 
-/* Greenhouse: plant lamps on or off */
-.lamp { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin: 8px 0; padding: 10px 12px; border-radius: var(--r-m); background: var(--panel-2); box-shadow: inset 4px 0 0 var(--line); }
-.lamp.on { box-shadow: inset 4px 0 0 var(--science); }
-.lamp b { font-size: 16px; }
-.lamp p { margin: 2px 0 0 !important; font-size: 15px !important; color: var(--text-2); }
-.lamp .btn { flex: none; min-height: var(--tap); }
+/* Greenhouse: the plant lamp switch at the top of the sheet (styles shared with the pause menu's .pz-toggle) */
+.lamp-toggle { margin: 10px 0 12px; }
+.lamp-toggle > .ic { color: var(--power); }
+.lamp-toggle[aria-checked='false'] > .ic { color: var(--text-2); }
+.lamp-toggle:disabled { cursor: default; opacity: 0.7; }
 
 @media (prefers-reduced-motion: reduce) { .ls-node { transition: none; } }
