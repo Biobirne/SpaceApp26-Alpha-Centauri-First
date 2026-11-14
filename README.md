@@ -6,7 +6,7 @@ A browser game for kids aged 7–12. You run a small base on the Moon for 30 day
 
 "Moon Base Commander" is a working title, and so is the crewmate's name, Sam.
 
-**Play:** not online yet. GitHub Pages is not switched on (the repo is private). Run it locally, see below.
+**Play:** https://biobirne.github.io/SpaceApp26-Alpha-Centauri-First/ (works on phones; no install, no login). Judges can add `?all=1` to unlock every storm.
 
 ## What's in the game
 - **Six real storms (2017–2025)** as levels, unlocked one after the other. Easy, Normal or Hard, each explained on the start screen.
