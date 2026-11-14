@@ -7,7 +7,8 @@
        minigame.html?game=dust&risky=1    high radiation, the kid decides first
        minigame.html?game=fort            build the storm wall
        minigame.html?game=leak            find and patch a leak
-       minigame.html?game=filter          swap the air filter -->
+       minigame.html?game=filter          swap the air filter
+       minigame.html?game=reopen          reopen a sealed room -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
@@ -38,6 +39,7 @@
       fort: { kind: 'fort', roomId: 'shelter', taps: 5 },
       leak: { kind: 'leak', roomId: 'hab', taps: 4 },
       filter: { kind: 'filter', roomId: 'hab', taps: 3 },
+      reopen: { kind: 'rebuild', roomId: 'lab', taps: 6 },
     };
     const again = document.querySelector('.again');
 

@@ -270,13 +270,27 @@ export function createIntro({ hud, startAt = '1', speak, relayout, syncSound, on
       },
     });
 
+    add('sealed', {
+      doneOn: 'repairDone',
+      enter: () => {
+        state.rooms.lab.status = 'lost'; // what happens to a leak that nobody fixes
+        spotlight('.task[data-room="lab"]');
+        render({
+          kind: 'problem', praise: 'Leak patched. The air is safe.', title: 'A leak that waits too long',
+          problem: 'If nobody fixes a leak in time, the crew closes that room to save the air. Look: the lab is sealed. A sealed lab does almost no science.',
+          fix: 'Close the hole, pump air back in, and open the lab again.',
+          todo: 'Tap “Reopen”, or the sealed lab.',
+        });
+      },
+    });
+
     add('filter', {
       doneOn: 'repairDone',
       enter: () => {
         trigger('filter');
         spotlight('.task[data-room="hab"]');
         render({
-          kind: 'problem', praise: 'Leak patched. The air is safe.', title: 'A full air filter',
+          kind: 'problem', praise: 'The lab is open again!', title: 'A full air filter',
           problem: 'You breathe out a gas called CO₂. The filter catches it, and now it is full.',
           fix: 'Swap in a fresh filter.',
           todo: 'Tap the red button, or Home.',
@@ -393,7 +407,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, syncSound, on
 
   /** Jump straight to one lesson (for testing): everything before it counts as done. */
   function jumpTo(name) {
-    const alias = { storm: 'storm-shield', drill: 'storm-shield', shelter: 'storm-shelter', build: 'build-solar' };
+    const alias = { storm: 'storm-shield', drill: 'storm-shield', shelter: 'storm-shelter', build: 'build-solar', reopen: 'sealed' };
     if (name === 'fort') show('rates', 'tasks');
     const target = steps.findIndex((s) => s.id === (alias[name] ?? name));
     if (target <= 0) return 0;
@@ -467,7 +481,11 @@ export function createIntro({ hud, startAt = '1', speak, relayout, syncSound, on
       // A card with a todo shrinks to one line, so it only keeps room for that line (it may cover
       // the base while the explanation is up). Other cards keep the base clear of the whole card.
       const full = Math.ceil(card.querySelector('.coach-body')?.getBoundingClientRect().height ?? 260);
-      const h = spec?.todo ? (mini ? full : 64) : full;
+      let h = spec?.todo ? (mini ? full : 64) : full;
+      // On a small phone a big card would squeeze the base into a strip. Then the card lies over the
+      // base while the kid reads it, and the base keeps its size and its places.
+      const stageH = hud.stage.getBoundingClientRect().height;
+      if (h > stageH * 0.45) h = 64;
       return wide ? { top: 0, bottom: h + 24 } : { top: h + 8, bottom: 0 };
     },
 

@@ -27,7 +27,7 @@ export function showRoomInfo(roomId, state) {
   const info = ROOM_INFO[roomId];
   const room = state.rooms[roomId];
   let status = 'Working fine.';
-  if (room.status === 'lost') status = 'Sealed after a leak. Tap it again to rebuild it with science points.';
+  if (room.status === 'lost') status = 'Sealed after a leak. Tap it again to fix the wall and open it.';
   else if (roomId === 'shelter' && (state.sheltered || state.forcedShelter)) status = 'The crew is inside right now.';
   else if (roomId === 'lab' && state.powerEmergency) status = 'Paused: the battery is empty.';
   else if (roomId === 'lab' && (state.sheltered || state.forcedShelter)) status = 'Paused: the crew is in the shelter.';
@@ -104,8 +104,8 @@ export function jobName(job) {
     leak: `Patch the leak in the ${room}`,
     filter: 'Swap the air filter',
     dust: 'Clean the solar panels',
-    fort: 'Build the storm fort',
-    rebuild: `Rebuild the ${room}`,
+    fort: 'Build the storm wall',
+    rebuild: `Reopen the ${room}`,
   }[job.kind] || `Fix the ${room}`;
 }
 
@@ -125,7 +125,7 @@ function openJobs(state, kind) {
 function fixesHTML(jobs) {
   if (!jobs.length) return '';
   return `<div class="fixes">${jobs.map((j) => `
-    <button type="button" class="btn go fix" data-room="${j.roomId}">${icon('wrench')}<span>${esc(jobName(j))}<small class="sub">${j.kind === 'rebuild' ? `Costs ${j.cost} science points` : j.kind === 'dust' ? 'A short spacewalk' : 'Opens the repair'}</small></span></button>`).join('')}
+    <button type="button" class="btn go fix" data-room="${j.roomId}">${icon('wrench')}<span>${esc(jobName(j))}<small class="sub">${j.kind === 'dust' ? 'A short spacewalk' : 'Opens the repair'}</small></span></button>`).join('')}
   </div>`;
 }
 

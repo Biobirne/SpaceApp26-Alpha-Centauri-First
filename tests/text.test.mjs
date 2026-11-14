@@ -100,10 +100,11 @@ test('Call Earth notices a sealed building, an empty battery and the forced shel
   s.science = 5;
   let a = adviceNow(s);
   assert.doesNotMatch(a.text, /Everything looks great/);
-  assert.match(a.text, /rebuild the science lab/i);
+  assert.match(a.text, /Reopen the science lab/);
+  assert.equal(a.action.repair, 'lab', 'reopening costs no points, so it is offered even with few of them');
   s.science = 40;
   a = adviceNow(s);
-  assert.match(a.text, /Rebuild the science lab/);
+  assert.match(a.text, /Reopen the science lab/);
   assert.equal(a.action.repair, 'lab');
 
   const p = createMission(load('oct2021'), { seed: 1 });

@@ -10,6 +10,7 @@ import { mountDust } from './minigames/dust.js';
 import { mountFort } from './minigames/fort.js';
 import { mountLeak } from './minigames/leak.js';
 import { mountFilter } from './minigames/filter.js';
+import { mountReopen } from './minigames/reopen.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -106,7 +107,7 @@ const TASKS = {
   dust: { title: 'Clean the solar panels', icon: 'sun', game: mountDust },
   fort: { title: 'Build the storm wall', icon: 'shelter', game: mountFort },
   filter: { title: 'Swap the air filter', icon: 'filter', game: mountFilter },
-  rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
+  rebuild: { title: 'Reopen the room', icon: 'wrench', game: mountReopen },
 };
 
 function evaPanel(eva) {
@@ -220,21 +221,6 @@ function layoutSpots(kind, n) {
   }
   while (pts.length < n) pts.push({ x: 20 + pts.length * 15, y: 50 });
   return pts;
-}
-
-export function showRebuild(job, science, onYes) {
-  const room = ROOMS[job.roomId];
-  const enough = science >= job.cost;
-  const html = `
-    <h2>Rebuild the ${esc(room.name.toLowerCase())}?</h2>
-    <p>We sealed it to save air. New wall panels cost science points.</p>
-    <div class="row">
-      <button type="button" class="btn go" ${enough ? '' : 'disabled'}>${icon('wrench')}Rebuild for ${icon('science')}${job.cost}</button>
-    </div>
-    ${enough ? '' : `<p class="source">You need ${Math.ceil(job.cost - science)} more science points. Keep the crew working!</p>`}`;
-  const sheet = openSheet(html);
-  sheet.el.querySelector('.btn.go').addEventListener('click', () => { sheet.close(); onYes(); });
-  return sheet;
 }
 
 // ------------------------------------------------------------------ Call Earth

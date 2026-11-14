@@ -28,7 +28,7 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Done (intro: `?intro=1`, also the first visit and the Training button). The kid places the five buildings one by one, each with its job and its power cost, then meets dust, leak, filter and a storm drill once, with problem and fix before each. |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
-| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Done: dust (rub the dust off), storm wall (test what stops particles, then stack it), leak (fog shows the hole, tape the patch), filter (pull out, build the Apollo 13 adapter, push in). Each has numbered steps or a test first, and a real story at the end. Test page `minigame.html?game=dust`, `fort`, `leak` or `filter`. Greenhouse and lab still have no event of their own. |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Done: dust, storm wall, leak, filter and reopening a sealed room (close the hole, pump air in, pressure test, open the hatch). Each has numbered steps or a test first, and a checked real story at the end. Test page `minigame.html?game=dust`, `fort`, `leak`, `filter` or `reopen`. Greenhouse and lab still have no event of their own. |
 
 ## Team
 
@@ -179,6 +179,13 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 ### Florian (14 Nov, ~18:40)
 - On a phone held sideways the game looks bad: in the intro, Sam's card becomes a tall narrow column and its button is off the screen; the mini-games need scrolling.
 - Decision: no landscape layout for phones. A phone on its side gets a note to hold it upright, with "Play sideways anyway" in case a device reports its shape wrongly. Tablets and computers keep the wide layout.
+
+### Florian (14 Nov, ~19:00)
+- A sealed building (a leak in the lab or greenhouse left open too long) was rebuilt by tapping 6 placeholders, for 30 science points. That was never explained and is not in the intro.
+- With a sealed lab, science drops to 30 %, so the 30 points could take 17 game days: close to a dead end. Decision: reopening costs no points. The price is the slow science while the room is shut.
+- New mini-game "Reopen": pick the wall panel that fits the hole, pump air in, run a pressure test, open the hatch. Ends with the checked story of Mir's Spektr module (1997).
+- The intro has a lesson for it, after the leak.
+- In the intro the buildings jumped from "3 and 2" to "5 in a row" when Sam's card was big. Now the rows are decided from the whole stage, so the buildings keep their places. On a very small phone a big card lies over the base while it is read.
 
 ## Automatic SI review
 

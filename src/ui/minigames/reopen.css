@@ -1,0 +1,42 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Reopen mini-game (reopen.js): a wall with a hole, three panels to choose from, then pump, test and hatch. */
+
+.ro-wall {
+  position: relative; min-height: 170px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #e9e4d8, #cfc8b8); box-shadow: inset 0 0 0 3px #8f897c;
+}
+.ro-label { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 14px; font-weight: 600; color: #57524a; }
+
+/* The three shapes, used for the hole and for the panels. */
+.ro-hole, .ro-shape { display: block; width: 78px; height: 78px; }
+.ro-hole[data-shape='round'], .ro-shape[data-shape='round'] { border-radius: 50%; }
+.ro-hole[data-shape='square'], .ro-shape[data-shape='square'] { border-radius: 8px; }
+.ro-hole[data-shape='triangle'], .ro-shape[data-shape='triangle'] { clip-path: polygon(50% 4%, 98% 96%, 2% 96%); }
+
+/* The hole: black space behind the wall. Closed: the silver panel sits on it. */
+.ro-hole { margin-bottom: 18px; background: #050505; box-shadow: 0 0 0 6px rgb(0 0 0 / 0.12); transition: background 300ms; }
+.ro-hole.closed { background: repeating-linear-gradient(45deg, #c8ccd4 0 8px, #b4b9c2 8px 16px); animation: ro-fit 360ms var(--ease-pop, ease-out); }
+@keyframes ro-fit { from { transform: scale(1.5); opacity: 0.4; } }
+
+.ro-panels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; } /* room for the Tap pointer */
+.ro-panels[hidden] { display: none; }
+.ro-panel {
+  min-height: 96px; display: grid; place-items: center; cursor: pointer;
+  border: 0; border-radius: 12px; background: var(--dark); box-shadow: inset 0 0 0 2px var(--line), 0 3px 0 #000;
+}
+.ro-panel .ro-shape { width: 62px; height: 62px; background: repeating-linear-gradient(45deg, #c8ccd4 0 8px, #b4b9c2 8px 16px); }
+.ro-panel.miss { animation: ro-shake 320ms; box-shadow: inset 0 0 0 3px var(--bad), 0 3px 0 #000; }
+@keyframes ro-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+.ro .mg-btn { margin-top: 22px; align-self: stretch; } /* room for the Tap pointer */
+.ro .mg-btn[hidden] { display: none; }
+/* During the test the bar pulses gently: the kid is watching it. */
+.ro[data-stage='testing'] .mg-fill { animation: ro-watch 650ms ease-in-out infinite; }
+@keyframes ro-watch { 50% { filter: brightness(1.25); } }
+
+@media (max-height: 700px) {
+  .ro-wall { min-height: 140px; }
+  .ro-hole { width: 64px; height: 64px; }
+  .ro-panel { min-height: 80px; }
+}

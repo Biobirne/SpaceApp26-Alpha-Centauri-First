@@ -209,7 +209,7 @@ const JOB_LABEL = {
   dust: () => 'Clean panels',
   filter: () => 'Swap filter',
   fort: () => 'Build storm wall',
-  rebuild: (r) => `Rebuild ${r.short}`,
+  rebuild: (r) => `Reopen ${r.short}`,
 };
 
 function meter(kind, ic, label) {

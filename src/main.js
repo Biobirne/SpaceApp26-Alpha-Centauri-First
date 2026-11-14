@@ -13,7 +13,7 @@ import { showHelp } from './ui/help.js';
 import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
 import { showData, scienceMeaning } from './ui/numbers.js';
 import { createHud } from './ui/hud.js';
-import { showCard, showRepair, showRebuild, showCall, showShop, showPause, toast, floater, esc } from './ui/overlays.js';
+import { showCard, showRepair, showCall, showShop, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
 import { icon } from './ui/icons.js';
 import {
@@ -546,10 +546,7 @@ const actions = {
         run?.guide.onAction('repairDone');
       }, () => block('repair', false));
     };
-    if (job.kind === 'rebuild') {
-      block('rebuild', true);
-      watchClose(showRebuild(job, s.science, doRepair), 'rebuild');
-    } else doRepair();
+    doRepair();
   },
 
   info(kind) {
