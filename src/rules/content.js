@@ -234,7 +234,7 @@ export const LESSONS = {
   roomLost: ({ room, days }) => ({
     title: `The ${room} was sealed`,
     why: `The leak in the ${room} was not fixed for ${days} days, so the crew closed it to save air.`,
-    next: 'Tap a room with a red ! as soon as you see it. You can rebuild sealed rooms with science points.',
+    next: 'Tap a room with a red ! as soon as you see it. A sealed room can be fixed and opened again.',
   }),
 };
 

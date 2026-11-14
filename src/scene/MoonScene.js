@@ -147,7 +147,11 @@ export function createMoonScene() {
         const bh = bs.h - 20 * this.dpr - labels;
         const rowU = Math.min(bs.w / 125, bh / 22); // 125: modules stand apart, joined by hoses
         const tallU = Math.min(bs.w / 72, bh / 42);
-        tall = tallU > rowU * 1.1;
+        // One row or two is decided from the whole stage, not from what a text bubble leaves free.
+        // Otherwise a big bubble flips "3 and 2" into "5 in a row", and the kid has to find every
+        // building again. With a big bubble the buildings get smaller for a moment, but stay put.
+        const sh = s.h - 20 * this.dpr - labels;
+        tall = Math.min(s.w / 72, sh / 42) > Math.min(s.w / 125, sh / 22) * 1.1;
         unit = tall ? tallU : rowU;
         this.groundY = bs.y + labels + bh / 2 + (tall ? -6.5 : 4.5) * unit;
       } else {

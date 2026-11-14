@@ -216,7 +216,7 @@ export function buyUpgrade(state, key) {
 export function repairFor(state, roomId) {
   const room = state.rooms[roomId];
   if (room.status === 'leak') return { roomId, kind: 'leak', taps: 4 };
-  if (room.status === 'lost') return { roomId, kind: 'rebuild', taps: 6, cost: 30 };
+  if (room.status === 'lost') return { roomId, kind: 'rebuild', taps: 6 }; // the repair itself is the price, no points (a sealed lab earns too few to pay)
   if (roomId === 'solar' && state.dust) return { roomId, kind: 'dust', taps: 5, eva: evaCost(state) };
   if (roomId === 'hab' && state.filter) return { roomId, kind: 'filter', taps: 3 };
   if (roomId === 'shelter' && fortOpen(state)) return { roomId, kind: 'fort', taps: 5 };
@@ -267,11 +267,9 @@ export function completeRepair(state, roomId, kind) {
     emit(state, 'room', { roomId, status: 'ok' });
     emit(state, 'crew', { mood: 'happy', text: `Leak patched! The ${ROOMS[roomId].name.toLowerCase()} is airtight again. Nice work!` });
   } else if (kind === 'rebuild' && room.status === 'lost') {
-    if (!canAfford(state, 30)) return false;
-    state.science -= 30;
     room.status = 'ok';
     emit(state, 'room', { roomId, status: 'ok' });
-    emit(state, 'crew', { mood: 'happy', text: `The ${ROOMS[roomId].name.toLowerCase()} is back online!` });
+    emit(state, 'crew', { mood: 'happy', text: `The ${ROOMS[roomId].name.toLowerCase()} is open again. The wall holds and the air is back!` });
   } else if (kind === 'dust' && state.dust) {
     state.dust = false;
     emit(state, 'room', { roomId: 'solar', status: 'ok' });
@@ -395,20 +393,15 @@ export function getAdvice(state) {
   if (state.filter) {
     return advice('Swap the air filter in the home.', `A clogged filter cleans less air. Air is at ${Math.round(state.air)}% now.`, { repair: 'hab' });
   }
-  // A lost building: say what is missing, and how to get it back (or how to earn the points first).
+  // A lost building: say what is missing, and how to get it back.
   if (lost) {
     const name = ROOMS[lost].name.toLowerCase();
-    const job = repairFor(state, lost);
     const missing = {
       lab: `Until then, the lab makes only ${Math.round(state.cfg.science.labLostFactor * 100)}% of its science.`,
       greenhouse: 'Until then, the plants can’t help the air.',
       shelter: 'Until then, there is no shelter in a storm: use the shield.',
     }[lost] || '';
-    if (canAfford(state, job.cost)) {
-      return advice(`Rebuild the ${name}: tap it.`, `It was sealed to save the air. Rebuilding costs ${job.cost} science points, and you have ${Math.floor(state.science)}.`, { repair: lost });
-    }
-    return advice(`Save up ${job.cost} science points to rebuild the ${name}.`,
-      `You have ${Math.floor(state.science)}. Calm days with the crew at work earn points. ${missing}`, null);
+    return advice(`Reopen the ${name}: tap it.`, `It was sealed to save the air. Fix the wall and let the air back in. ${missing}`, { repair: lost });
   }
   if (state.dose > state.cfg.dose.warnAbove && rad > 3) {
     return advice(state.sheltered || state.forcedShelter ? 'Keep the crew in the shelter for now.' : 'Send the crew to the shelter for now.',
@@ -456,7 +449,7 @@ export function applyAdvice(state, action) {
 export function describeAdvice(state, action) {
   if (!action) return null;
   if (action.repair === 'shelter' && fortOpen(state)) return 'Build the storm fort';
-  if (action.repair && state.rooms[action.repair].status === 'lost') return `Rebuild the ${ROOMS[action.repair].name.toLowerCase()}`;
+  if (action.repair && state.rooms[action.repair].status === 'lost') return `Reopen the ${ROOMS[action.repair].name.toLowerCase()}`;
   if (action.repair) return `Fix the ${ROOMS[action.repair].name.toLowerCase()}`;
   const parts = [];
   if (action.shield !== undefined && action.shield !== state.shield) parts.push(`Shield to ${SHIELD_LABELS[action.shield]}`);
@@ -572,7 +565,7 @@ function step(state, h) {
       state.stats.roomsLost++;
       trouble(state);
       emit(state, 'room', { roomId: id, status: 'lost' });
-      emit(state, 'crew', { mood: 'alert', text: `We sealed the ${ROOMS[id].name.toLowerCase()} to save the air. You can rebuild it later with science points.` });
+      emit(state, 'crew', { mood: 'alert', text: `We sealed the ${ROOMS[id].name.toLowerCase()} to save the air. Tap it to fix the wall and open it again.` });
       lesson(state, 'roomLost', { room: ROOMS[id].name.toLowerCase(), days: Math.round(state.t - room.since) });
     }
   }
