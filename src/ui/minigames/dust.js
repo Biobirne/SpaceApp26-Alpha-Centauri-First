@@ -1,9 +1,12 @@
 // SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Mini-game: brush Moon dust off the solar panels during a spacewalk. Full screen, few words.
-// It shows (instead of telling) three true things:
+// It shows (instead of telling) four true things:
 // - dust blocks sunlight: dusty squares stay dark, clean ones light up and send power down the cable to the battery
-// - Moon dust is sticky: a few brushes make some dust land again
+// - the battery runs the base: as power comes back, water, lab and radio switch on again
+// - Moon dust is sticky, so it takes rubbing
 // - NASA tested an electric dust shield on the Moon in 2025 (the line at the end)
+import { icon } from '../icons.js';
+
 // Styles live next to this file (dust.css) and load themselves, so no shared file changes.
 
 const CSS_URL = new URL('./dust.css', import.meta.url).href;
@@ -16,7 +19,14 @@ if (typeof document !== 'undefined' && !document.querySelector(`link[href="${CSS
 
 const COLS = 4;
 const ROWS = 3;
-const MAX_RESETTLE = 3; // sticky dust lands again at most this often, so it never feels unfair
+
+// What the battery runs. Low power means only the most important machine keeps going.
+const DEVICES = [
+  { id: 'air', icon: 'air', label: 'Air', at: 0, say: '' },
+  { id: 'water', icon: 'drop', label: 'Water', at: 55, say: 'Water recycler on. We can clean our water again.' },
+  { id: 'lab', icon: 'science', label: 'Lab', at: 75, say: 'The lab is on. The crew can do science again!' },
+  { id: 'radio', icon: 'dish', label: 'Radio', at: 95, say: 'Radio on. We can talk to Earth again!' },
+];
 
 const fmt = (x) => (x >= 10 ? Math.round(x) : Math.round(x * 10) / 10);
 
@@ -29,13 +39,12 @@ const fmt = (x) => (x >= 10 ? Math.round(x) : Math.round(x * 10) / 10);
  */
 export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion = false, onFinish, onWait }) {
   const n = COLS * ROWS;
-  // 2 = thick dust (two strokes), 1 = thin dust, 0 = clean.
-  const dust = Array.from({ length: n }, (_, i) => ((i * 7) % 3 === 0 ? 1 : 2));
+  // How much dust is on each square: 1 = thick, 0 = clean. Rubbing lowers it bit by bit.
+  const dust = Array.from({ length: n }, (_, i) => ((i * 7) % 3 === 0 ? 0.6 : 1));
   const startDust = dust.reduce((a, d) => a + d, 0);
   const startPower = Math.round(dustyFactor * 100);
-  let resettled = 0;
+  const on = new Set(DEVICES.filter((d) => d.at <= startPower).map((d) => d.id));
   let saidLight = false;
-  let saidSticky = false;
   let finished = false;
 
   const risky = eva && eva.dose >= 2;
@@ -61,12 +70,15 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
           <div class="dg-fill"></div>
           <b class="dg-pct"></b>
         </div>
+        <ul class="dg-devices" aria-label="What the power runs">
+          ${DEVICES.map((d) => `<li data-id="${d.id}">${icon(d.icon)}<span>${d.label}</span></li>`).join('')}
+        </ul>
       </div>
       <div class="dg-ground" aria-hidden="true"></div>
-      <p class="dg-sam" aria-live="polite"><b>Sam</b><span>Tap or swipe the dust. Watch the battery!</span></p>
+      <p class="dg-sam" aria-live="polite"><b>Sam</b><span>Low power! Only the air machine still runs. Rub the dust off.</span></p>
       <div class="dg-win" hidden>
         <p class="dg-gain"></p>
-        <p class="dg-fact">Brushing is slow work. In 2025, NASA tested a dust shield on the Moon that shakes dust off with electricity.</p>
+        <p class="dg-fact">Moon dust sticks like a balloon on your hair, so brushing is slow. In 2025, NASA tested a dust shield on the Moon that shakes dust off with electricity.</p>
         <button type="button" class="dg-btn dg-back">Back inside</button>
       </div>
       ${risky ? `
@@ -85,6 +97,7 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
   const pct = root.querySelector('.dg-pct');
   const cable = root.querySelector('.dg-cable');
   const sam = root.querySelector('.dg-sam span');
+  const deviceEls = Object.fromEntries([...root.querySelectorAll('.dg-devices li')].map((li) => [li.dataset.id, li]));
 
   if (risky) {
     root.querySelector('.dg-go').addEventListener('click', () => root.querySelector('.dg-gate').remove());
@@ -101,31 +114,38 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
     game.style.setProperty('--p', p);
     pct.textContent = `${p}%`;
     cells.forEach((c, i) => {
-      c.dataset.dust = dust[i];
+      c.style.setProperty('--d', dust[i].toFixed(3));
+      c.classList.toggle('clean', dust[i] === 0);
       c.setAttribute('aria-label', dust[i] ? `Dusty square ${i + 1}` : `Clean square ${i + 1}`);
     });
+    for (const d of DEVICES) {
+      const el = deviceEls[d.id];
+      el.classList.toggle('on', on.has(d.id) || p >= d.at);
+      if (!on.has(d.id) && p >= d.at) {
+        on.add(d.id);
+        if (d.say) say(d.say);
+      }
+    }
+    return p;
   };
-
-  const neighbours = (i) => {
-    const r = Math.floor(i / COLS), c = i % COLS;
-    return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]]
-      .filter(([y, x]) => y >= 0 && y < ROWS && x >= 0 && x < COLS)
-      .map(([y, x]) => y * COLS + x);
-  };
-  const cleanCount = () => dust.filter((d) => d === 0).length;
 
   // Dust floats off slowly: the Moon has weak gravity and no air.
-  const puff = (cell) => {
+  let lastPuff = 0;
+  const puff = (cell, x, y) => {
     if (reducedMotion) return;
-    for (let k = 0; k < 6; k++) {
+    const now = performance.now();
+    if (now - lastPuff < 60) return;
+    lastPuff = now;
+    const r = cell.getBoundingClientRect();
+    for (let k = 0; k < 3; k++) {
       const d = document.createElement('i');
       d.className = 'dg-puff';
-      d.style.left = `${15 + Math.random() * 70}%`;
-      d.style.top = `${25 + Math.random() * 50}%`;
-      d.style.setProperty('--dx', `${(Math.random() - 0.5) * 50}px`);
-      d.style.setProperty('--dy', `${-25 - Math.random() * 35}px`);
+      d.style.left = `${((x ?? r.x + r.width / 2) - r.x) + (Math.random() - 0.5) * 16}px`;
+      d.style.top = `${((y ?? r.y + r.height / 2) - r.y) + (Math.random() - 0.5) * 16}px`;
+      d.style.setProperty('--dx', `${(Math.random() - 0.5) * 40}px`);
+      d.style.setProperty('--dy', `${-20 - Math.random() * 30}px`);
       cell.appendChild(d);
-      setTimeout(() => d.remove(), 1500);
+      setTimeout(() => d.remove(), 1400);
     }
   };
   // Light from a clean square travels down the cable into the battery.
@@ -137,28 +157,18 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
     setTimeout(() => p.remove(), 900);
   };
 
-  const brush = (cell) => {
+  /** Take `amount` of dust off one square (1 = a whole thick layer). */
+  const rub = (cell, amount, x, y) => {
     if (!cell || finished || root.querySelector('.dg-gate')) return;
     const i = Number(cell.dataset.i);
     if (!dust[i]) return;
-    dust[i]--;
-    puff(cell);
-    if (navigator.vibrate) try { navigator.vibrate(10); } catch { /* not allowed */ }
+    dust[i] = Math.max(0, dust[i] - amount);
+    if (dust[i] < 0.06) dust[i] = 0;
+    puff(cell, x, y);
     if (dust[i] === 0) {
       pulse();
+      if (navigator.vibrate) try { navigator.vibrate(12); } catch { /* not allowed */ }
       if (!saidLight) { saidLight = true; say('See? Sunlight gets through again. More light, more power.'); }
-      // Sticky dust: some of it lands on a clean square next to this one.
-      if (resettled < MAX_RESETTLE && cleanCount() >= 2 + resettled * 3) {
-        const j = neighbours(i).find((k) => dust[k] === 0);
-        if (j !== undefined) {
-          dust[j] = 1;
-          resettled++;
-          cells[j].classList.remove('landed');
-          void cells[j].offsetWidth; // restart the animation
-          cells[j].classList.add('landed');
-          if (!saidSticky) { saidSticky = true; say('Moon dust is sticky, like a balloon on your hair!'); }
-        }
-      }
     }
     render();
     if (dust.every((d) => d === 0)) win();
@@ -167,7 +177,7 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
   const win = () => {
     finished = true;
     game.classList.add('won');
-    say('Full power again!');
+    say('Full power! Everything in the base runs again.');
     const box = root.querySelector('.dg-win');
     box.querySelector('.dg-gain').textContent = `+${100 - startPower}% power`;
     box.hidden = false;
@@ -176,22 +186,33 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
     setTimeout(() => back.focus({ preventScroll: true }), 60);
   };
 
-  // Pointer: brush on touch-down and on every new square the finger slides over (swipe shortcut).
-  // Click only handles the keyboard (Enter/Space), so one tap never brushes twice.
+  // Rubbing: hold and move over the panel. The farther you rub over a square, the cleaner it gets.
+  // A tap also takes some dust off, so it works without swiping too.
+  const TAP = 0.36;
   let down = false;
-  let last = null;
-  const cellAt = (e) => {
-    const c = document.elementFromPoint(e.clientX, e.clientY)?.closest('.dg-cell');
+  let lx = 0, ly = 0;
+  const cellAt = (x, y) => {
+    const c = document.elementFromPoint(x, y)?.closest('.dg-cell');
     return c && panel.contains(c) ? c : null;
   };
-  panel.addEventListener('pointerdown', (e) => { down = true; last = cellAt(e); brush(last); });
-  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) panel.addEventListener(ev, () => { down = false; });
+  panel.addEventListener('pointerdown', (e) => {
+    down = true;
+    lx = e.clientX; ly = e.clientY;
+    try { panel.setPointerCapture(e.pointerId); } catch { /* fine without */ }
+    rub(cellAt(e.clientX, e.clientY), TAP, e.clientX, e.clientY);
+  });
+  for (const ev of ['pointerup', 'pointercancel']) panel.addEventListener(ev, () => { down = false; });
   panel.addEventListener('pointermove', (e) => {
     if (!down) return;
-    const c = cellAt(e);
-    if (c && c !== last) { last = c; brush(c); }
+    const pts = e.getCoalescedEvents?.() ?? [e];
+    for (const p of pts.length ? pts : [e]) {
+      const dist = Math.hypot(p.clientX - lx, p.clientY - ly);
+      lx = p.clientX; ly = p.clientY;
+      const cell = cellAt(p.clientX, p.clientY);
+      if (cell && dist > 0) rub(cell, dist / (cell.offsetWidth * 1.4), p.clientX, p.clientY);
+    }
   });
-  panel.addEventListener('click', (e) => { if (e.detail === 0) brush(e.target.closest('.dg-cell')); });
+  panel.addEventListener('click', (e) => { if (e.detail === 0) rub(e.target.closest('.dg-cell'), 0.5); });
 
   render();
 }
