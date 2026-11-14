@@ -108,3 +108,17 @@ test('upgrades cost science', () => {
   assert.equal(s.capacity, 140);
   assert.equal(Math.round(s.science), 10);
 });
+
+test('guided first steps: a scripted leak comes first, random problems wait', () => {
+  const s = createMission(load('oct2021'), { seed: 4, script: [{ t: 0.7, kind: 'leak', roomId: 'hab' }] });
+  const problems = [];
+  while (s.t < 3) {
+    tick(s, 0.05);
+    for (const e of s.outbox) if (e.type === 'room' && e.status !== 'ok') problems.push([e.roomId, +e.t.toFixed(2)]);
+    s.outbox.length = 0;
+    if (s.rooms.hab.status === 'leak' && s.t > 1) completeRepair(s, 'hab', 'leak');
+  }
+  assert.deepEqual(problems[0][0], 'hab');
+  assert.ok(problems[0][1] >= 0.7 && problems[0][1] < 0.8);
+  assert.ok(problems.slice(1).every(([, t]) => t >= 0.7 + s.cfg.events.randomGapDays[0]), JSON.stringify(problems));
+});

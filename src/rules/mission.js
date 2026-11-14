@@ -12,7 +12,11 @@ const STEP = 0.02; // max simulation step in days (~29 minutes of mission time)
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const BLOCK_WORDS = ['nothing', 'about half', 'most', 'almost all'];
 
-export function createMission(stormDoc, { seed = 1, config = CONFIG } = {}) {
+/**
+ * @param script Optional scripted problems for guided first steps, e.g. [{ t: 0.7, kind: 'leak', roomId: 'hab' }].
+ *   Random problems then start only after the script is done.
+ */
+export function createMission(stormDoc, { seed = 1, config = CONFIG, script = [] } = {}) {
   const cfg = config;
   const timeline = buildTimeline(stormDoc, cfg.missionDays);
   const rng = createRng(seed);
@@ -48,7 +52,8 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG } = {}) {
     dayIndex: -1,
     daylight: null,
     lastAnnounced: 1,
-    nextRandomAt: cfg.events.firstRandomDay + rng.range(0, 1),
+    nextRandomAt: Math.max(cfg.events.firstRandomDay, ...script.map((e) => e.t + cfg.events.randomGapDays[0])) + rng.range(0, 1),
+    script: [...script].sort((a, b) => a.t - b.t),
     nextChatterAt: 0.6,
     chatterOrder: shuffle([...CHATTER.keys()], rng),
     chatterIdx: 0,
@@ -58,7 +63,7 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG } = {}) {
   updateSky(state, true);
   emit(state, 'crew', {
     mood: 'happy',
-    text: `Hi Commander, I'm ${CREWMATE_NAME}! We'll run this Moon base for 30 days. Real NASA data decides the space weather.`,
+    text: `Hi Commander, I'm ${CREWMATE_NAME}! Real NASA data decides our space weather.`,
   });
   if (!state.daylight) {
     learn(state, 'lunarNight');
@@ -341,6 +346,10 @@ function step(state, h) {
   updateSky(state, false);
   processDataEvents(state);
   if (state.pendingCard) return;
+  while (state.script.length && state.script[0].t <= state.t) {
+    const e = state.script.shift();
+    startProblem(state, e.kind, e.roomId);
+  }
   if (state.t >= state.nextRandomAt) randomEvent(state);
 
   // power
@@ -585,8 +594,12 @@ function randomEvent(state) {
   if (!state.filter) options.push('filter');
   if (!options.length) return;
   const kind = rng.pick(options);
+  startProblem(state, kind, kind === 'leak' ? rng.pick(leakable) : null);
+}
+
+function startProblem(state, kind, id) {
   if (kind === 'leak') {
-    const id = rng.pick(leakable);
+    if (state.rooms[id].status !== 'ok') return;
     state.rooms[id].status = 'leak';
     state.rooms[id].since = state.t;
     learn(state, 'micrometeoroid');

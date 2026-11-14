@@ -6,20 +6,42 @@ const KEY = 'moonbase.progress.v1';
 /** Suggested order from GAME_DESIGN.md: gentle → extreme. Feb 2022 and Nov 2025 come last. */
 export const LEVEL_ORDER = ['oct2021', 'may2024', 'mar2024', 'sep2017', 'feb2022', 'nov2025'];
 
+// Without storage we still keep progress for this page visit.
+let memory = null;
+
 export function loadProgress() {
   try {
     const raw = localStorage.getItem(KEY);
     const data = raw ? JSON.parse(raw) : null;
-    if (data && typeof data.stars === 'object') return data;
+    if (data && typeof data.stars === 'object') return { hints: true, seen: {}, ...data };
   } catch { /* storage unavailable: play without saving */ }
-  return { stars: {} };
+  return memory ? structuredClone(memory) : { stars: {}, hints: true, seen: {} };
+}
+
+function save(p) {
+  memory = structuredClone(p);
+  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* ignore */ }
+  return p;
 }
 
 export function saveResult(id, stars) {
   const p = loadProgress();
   p.stars[id] = Math.max(p.stars[id] || 0, stars);
-  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* ignore */ }
-  return p;
+  return save(p);
+}
+
+/** Guided first steps: each hint shows once. Turning hints back on shows them all again. */
+export function markHintSeen(id) {
+  const p = loadProgress();
+  p.seen[id] = true;
+  save(p);
+}
+
+export function setHints(on) {
+  const p = loadProgress();
+  p.hints = on;
+  if (on) p.seen = {};
+  return save(p);
 }
 
 export function isUnlocked(id, progress, unlockAll = false) {
