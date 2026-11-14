@@ -48,11 +48,20 @@ Only change files in your own module unless the task explicitly says otherwise.
 - **Data + content** (DONKI loader, snapshot, events JSON, learning texts, end screen facts): _TBD Saturday_
 
 ## Interfaces
-_To be defined Saturday morning before any code is written:_
-- Game state shape
-- Event JSON format
-- Functions modules use to talk to each other
-- Sprite list (file names + sizes)
+First version from the foundation build (14 Nov). Change it here when the team decides otherwise.
+- **Rules** (`src/rules/`, plain JS, no Phaser, no DOM, tested with `npm test`):
+  - `createMission(stormDoc, { seed })` returns the whole game state.
+  - `tick(state, dtDays)` advances it.
+  - Player actions: `setShield`, `setShelter`, `chooseOption`, `repairFor` / `completeRepair`, `buyUpgrade`, `callEarth` / `applyAdvice`.
+  - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `particles`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
+- **Controller** (`src/main.js`):
+  - Runs the clock, calls `tick`, drains the outbox, and pauses on cards and sheets.
+  - Hands the scene a plain `view` object every frame.
+- **Presentation:**
+  - `src/ui/` is the HTML/CSS HUD, sheets and screens. It reads state and calls controller actions.
+  - `src/scene/MoonScene.js` is the Phaser canvas. It only draws `scene.view` and emits `room-tap`.
+- **Data:** storms in `data/storms/*.json` (format in `data/README.md`). Tuning numbers live in `src/rules/config.js`, and kid-facing text in `src/rules/content.js`.
+- **Sprites:** listed in `assets/art/manifest.json`, with sizes and anchors in `assets/art/README.md`.
 
 ## Workflow
 - `main` must always be playable. GitHub Pages deploys from `main`.

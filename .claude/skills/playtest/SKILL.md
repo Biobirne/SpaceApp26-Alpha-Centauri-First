@@ -11,10 +11,12 @@ The game is a static site with no build step. Checking it means serving it over 
 Start a server in the background from the repo root (ES modules do not load from `file://`):
 
 ```sh
-python -m http.server 8000
+python tools/serve.py 8000
 ```
 
-If port 8000 is busy, use 8001. Reuse a server that is already running.
+It works like `python -m http.server` but turns off caching, so a reload always loads the latest modules. If port 8000 is busy, use 8001. Reuse a server that is already running.
+
+Useful URLs: `?storm=may2024` starts a storm directly, `?all=1` unlocks every storm, `?seed=5` makes random events repeatable, and `?debug=1` exposes `window.__moonbase.skip(days)` to jump ahead (cards are answered with the first option).
 
 ## 2. Look at it (Playwright MCP)
 Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailable, fall back to Claude in Chrome.
