@@ -55,8 +55,8 @@ export function createMoonScene() {
       this.domeG = this.add.graphics();
       this.fxG = this.add.graphics();
       this.badgeLayer = this.add.container(0, 0);
+      this.radLabel = this.add.text(0, 0, 'Radiation from the Sun', {}).setOrigin(0, 0).setVisible(false);
       this.labelLayer = this.add.container(0, 0);
-      this.flash = this.add.rectangle(0, 0, 10, 10, 0xfff2c4, 1).setOrigin(0).setAlpha(0);
       this.zones = {};
       // A tap counts only if it started and ended on the same spot, and not on an HTML control.
       // Phaser hears every press on the page, so without this a tap on a button above the base
@@ -132,7 +132,12 @@ export function createMoonScene() {
       this.earth = { x: s.x + s.w * (tall ? 0.78 : 0.83), y: s.y + Math.max(unit * 10, s.h * 0.17), r: Math.max(14 * this.dpr, unit * (tall ? 6.5 : 5.2)) };
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
-      this.flash.setSize(W, H);
+      // Names the purple particles, so nobody takes them for rain. Shown while radiation is raised.
+      const rfs = Math.round(15 * this.dpr);
+      this.radLabel.setStyle({
+        fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${rfs}px`, fontStyle: '600', color: '#e3c8ff',
+        backgroundColor: 'rgba(60,28,104,0.92)',
+      }).setPadding(8 * this.dpr, 4 * this.dpr).setPosition(this.sunPos.x + this.sunPos.r * 1.8, this.sunPos.y + this.sunPos.r * 1.5);
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
@@ -379,6 +384,7 @@ export function createMoonScene() {
       this.shieldAlpha += (target - this.shieldAlpha) * Math.min(1, dt * 4);
       this.drawDome();
       this.updateParticles(dt, v);
+      this.radLabel.setVisible((v.radiation || 1) >= 2);
     }
 
     drawDome() {
@@ -407,14 +413,13 @@ export function createMoonScene() {
       if (this.parts.length > want) this.parts.length = want;
       const g = this.fxG.clear();
       const d = this.dome;
-      const speed = H * (0.55 + Math.min(0.6, Math.log10(times) * 0.15));
-      const len = 12 * this.dpr;
-      const dir = { x: 0.42, y: 0.91 };
-      g.lineStyle(Math.max(1.5, this.dpr * 1.6), C.particle, 0.85);
+      const speed = H * (0.5 + Math.min(0.6, Math.log10(times) * 0.15));
+      const len = 14 * this.dpr;
+      const head = Math.max(1.6, this.dpr * 1.7);
       for (let i = 0; i < this.parts.length; i++) {
         const p = this.parts[i];
-        p.x += dir.x * speed * dt;
-        p.y += dir.y * speed * dt;
+        p.x += p.dx * speed * p.v * dt;
+        p.y += p.dy * speed * p.v * dt;
         if (!p.checked && v.blockShield > 0) {
           const nx = (p.x - d.cx) / d.rx;
           const ny = (p.y - d.cy) / d.ry;
@@ -431,7 +436,15 @@ export function createMoonScene() {
           this.parts[i] = this.spawn(false);
           continue;
         }
-        g.lineBetween(p.x, p.y, p.x - dir.x * len, p.y - dir.y * len);
+        // Particles from the Sun: a bright dot with a short fading tail, not a rain streak.
+        g.lineStyle(head * 1.1, C.particle, 0.5);
+        g.lineBetween(p.x, p.y, p.x - p.dx * len, p.y - p.dy * len);
+        g.fillStyle(C.particle, 0.35);
+        g.fillCircle(p.x, p.y, head * 2.2);
+        g.fillStyle(C.particle, 1);
+        g.fillCircle(p.x, p.y, head * 1.3);
+        g.fillStyle(C.spark, 1);
+        g.fillCircle(p.x, p.y, head * 0.6);
       }
       // sparks where the shield stopped a particle
       for (let i = this.sparks.length - 1; i >= 0; i--) {
@@ -462,26 +475,20 @@ export function createMoonScene() {
     }
 
     spawn(anywhere) {
-      const W = this.scale.width;
-      const H = this.scale.height;
-      // Enter from the top edge (and a bit of the left edge), travelling down-right.
-      const x = anywhere ? Math.random() * W : Math.random() * (W * 1.1) - W * 0.3;
-      const y = anywhere ? Math.random() * this.groundY : -Math.random() * H * 0.2;
-      return { x, y, checked: false };
+      // Particles stream out of the Sun in a fan towards the base and the ground.
+      // At night the Sun is below the horizon, so they come in from the top-left corner instead.
+      const night = this.view && this.view.daylight === false;
+      const s = !night && this.sunPos ? this.sunPos : { x: -this.scale.width * 0.15, y: -this.scale.height * 0.1, r: 0 };
+      const a = (8 + Math.random() * 62) * Math.PI / 180; // between almost flat and steeply down
+      const dx = Math.cos(a), dy = Math.sin(a);
+      const d = s.r + (anywhere ? Math.random() * this.scale.width * 0.9 : 0);
+      return { x: s.x + dx * d, y: s.y + dy * d, dx, dy, v: 0.75 + Math.random() * 0.5, checked: false };
     }
 
     // ------------------------------------------------------------------ effects
 
-    flare(score) {
-      const big = score >= 400; // X class
-      const peak = this.reduced ? 0.18 : big ? 0.55 : 0.28;
-      this.tweens.killTweensOf(this.flash);
-      this.flash.setAlpha(0);
-      // One soft glow (no strobe): well under 3 flashes per second.
-      this.tweens.add({ targets: this.flash, alpha: peak, duration: this.reduced ? 300 : 160, ease: 'Quad.easeOut', yoyo: true, hold: 120,
-        onComplete: () => this.flash.setAlpha(0) });
-      if (!this.reduced && big) this.cameras.main.shake(260, 0.004);
-    }
+    /** A real flare happened. No visual on purpose: the full-screen flash confused players. The card and Sam explain it. */
+    flare() {}
 
     burst() {
       for (let i = 0; i < (this.reduced ? 6 : 24); i++) this.parts.push(this.spawn(true));
