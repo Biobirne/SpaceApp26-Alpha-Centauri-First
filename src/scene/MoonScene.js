@@ -133,11 +133,11 @@ export function createMoonScene() {
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
       // Names the purple particles, so nobody takes them for rain. Shown while radiation is raised.
-      const rfs = Math.round(13 * this.dpr);
+      const rfs = Math.round(15 * this.dpr);
       this.radLabel.setStyle({
         fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${rfs}px`, fontStyle: '600', color: '#e3c8ff',
-        backgroundColor: 'rgba(40,18,70,0.8)', padding: { x: 7 * this.dpr, y: 3 * this.dpr },
-      }).setPosition(this.sunPos.x + this.sunPos.r * 1.8, this.sunPos.y + this.sunPos.r * 1.5);
+        backgroundColor: 'rgba(60,28,104,0.92)',
+      }).setPadding(8 * this.dpr, 4 * this.dpr).setPosition(this.sunPos.x + this.sunPos.r * 1.8, this.sunPos.y + this.sunPos.r * 1.5);
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
