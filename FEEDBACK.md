@@ -28,7 +28,7 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Round 3 |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
-| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Round 2 |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (#19: rub the dust off, the battery switches air, water, lab and radio back on, real 2025 dust shield fact; test page `minigame.html`); leak, filter and storm fort next |
 
 ## Team
 
@@ -82,6 +82,17 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Resources on the Moon are limited. Science could be open-ended, but repairs could use up limited materials.
 
 **Look:** the UI colours feel generic, like the cheap SI style. This shows most in the bars and on the end/results screen. We should stand out from that.
+
+### Florian (14 Nov, ~15:30)
+- Device / build: laptop, Brave, `main` after the mentor rounds 1 and 2 (#13–#17), plus the first dust mini-game (#19).
+
+**P1: The game stresses me out instead of teaching me.**
+- I nearly lost the base before I even got to the solar panel task.
+- It feels like a website with more tabs and a cleaner look. I can't see where the learning happens.
+- There is too much to read, and I don't read it all. I doubt any kid will.
+- Idea: when Sam gives a tip, pause the game until the player has done it.
+
+**P1: Testing must be quick.** Open a mini-game directly, without playing a whole mission first. Done: `minigame.html?game=dust`.
 
 ## Automatic SI review
 
