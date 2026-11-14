@@ -568,10 +568,11 @@ const actions = {
   },
 
   /** Greenhouse lamps on or off (life support loop). */
-  growLights(on) {
+  growLights(on, { quiet = false } = {}) {
     if (!run) return;
     sfx.play('tap');
     if (!setGrowLights(run.state, on)) return;
+    if (quiet) return; // the switch in the greenhouse sheet shows the new state and its cost itself
     const c = run.state.cfg;
     toast(`${icon(on ? 'plant' : 'moon')}<span>${on
       ? `Plant lamps on: +${c.air.greenhouseBonusPerDay}% air, −${c.power.growLightsPerDay} ⚡ per day`
@@ -589,7 +590,7 @@ const actions = {
 
 // The learn-more sheets can switch the plant lamps and teach the loop words.
 setInfoActions({
-  growLights: (on) => actions.growLights(on),
+  growLights: (on) => actions.growLights(on, { quiet: true }),
   loopSeen: () => run && noteLoopSeen(run.state),
 });
 
