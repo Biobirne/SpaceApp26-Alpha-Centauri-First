@@ -40,6 +40,7 @@ AGENTS.md          this file
 CLAUDE.md          imports this file
 README.md          what the project is and how to run it
 GAME_DESIGN.md     design, real vs. game rules, build status
+RESEARCH.md        how the game teaches: learning goals, teaching test, realism check
 FEEDBACK.md        all feedback (mentors, SI review, team) and what we did with it
 SI_USAGE.md        log of SI tool usage (required for submission)
 SI_DISCLOSURE.md   how SI use is labelled (watermarks, text, metadata)
@@ -72,6 +73,9 @@ Current state (14 Nov, evening). Change it here when the team decides otherwise.
 - **Data:** storms in `data/storms/*.json` (format in `data/README.md`). Tuning numbers live in `src/rules/config.js`, and kid-facing text in `src/rules/content.js`.
 - **Sprites:** listed in `assets/art/manifest.json`, with sizes and anchors in `assets/art/README.md`.
 
+## Teaching comes first
+The game must teach. This is the team's top priority, above looks and features. Before building anything, check it against `RESEARCH.md` section 0: the learning goals, how we teach, and the teaching test. Every new mechanic needs its "why" in one sentence for a 7-year-old, and every number change needs a visible cause. Science facts shown to kids must come from a source someone opened, not from memory.
+
 ## Workflow
 - `main` must always be playable. GitHub Pages deploys from `main`.
 - One branch per task, small pull requests, merge every 30–60 minutes.
@@ -79,6 +83,10 @@ Current state (14 Nov, evening). Change it here when the team decides otherwise.
 - Small, focused commits with clear messages. Never force-push.
 - Do not add new dependencies or frameworks without asking the team.
 - After each task: append one line to `SI_USAGE.md` (SI tool, what it did) and update `si-manifest.json` for new files.
+- **Avoid merge conflicts** (two laptops, one GitHub account):
+  - Before creating a file, run `git fetch` and check that the name doesn't exist on `main` (`git ls-tree --name-only origin/main`). One topic, one file: add a section to `FEEDBACK.md`, `RESEARCH.md` or `GAME_DESIGN.md` instead of starting a second file with a similar name.
+  - Right before pushing, and again before merging a PR, merge `origin/main` into your branch and run `npm test`. In `SI_USAGE.md` and `si-manifest.json`, keep both sides' lines.
+  - Both laptops commit as the same GitHub account, so say in each PR description who did the work.
 
 ## Tech stack
 Decided Saturday 14 Nov: **Phaser 3.90.0 via CDN**, plus our own code as plain ES modules. There is no build step.

@@ -234,7 +234,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
 
 ## Still to decide (team)
 - Interfaces: a first version is in `AGENTS.md`. Change it there if the team wants something else.
-- Mentor rounds 2 and 3, and the playtest feedback in PR #12: what comes first (`FEEDBACK.md`).
+- Mentor rounds 2 and 3, and the playtest feedback (team and SI review in `FEEDBACK.md`, research in `RESEARCH.md`): what comes first.
 - Easy/Normal/Hard names and the briefing length (see the two **Open** rows in "Designing for kids aged 7–12").
 - Game title: "Moon Base Commander" is a placeholder (`GAME_TITLE` in `src/ui/screens.js`). The crewmate's name "Sam" is a placeholder too (`CREWMATE_NAME`).
 - Art style and who draws (no SI images; `CREDITS.md` for everything).

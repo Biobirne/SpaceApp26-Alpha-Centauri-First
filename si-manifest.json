@@ -32,9 +32,10 @@
     { "path": "CREDITS.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "SI_USAGE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
-    { "path": "FEEDBACK.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Feedback from mentors and the team, with our decisions; written down with SI help." },
+    { "path": "FEEDBACK.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Feedback from mentors and the team, with our decisions; written down with SI help. The Automatic SI review section is an SI playtest by Claude Code." },
     { "path": ".claude/skills/{kids-ux,playtest,ship-task}/SKILL.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "assets/fonts/*", "kind": "font", "si": "none", "notes": "Lexend, SIL Open Font License, see CREDITS.md" },
-    { "path": "GAME_DESIGN.md#designing-for-kids-aged-712", "kind": "docs", "si": "generated", "tool": "gemini", "notes": "Research findings on game design for kids aged 7-12, gathered from the web by Gemini at the team's request (German original removed after its points were summarised in English by Claude Code). Used as background; the game ideas are the team's." }
+    { "path": "GAME_DESIGN.md#designing-for-kids-aged-712", "kind": "docs", "si": "generated", "tool": "gemini", "notes": "Research findings on game design for kids aged 7-12, gathered from the web by Gemini at the team's request (German original removed after its points were summarised in English by Claude Code). Used as background; the game ideas are the team's." },
+    { "path": "RESEARCH.md", "kind": "docs", "si": "generated", "tool": "claude-code", "notes": "Research summary by Claude Code with web sources, at the team's request. Proposals only; decisions are the team's." }
   ]
 }

@@ -50,6 +50,7 @@ npm test
 |------|------------|
 | [AGENTS.md](AGENTS.md) | Rules for everyone who works on the code, people and coding agents |
 | [GAME_DESIGN.md](GAME_DESIGN.md) | The game design, what is real and what is made up, and the build status |
+| [RESEARCH.md](RESEARCH.md) | How the game should teach kids aged 7–12: learning goals, the teaching test, a realism check |
 | [FEEDBACK.md](FEEDBACK.md) | Feedback from mentors, playtests and SI review, with our decisions |
 | [data/README.md](data/README.md) | The NASA data, how the storm library was built, and the wording rules (archived, not live) |
 | [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
