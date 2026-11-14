@@ -124,6 +124,13 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Is the shield real? It is test tech (magnet shields are research only), so the intro now says so, and the new storm fort teaches what really protects astronauts: mass.
 - Only three kinds of events exist (dust, leak, filter), and the shelter has none. Done for the shelter: the storm fort. Greenhouse and lab still only get leaks.
 
+### Florian (14 Nov, ~17:15, on the phone)
+- In the intro, repairs could still be started from a button on Sam's card. Now only the red button or the broken building works, like building.
+- On a phone the base was tiny while the text was up. Now the card explains first ("OK, let me do it") and then shrinks to one line that says what to tap.
+- The storm fort explained nothing: "no idea what I did or learned". Now it starts with a test (pillow, then water bag, in the particle stream), states the rule (light lets radiation through, heavy stops it), and shows before and after for the crew.
+- Sam's text in the mini-games was cut off at the bottom of a small phone. Now it sits under the title in both mini-games, and both fit a 375×640 screen.
+- "Cool, we have the lab, and now?" The intro now gives 40 training points and lets the kid build one upgrade.
+
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.

@@ -261,7 +261,6 @@ function startMission(id, { training = null } = {}) {
   const guide = training
     ? createIntro({
       hud, startAt: training,
-      repair: (roomId) => actions.repair(roomId),
       speak: (text) => { if (readAloud) voice.speak(text); },
       relayout: () => syncSlot(),
       onDone: endTraining,

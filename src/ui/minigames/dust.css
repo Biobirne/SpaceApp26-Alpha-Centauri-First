@@ -60,8 +60,8 @@
 .dg-rays i:nth-child(2) { transform: rotate(40deg); width: 90px; }
 .dg-rays i:nth-child(3) { transform: rotate(52deg); }
 
-.dg-head { position: relative; z-index: 2; width: 100%; max-width: 520px; padding-right: 64px; }
-.dg-head h2 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+.dg-head { position: relative; z-index: 2; width: 100%; max-width: 520px; }
+.dg-head h2 { margin: 0; padding-right: 64px; min-height: 48px; display: flex; align-items: center; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
 .dg-head p { margin: 6px 0 0; font-size: 18px; color: var(--ink-2); }
 .dg-head .dg-why { margin-top: 4px; font-size: 17px; line-height: 1.3; }
 .dg-head .dg-why b { color: var(--sun); font-weight: 700; }
@@ -142,11 +142,11 @@
 .dg-devices li .ic { width: 20px; height: 20px; }
 .dg-devices li.on { color: #1d1b18; background: var(--sun); box-shadow: 0 0 14px rgb(255 201 74 / 0.5); }
 
-/* Sam speaks from the ground. */
-.dg-sam {
-  position: relative; z-index: 2; width: 100%; max-width: 460px; margin: 14px 0 0;
+/* Sam speaks right under the title, where the eyes already are (at the bottom it was cut off on small phones). */
+.dg .dg-sam {
+  position: relative; z-index: 2; margin: 10px 0 0;
   display: flex; flex-direction: column; gap: 2px;
-  padding: 12px 16px; border-radius: 18px 18px 18px 4px;
+  padding: 10px 14px; border-radius: 4px 18px 18px 18px;
   background: var(--ink); color: #1d1b18; font-size: 18px; line-height: 1.35;
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
 }
@@ -201,19 +201,23 @@
   .dg {
     display: grid; align-items: center; justify-content: center;
     grid-template-columns: minmax(280px, 380px) minmax(0, 520px); column-gap: 56px;
-    grid-template-rows: 1fr auto auto 1fr;
-    grid-template-areas: '. rig' 'head rig' 'sam rig' '. rig';
+    grid-template-areas: 'head rig';
   }
-  .dg-head { grid-area: head; padding-right: 0; }
+  .dg-head { grid-area: head; }
+  .dg-head h2 { padding-right: 0; }
   .dg-head .dg-why { font-size: 20px; margin-top: 8px; }
-  .dg-sam { grid-area: sam; margin-top: 22px; }
+  .dg .dg-sam { margin-top: 22px; }
   .dg-rig { grid-area: rig; }
   .dg-panel { max-height: 52vh; }
   .dg-win { left: auto; right: 0; width: min(520px, 50%); border-radius: 26px 0 0 0; }
 }
-@media (max-height: 640px) {
+/* Small phones: the title, Sam's line and the panel must all fit, so the two static lines go. */
+@media (max-height: 720px) {
+  .dg { padding-top: calc(var(--safe-t) + 12px); padding-bottom: calc(var(--safe-b) + 20px); overflow: hidden auto; }
   .dg-panel { max-height: 34vh; }
   .dg-head h2 { font-size: 22px; }
+  .dg-head .dg-why { display: none; }
+  .dg .dg-sam { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dg *, .dg *::after { animation: none !important; transition: none !important; }
