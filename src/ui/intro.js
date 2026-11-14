@@ -6,6 +6,7 @@
 
 import { setShield, setShelter, powerInPerDay } from '../rules/mission.js';
 import { crewAvatar } from './icons.js';
+import { UPGRADES } from '../rules/content.js';
 
 const CSS_URL = new URL('./intro.css', import.meta.url).href;
 if (typeof document !== 'undefined' && !document.querySelector(`link[href="${CSS_URL}"]`)) {
@@ -51,7 +52,7 @@ function buildings(cfg, solarNow) {
   ];
 }
 
-export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDone }) {
+export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
   const root = hud.el;
   let state = null;
   let steps = [];
@@ -62,6 +63,8 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
   let spotSel = null;
   let spotEl = null;
   let stopped = false;
+  let lastUpgrade = null;
+  let call = null; // set while the kid's first call to Earth is open
 
   root.classList.add('intro');
   const card = document.createElement('section');
@@ -94,36 +97,60 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
   /**
    * Draw the coach card.
    * praise: one line about what the kid just did. problem/fix: the two labelled lines.
-   * text: plain lines. tap: what to tap in the game. button: { label, go } for the card's own button.
+   * text: plain lines. tap: a highlighted hint that stays on the card. button: { label, go }.
+   * todo: what the kid has to do in the game itself. A card with a todo has two phases: first the
+   *   explanation with an OK button, then it shrinks to that one line, so the base has room
+   *   (on a phone the base was tiny while the whole text was up).
    */
-  function render({ kind = 'info', praise, title, note, text = [], problem, fix, tap, button }) {
-    const lines = [
-      praise ? `<p class="coach-praise">${praise}</p>` : '',
-      `<h2>${title}</h2>`,
-      note ? `<p class="coach-note">${note}</p>` : '',
-      problem ? `<p class="coach-row"><b>Problem</b><span>${problem}</span></p>` : '',
-      fix ? `<p class="coach-row fix"><b>Fix</b><span>${fix}</span></p>` : '',
-      ...text.map((line) => `<p>${line}</p>`),
-      tap ? `<p class="coach-tap">${tap}</p>` : '',
-    ].join('');
+  let spec = null;
+  let mini = false;
+  function render(next) {
+    spec = { kind: 'info', text: [], ...next };
+    mini = false;
+    draw();
+    const { praise, title, problem, fix, text, tap, todo } = spec;
+    speak?.([praise, title, problem, fix, ...text, tap, todo].filter(Boolean).join(' ').replace(/<[^>]+>/g, ''));
+  }
+
+  function draw() {
+    const { kind, praise, title, note, text, problem, fix, tap, button, todo } = spec;
     card.dataset.kind = kind;
-    card.innerHTML = `
-      <div class="coach-av" aria-hidden="true">${crewAvatar(kind === 'problem' ? 'alert' : 'happy')}</div>
-      <div class="coach-body">
-        <div class="coach-top">
-          <span class="coach-progress" role="img" aria-label="Training step ${idx + 1} of ${steps.length}"><i style="width:${Math.round(((idx + 1) / steps.length) * 100)}%"></i></span>
-          <button type="button" class="coach-skip">Skip training</button>
-        </div>
-        ${lines}
-        ${button ? `<button type="button" class="coach-btn">${button.label}</button>` : ''}
-      </div>`;
-    card.querySelector('.coach-skip').addEventListener('click', () => onDone({ skipped: true }));
-    if (button) card.querySelector('.coach-btn').addEventListener('click', () => button.go());
+    card.dataset.mode = mini ? 'mini' : 'full';
+    if (mini) {
+      card.innerHTML = `
+        <div class="coach-body">
+          <p class="coach-todo">${todo}</p>
+          <button type="button" class="coach-more" aria-label="Show the explanation again">?</button>
+        </div>`;
+      card.querySelector('.coach-more').addEventListener('click', () => { mini = false; draw(); });
+    } else {
+      const lines = [
+        praise ? `<p class="coach-praise">${praise}</p>` : '',
+        `<h2>${title}</h2>`,
+        note ? `<p class="coach-note">${note}</p>` : '',
+        problem ? `<p class="coach-row"><b>Problem</b><span>${problem}</span></p>` : '',
+        fix ? `<p class="coach-row fix"><b>Fix</b><span>${fix}</span></p>` : '',
+        ...text.map((line) => `<p>${line}</p>`),
+        tap ? `<p class="coach-tap">${tap}</p>` : '',
+      ].join('');
+      const act = todo ? { label: 'OK, let me do it', go: () => { mini = true; draw(); } } : button;
+      card.innerHTML = `
+        <div class="coach-av" aria-hidden="true">${crewAvatar(kind === 'problem' ? 'alert' : 'happy')}</div>
+        <div class="coach-body">
+          <div class="coach-top">
+            <span class="coach-progress" role="img" aria-label="Training step ${idx + 1} of ${steps.length}"><i style="width:${Math.round(((idx + 1) / steps.length) * 100)}%"></i></span>
+            <button type="button" class="coach-skip">Skip training</button>
+          </div>
+          ${lines}
+          ${act ? `<button type="button" class="coach-btn">${act.label}</button>` : ''}
+        </div>`;
+      card.querySelector('.coach-skip').addEventListener('click', () => onDone({ skipped: true }));
+      if (act) card.querySelector('.coach-btn').addEventListener('click', () => act.go());
+    }
     card.classList.remove('pop');
     void card.offsetWidth; // restart the entrance
     card.classList.add('pop');
-    requestAnimationFrame(() => relayout?.()); // the base moves out of the card's way
-    speak?.([praise, title, problem, fix, ...text, tap].filter(Boolean).join(' ').replace(/<[^>]+>/g, ''));
+    requestAnimationFrame(() => relayout?.()); // the base takes the room the card leaves
   }
 
   const next = () => go(idx + 1);
@@ -136,6 +163,36 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
   }
 
   // ------------------------------------------------------------------ the steps
+
+  /** What science points are for: the kid gets a few and builds one upgrade. */
+  function addScienceLesson(add) {
+    const cheapest = Math.min(...Object.values(state.cfg.upgrades).map((u) => u.cost));
+    add('science', {
+      doneOn: 'upgrade',
+      enter: () => {
+        state.science += cheapest;
+        spotlight('.meter.science');
+        render({
+          title: 'Science points buy upgrades',
+          text: [
+            'The lab earns science points while the crew works.',
+            `You spend them on better gear for the base. Here are ${cheapest} points to try it.`,
+          ],
+          todo: 'Tap Science, then build one upgrade.',
+        });
+      },
+    });
+    add('science-done', {
+      enter: () => {
+        spotlight('.meter.science');
+        render({
+          praise: `Built: ${UPGRADES[lastUpgrade]?.name ?? 'your first upgrade'}!`, title: 'An upgrade lasts the whole mission',
+          text: ['In a mission, you earn points while the crew works in the lab.'],
+          button: { label: 'Next', go: next },
+        });
+      },
+    });
+  }
 
   function makeSteps() {
     const cfg = state.cfg;
@@ -178,6 +235,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           });
         },
       });
+      if (b.id === 'lab') addScienceLesson(add);
     }
 
     add('dust', {
@@ -190,7 +248,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           kind: 'problem', praise: 'The base is ready. Now we practise!', title: 'Dusty solar panels',
           problem: 'Moon dust covers the panels. Less sunlight gets in, so they make less power.',
           fix: 'Go outside and brush the dust off.',
-          button: { label: 'Clean the panels', go: () => repair('solar') },
+          todo: 'Tap the red button, or the dusty panels.',
         });
       },
     });
@@ -204,7 +262,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           kind: 'problem', praise: 'Clean panels, full power!', title: 'A leak in Home',
           problem: 'A tiny space rock made a hole. The air we breathe is leaking out.',
           fix: 'Patch the hole.',
-          button: { label: 'Patch the leak', go: () => repair('hab') },
+          todo: 'Tap the red button, or Home.',
         });
       },
     });
@@ -218,7 +276,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           kind: 'problem', praise: 'Leak patched. The air is safe.', title: 'A full air filter',
           problem: 'You breathe out a gas called CO₂. The filter catches it, and now it is full.',
           fix: 'Swap in a fresh filter.',
-          button: { label: 'Swap the filter', go: () => repair('hab') },
+          todo: 'Tap the red button, or Home.',
         });
       },
     });
@@ -233,7 +291,8 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           kind: 'problem', praise: 'Fresh filter, clean air!', title: 'Practice alarm: solar storm',
           note: 'This is a drill, not real data.',
           problem: 'Particles from the Sun raise the radiation. Too much harms the crew.',
-          fix: 'Switch on the shield: tap Low, Mid or Max.',
+          fix: 'Switch on the shield.',
+          todo: 'Tap Low, Mid or Max at the bottom.',
         });
       },
     });
@@ -262,7 +321,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
           kind: 'problem', title: 'What really protects astronauts',
           problem: 'In a very strong storm, the shield alone is not enough.',
           fix: 'Thick, heavy walls stop radiation. Build a storm fort at the shelter.',
-          button: { label: 'Build the storm fort', go: () => repair('shelter') },
+          todo: 'Tap the red button, or the shelter.',
         });
       },
     });
@@ -275,7 +334,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
         render({
           praise: 'The fort is built!', title: 'Now send the crew inside',
           text: ['Behind the thick wall, almost no radiation reaches them.'],
-          tap: 'Tap Shelter at the bottom.',
+          todo: 'Tap Shelter at the bottom.',
         });
       },
     });
@@ -287,7 +346,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
         render({
           praise: 'Everyone is safe inside!', title: 'But look at Science: paused',
           text: ['Nobody can work in the shelter. That is the trade: safe, or science.'],
-          tap: 'Tap Shelter again to go back to work.',
+          todo: 'Tap Shelter again to go back to work.',
         });
       },
     });
@@ -307,20 +366,21 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
     });
 
     add('call', {
+      doneOn: 'call', // the step ends when the call sheet is closed again (see update)
       enter: () => {
         show('call');
         spotlight('.callbtn');
         render({
           title: 'Stuck? Call Earth',
-          text: ['Mission Control tells you the most important thing to do, and why.', 'The radio signal needs 1.3 seconds to reach Earth.'],
-          button: { label: 'Got it', go: next },
+          text: ['Mission Control tells you the most important thing to do, and why.', 'Try it once now.'],
+          todo: 'Tap Call Earth at the bottom.',
         });
       },
     });
 
     add('done', {
       enter: () => render({
-        kind: 'done', title: 'Training complete!',
+        kind: 'done', praise: 'You called Earth. They always tell you why.', title: 'Training complete!',
         text: ['You built the base and fixed every problem once.', 'Now a real solar storm is waiting, measured by NASA spacecraft.'],
         button: { label: 'Choose a mission', go: () => onDone({ skipped: false }) },
       }),
@@ -357,7 +417,11 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
     flags: {},
     script: () => [],
     setEnabled() {},
-    onEvent() {},
+    onEvent(e) {
+      if (e.type !== 'upgrade') return;
+      lastUpgrade = e.key;
+      if (steps[idx]?.doneOn === 'upgrade') next();
+    },
 
     /** Called once the mission state exists. */
     begin(missionState) {
@@ -380,17 +444,27 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
     },
 
     onAction(name) {
-      if (steps[idx]?.doneOn === name) next();
+      if (steps[idx]?.doneOn !== name) return;
+      // A call opens a sheet with the answer. The lesson is over when the kid has read it and closed it.
+      if (name === 'call') call = { seen: false, frames: 0 };
+      else next();
     },
 
     update() {
       applySpot(); // repair buttons are re-rendered, so the glow is re-applied
+      if (!call) return;
+      const open = Boolean(document.querySelector('.call-sheet'));
+      if (open) call.seen = true;
+      else if (call.seen || ++call.frames > 60) { call = null; next(); }
     },
 
     /** Room the coach card needs inside the stage: on top on phones, at the bottom on wide screens. */
     stagePad() {
       const wide = window.matchMedia('(min-width: 900px) and (min-aspect-ratio: 5/4)').matches;
-      const h = Math.ceil(card.querySelector('.coach-body')?.getBoundingClientRect().height ?? 260);
+      // A card with a todo shrinks to one line, so it only keeps room for that line (it may cover
+      // the base while the explanation is up). Other cards keep the base clear of the whole card.
+      const full = Math.ceil(card.querySelector('.coach-body')?.getBoundingClientRect().height ?? 260);
+      const h = spec?.todo ? (mini ? full : 64) : full;
       return wide ? { top: 0, bottom: h + 24 } : { top: h + 8, bottom: 0 };
     },
 
