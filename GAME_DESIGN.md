@@ -122,7 +122,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 
 ## End screen (the lesson)
 - What happened, with the real numbers. For example: "On 14 May 2024 the radiation near the Moon was 278× normal. Your shield blocked most of it."
-- **The real comparison, same day, from the same storm file:**
+- **The real comparison, at each place's peak within the same storm file:**
   - "On Mars it was only 15×. Mars has a thin atmosphere."
   - "On the space station it was about 1×. Earth's magnetic field protects it."
 - A science score and 1–3 stars, badges earned, new rank, and the science words learned.
@@ -130,7 +130,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 - Data attribution, with the label "Archived NASA measurements, <month year>".
 
 ## Progression and unlocks
-1. **The storm library as levels** (built). The order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme) → Feb 2022 → Nov 2025. Each finished mission unlocks the next. Ranks grow with stars: Cadet → Flight Engineer → Base Commander.
+1. **The storm library as levels** (built). The order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme) → Feb 2022 (the storm misses the Moon). Each finished mission unlocks the next. Ranks grow with stars: Cadet → Flight Engineer → Base Commander. Nov 2025 is in the data but not a Moon level: it has deep-space measurements only and is kept for the Mars mission.
 2. **Live mission (not built yet).** Unlocked after the first mission: "The real Sun this month", using DONKI fetched live. The radiation factor is then estimated from similar past storms, and the game labels it as an estimate.
 3. **Rocket to Mars, the end goal (not built yet).** Unlocked after a few missions. Grounded in real facts:
    - Earth and Mars line up for a launch about **every 26 months**. The trip takes **about 7 months**.
@@ -193,7 +193,7 @@ Everything below is drawn by code (shapes, not image files). Team art can replac
   - A micrometeoroid leak (tap 4 cracks).
   - Dust on the panels (wipe 5 panels).
   - A clogged CO₂ filter (3 steps in order).
-  - A leaking lab or greenhouse is sealed after 2.5 days and can be rebuilt for 30 science.
+  - A leaking lab or greenhouse is sealed after 2.5 days and can be reopened for free; the price is that it earns almost no science until it is open again.
   - A to-do list shows open repairs; rooms can also be tapped in the scene.
 - **Safe failure.**
   - Battery at 0: the shield and lab switch off until it recharges.

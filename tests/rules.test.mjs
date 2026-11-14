@@ -276,3 +276,32 @@ test('suitports can be bought like the other upgrades', () => {
   buyUpgrade(s, 'suitport');
   assert.equal(s.upgrades.suitport, true);
 });
+
+test('the end screen compares each place at its peak in the same storm', () => {
+  const s = play('may2024', passive);
+  const sum = summarize(s);
+  assert.deepEqual(sum.moonPeak, { iso: '2024-05-14', times: 278.4 });
+  const mars = sum.comparisons.find((c) => c.site === 'marsSurface');
+  assert.ok(mars, 'Mars is compared');
+  assert.equal(mars.iso, '2024-05-20', 'Mars peak day, not the Moon peak day');
+  assert.ok(Math.abs(mars.times - 15.4) < 0.05, `Mars ${mars.times}`);
+  const iss = sum.comparisons.find((c) => c.site === 'iss');
+  assert.ok(iss && iss.times < 2, 'the space station stayed near normal');
+});
+
+test('a storm that misses the Moon says so (the aim lesson)', () => {
+  const feb = createMission(load('feb2022'), { seed: 1 });
+  assert.ok(feb.outbox.some((e) => e.type === 'crew' && /misses the Moon/.test(e.text)),
+    'feb2022 explains that the storm went elsewhere');
+  const may = createMission(load('may2024'), { seed: 1 });
+  assert.ok(!may.outbox.some((e) => e.type === 'crew' && /misses the Moon/.test(e.text)));
+});
+
+test('createMission works on a private config copy', () => {
+  const a = createMission(load('oct2021'), { seed: 1 });
+  const before = a.cfg.power.solarPerDay;
+  a.cfg.power.solarPerDay = 999;
+  const b = createMission(load('oct2021'), { seed: 1 });
+  assert.equal(b.cfg.power.solarPerDay, before, 'mutating one mission must not change the next');
+  assert.equal(configFor('normal').power.solarPerDay, before);
+});

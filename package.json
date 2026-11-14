@@ -1,10 +1,10 @@
 {
   "name": "alpha-centauri-first",
   "private": true,
-  "description": "No dependencies and no build step. This file only tells Node that src/ uses ES modules, so the game rules can be tested with `node --test tests/*.test.mjs`.",
+  "description": "No dependencies and no build step. This file only tells Node that src/ uses ES modules, so the game rules can be tested with `node --test tests/`.",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/"
   },
   "license": "MIT"
 }

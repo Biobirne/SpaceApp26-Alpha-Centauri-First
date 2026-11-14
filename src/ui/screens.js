@@ -12,7 +12,7 @@ export const GAME_TITLE = 'Moon Base Commander'; // (open) final name decided by
 const SOURCES = `Real data: space weather from <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener">NASA DONKI</a>,
   radiation from <a href="https://visualization.osdr.nasa.gov/radlab/" target="_blank" rel="noopener">NASA OSDR RadLab</a>
   (archived measurements, not live). Made for the NASA Space Apps Challenge 2026 by team Alpha Centauri First. Not made or endorsed by NASA.
-  Code written with help from SI tools (Claude Code). The placeholder pictures are SI-generated and marked in the game. No SI-generated audio.`;
+  Code written with help from SI tools (Claude Code). All graphics are drawn in code: no image files and no SI-generated images or audio.`;
 
 function strength(peak) {
   const n = peak < 20 ? 1 : peak < 120 ? 2 : peak < 1000 ? 3 : 4;
@@ -96,13 +96,23 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
   const badgeList = (s.badges || []).map((id) => `<li class="got ${newBadges.includes(id) ? 'new' : ''}">${icon('medal')}<span><b>${esc(BADGES[id].title)}</b><small>${newBadges.includes(id) ? 'New badge!' : esc(BADGES[id].text)}</small></span></li>`).join('');
   const rows = [];
   if (s.moonPeak) {
-    rows.push(['Near the Moon', s.moonPeak.times]);
-    if (s.sameDay?.deepSpace != null) rows.push(['Deep space', s.sameDay.deepSpace]);
-    if (s.sameDay?.mars != null) rows.push(['On Mars', s.sameDay.mars]);
-    if (s.sameDay?.iss != null) rows.push(['Space station', s.sameDay.iss]);
+    rows.push(['Near the Moon', s.moonPeak.times, s.moonPeak.iso]);
+    for (const c of s.comparisons || []) rows.push([c.label, c.times, c.iso]);
   }
+  const mars = (s.comparisons || []).find((c) => c.site === 'marsSurface');
+  const iss = (s.comparisons || []).find((c) => c.site === 'iss');
+  const moonTimes = s.moonPeak?.times ?? 1;
+  const marsNote = !mars ? '' : moonTimes < 10 && mars.times > moonTimes * 1.5
+    ? 'This storm was aimed at Mars; the Moon stayed calm.'
+    : mars.times >= 3 && moonTimes >= 20
+      ? 'Mars has a thin atmosphere that helps a little.'
+      : 'Mars was mostly outside the storm’s path this time.';
+  const issNote = !iss ? '' : moonTimes >= 20 && iss.times < 3
+    ? 'The space station is inside Earth’s magnetic field, which bends the particles away.'
+    : 'The space station stayed close to its normal level.';
   const maxLog = Math.log10(Math.max(10, ...rows.map((r) => r[1])));
   const peakDate = s.moonPeak ? new Date(`${s.moonPeak.iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
+  const fmtDay = (iso) => iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '';
   el.innerHTML = `<div class="screen-tools">${soundButton(sound)}</div><div class="screen-inner">
     <h1>${s.stars === 3 && s.setbacks > 0 ? HEADLINES[2] : HEADLINES[s.stars]}</h1>
     <div class="bigstars" aria-label="${s.stars} of 3 stars">${[1, 2, 3].map((i) => icon('star', i <= s.stars ? '' : 'off')).join('')}</div>
@@ -115,11 +125,11 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
       <div class="stat"><b>${s.leaksFixed}</b><span>${s.leaksFixed === 1 ? 'leak' : 'leaks'} fixed</span></div>
     </div>
     ${rows.length ? `<section class="compare">
-      <h2>The real storm, ${esc(peakDate)}</h2>
-      ${rows.map(([label, v]) => `<div class="cmp"><span>${label}</span><span class="track"><i style="width:${Math.max(3, (Math.log10(Math.max(1, v)) / maxLog) * 100)}%"></i></span><b>${fmtTimes(v)}</b></div>`).join('')}
-      <p class="cmp-note">Times normal radiation, measured by NASA spacecraft that day.
-        ${s.sameDay?.mars != null ? 'Mars has a thin atmosphere that helps a little.' : ''}
-        ${s.sameDay?.iss != null ? 'The space station is inside Earth’s magnetic field, which bends the particles away.' : ''}
+      <h2>The same storm, everywhere NASA measured</h2>
+      ${rows.map(([label, v, iso]) => `<div class="cmp"><span>${label}<small class="cmp-date">${iso ? fmtDay(iso) : ''}</small></span><span class="track"><i style="width:${Math.max(3, (Math.log10(Math.max(1, v)) / maxLog) * 100)}%"></i></span><b>${fmtTimes(v)}</b></div>`).join('')}
+      <p class="cmp-note">Each bar is that place’s peak during the same storm, measured by NASA spacecraft. The peaks can fall on different days${s.moonPeak ? ` (the Moon’s was ${esc(peakDate)})` : ''}.
+        ${marsNote}
+        ${issNote}
         The Moon has no thick air and no magnetic field, so it gets the full storm.</p>
     </section>` : ''}
     ${s.difficulty !== 'normal' ? `<p class="diff-done">Played on ${esc(DIFFICULTY[s.difficulty].label)}.</p>` : ''}

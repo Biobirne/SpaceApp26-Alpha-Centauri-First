@@ -4,8 +4,15 @@
 
 const KEY = 'moonbase.progress.v1';
 
-/** Suggested order from GAME_DESIGN.md: gentle → extreme. Feb 2022 and Nov 2025 come last. */
-export const LEVEL_ORDER = ['oct2021', 'may2024', 'mar2024', 'sep2017', 'feb2022', 'nov2025'];
+/**
+ * Suggested order from GAME_DESIGN.md: gentle → extreme. Feb 2022 comes last because its storm
+ * misses the Moon (the aim lesson).
+ *
+ * Nov 2025 stays in `data/storms/` but is NOT a Moon level: there is no `moonOrbit` radiation
+ * measurement for that window, only deep space. It is kept for the planned deep-space / Mars
+ * mission (GAME_DESIGN.md, "Rocket to Mars").
+ */
+export const LEVEL_ORDER = ['oct2021', 'may2024', 'mar2024', 'sep2017', 'feb2022'];
 
 // Without storage we still keep progress for this page visit.
 let memory = null;
@@ -64,9 +71,11 @@ export function saveBadges(ids) {
 }
 
 export function isUnlocked(id, progress, unlockAll = false) {
-  if (unlockAll) return true;
   const i = LEVEL_ORDER.indexOf(id);
-  if (i <= 0) return true;
+  // An id that is not a Moon level (for example the deep-space Nov 2025 storm) is never startable.
+  if (i < 0) return false;
+  if (unlockAll) return true;
+  if (i === 0) return true;
   return Boolean(progress.stars[LEVEL_ORDER[i - 1]]);
 }
 

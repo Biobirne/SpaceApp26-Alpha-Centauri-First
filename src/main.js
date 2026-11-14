@@ -580,9 +580,18 @@ const actions = {
   data() {
     const s = run?.state;
     if (!s || run.blockers.size) return;
+    let sheet;
+    try {
+      sheet = showData(s, run.doc);
+    } catch (err) {
+      // A broken sheet must never leave `data` in the blocker set: that would freeze the clock.
+      console.error(err);
+      toast(`${icon('info')}<span>Could not open the data sheet. Please try again.</span>`);
+      return;
+    }
     block('data', true);
     run.guide.onAction('data');
-    watchClose(showData(s, run.doc), 'data');
+    watchClose(sheet, 'data');
   },
 };
 

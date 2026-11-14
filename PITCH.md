@@ -11,7 +11,7 @@ Kids aged 7–12 run a Moon base for 30 days through a **real solar storm measur
 ## Our 3 main selling points (focus on these)
 
 ### 1. A real storm, not invented numbers
-- **What:** six real solar storms from 2017 to 2025 are the levels. Every flare, particle storm and radiation value comes from NASA, replayed day by day.
+- **What:** five real solar storms from 2017 to 2024 are the Moon levels. Every flare, particle storm and radiation value comes from NASA, replayed day by day. A sixth storm (Nov 2025) is deep-space only and is kept for the planned Mars mission.
 - **Proof in the game:** the radiation chip shows "278× normal" on 14 May 2024. That is what NASA's LRO spacecraft measured near the Moon (1528 µGy/h against 5.5 on a calm day). Tap "Data" to see the real chart.
 - **Why it matters:** the challenge asks for "real NASA open data, rather than invented statistics" and names DONKI and OSDR. We use both: DONKI for flares and particle storms, OSDR RadLab for the radiation.
 
@@ -42,7 +42,7 @@ Kids aged 7–12 run a Moon base for 30 days through a **real solar storm measur
   - Easy, Normal and Hard. An intro where kids place each building themselves.
   - Badges and stars, with no streaks and no pressure.
 - **Works for everyone, right away:** runs in any phone browser. No install, no login, no personal data, a small download. The game plays without internet data from NASA, so venue Wi-Fi can't break it.
-- **The same storm on the Moon, on Mars and on the space station:** in May 2024, Mars had 15× its normal radiation and the space station about 1×, measured by NASA instruments on the same days.
+- **The same storm on the Moon, on Mars and on the space station:** in the May 2024 storm, the Moon peaked at 278× (14 May), Mars at 15× (20 May), and the space station stayed near 1×. Each is measured by NASA instruments; peaks can fall on different days.
 
 ## What mattered to us ✏️
 From our own rules (`AGENTS.md`, `RESEARCH.md`). Put this in our own words, and add one personal sentence each.
@@ -60,7 +60,7 @@ About 210 spoken words. Read slowly; pauses are marked with "/".
 | 0:00–0:12 | **1. Hook:** the May 2024 radiation chart, the Moon bar towering | "On the 14th of May 2024, a real solar storm hit the Moon. / NASA measured 278 times the normal radiation. / Imagine you are in charge of a Moon base that day. What do you do?" |
 | 0:12–0:22 | **2. The problem** (one line of text) | "Space content for kids is often posters and facts, or far too complex. Kids never feel the trade-offs that real missions face." |
 | 0:22–0:47 | **3. The game:** a short silent screen recording or 2 screenshots | "So we built Moon Base Commander. Kids aged 7 to 12 run a Moon base for 30 days, through a real storm from NASA's archive. / Raise the shield? It costs power, and at night the battery runs dry. Hide in the shelter? Safe, but no science gets done. Need help? Call Earth, and wait the real 2.6 seconds for the answer." |
-| 0:47–1:17 | **4. Three points**, one line each | "Three things make it special. / One: real data. Six real storms, from NASA DONKI and OSDR. No invented numbers. / Two: every choice costs something, and Sam, the crewmate, explains why. No game over, just lessons. / Three: honest science, one tap deep. Kids see simple numbers. Tap one, and you find the real unit and the source." |
+| 0:47–1:17 | **4. Three points**, one line each | "Three things make it special. / One: real data. Five real Moon storms, from NASA DONKI and OSDR. No invented numbers. / Two: every choice costs something, and Sam, the crewmate, explains why. No game over, just lessons. / Three: honest science, one tap deep. Kids see simple numbers. Tap one, and you find the real unit and the source." |
 | 1:17–1:30 | **5. QR code** + the game's link | "One rule came first for us: if kids don't learn, nothing else counts. / It runs on any phone. No install, no login. Scan the code and survive the storm yourself. Thank you!" |
 
 ✏️ If we pitch in German, translate the script but keep the numbers.
@@ -84,7 +84,7 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 ## Questions the jury might ask (short answers)
 | Question | Answer |
 |----------|--------|
-| Is the data live? | No. These are archived NASA measurements from six real storms, and the game says so. NASA's radiation archive ends in November 2025. A live month from DONKI is possible (the API works from the browser), but we did not build it. |
+| Is the data live? | No. These are archived NASA measurements from six real storms (five of them play on the Moon), and the game says so. NASA's radiation archive ends in November 2025. A live month from DONKI is possible (the API works from the browser), but we did not build it. |
 | Do magnet shields exist? | Not on any base yet. Scientists are testing the idea (CERN's SR2S project, NASA NIAC studies). The game calls it test tech, and the shield sheet says so with sources. Real protection today is mass: water, Moon soil and a shelter. That is what the storm fort mini-game teaches. |
 | Where are food and Mars? | Plants and algae are part of the life support loop. Food has no extra bar, because the challenge itself advises 2–3 core resources. Mars is in the data (same storm, Mars vs. Moon) and is planned as the end goal. |
 | How do you know kids learn? | Five learning goals (`RESEARCH.md`, section 0). Kids learn by doing, and the game explains each step, without a quiz. ✏️ Add what our playtests showed. |
@@ -100,7 +100,7 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 | 2.6 s radio round trip Earth–Moon | `GAME_DESIGN.md`, "Real vs. game rules" |
 | 98 % water recycling on the space station | `GAME_DESIGN.md`, NASA 2023 |
 | NASA career limit 600 mSv | `src/ui/numbers.js` (NASA-STD-3001) |
-| Six storms, 2017–2025 | `data/storms/` |
+| Six storms in the archive, 2017–2025 (five Moon levels) | `data/storms/` |
 
 ## Still to do before the pitch ✏️
 - [ ] Fill in the ✏️ parts in our own words.

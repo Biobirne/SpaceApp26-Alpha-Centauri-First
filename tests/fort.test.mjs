@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createMission, repairFor, completeRepair, setShelter, blockFraction } from '../src/rules/mission.js';
+import { createMission, repairFor, completeRepair, setShelter, blockFraction, shieldOptions, doseNow } from '../src/rules/mission.js';
 
 const doc = JSON.parse(readFileSync(new URL('../data/storms/oct2021.json', import.meta.url)));
 
@@ -35,4 +35,14 @@ test('the fort only helps while the crew is in the shelter', () => {
   const outside = blockFraction(s);
   completeRepair(s, 'shelter', 'fort');
   assert.equal(blockFraction(s), outside);
+});
+
+test('the shield sheet includes the fort, so it matches the dose bar', () => {
+  const s = createMission(doc, { seed: 1 });
+  s.t = 14.5; // the October 2021 peak
+  setShelter(s, true);
+  completeRepair(s, 'shelter', 'fort');
+  const current = shieldOptions(s).find((o) => o.current);
+  assert.ok(Math.abs(current.perDay - doseNow(s).perDay) < 1e-9,
+    `sheet ${current.perDay} vs dose bar ${doseNow(s).perDay}`);
 });
