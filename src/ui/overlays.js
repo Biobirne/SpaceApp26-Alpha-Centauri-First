@@ -15,6 +15,9 @@ export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 const BLOCK = ['Blocks nothing', 'Blocks about half', 'Blocks most', 'Blocks almost all'];
 
+/** How long a freshly opened sheet ignores clicks (see openSheet). Longer than any late click, shorter than a second tap. */
+const GHOST_TAP_MS = 450;
+
 /** A modal sheet. Returns { el, close }. `onClose` runs once, however it was closed. */
 export function openSheet(html, { className = '', closable = true, onClose } = {}) {
   const modal = document.createElement('div');
@@ -23,6 +26,14 @@ export function openSheet(html, { className = '', closable = true, onClose } = {
     ${closable ? `<button type="button" class="btn quiet icon-only close" aria-label="Close">${icon('close')}</button>` : ''}
     ${html}</div>`;
   document.body.appendChild(modal);
+  // On a phone, one touch can count twice: the touch itself opens this sheet (a tap on a building
+  // in the scene), and a moment later the browser sends a "click" for the same finger position.
+  // That late click would press whatever now lies under the finger, e.g. the first button of a
+  // mini-game. So the sheet ignores clicks for a short moment after it opens.
+  const openedAt = performance.now();
+  modal.addEventListener('click', (e) => {
+    if (performance.now() - openedAt < GHOST_TAP_MS) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
   let closed = false;
   const close = () => {
     if (closed) return;
