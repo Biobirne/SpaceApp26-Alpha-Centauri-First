@@ -48,8 +48,6 @@ export function createMoonScene() {
       this.sky = this.add.graphics();
       this.starsG = this.add.graphics();
       this.sunG = this.add.graphics();
-      // A flare makes the Sun glow for a moment (not the whole screen).
-      this.flash = this.add.circle(0, 0, 10, 0xfff2c4, 1).setAlpha(0);
       this.earthG = this.add.graphics();
       this.groundG = this.add.graphics();
       this.baseG = this.add.graphics();
@@ -57,6 +55,7 @@ export function createMoonScene() {
       this.domeG = this.add.graphics();
       this.fxG = this.add.graphics();
       this.badgeLayer = this.add.container(0, 0);
+      this.radLabel = this.add.text(0, 0, 'Radiation from the Sun', {}).setOrigin(0, 0).setVisible(false);
       this.labelLayer = this.add.container(0, 0);
       this.zones = {};
       // A tap counts only if it started and ended on the same spot, and not on an HTML control.
@@ -133,7 +132,12 @@ export function createMoonScene() {
       this.earth = { x: s.x + s.w * (tall ? 0.78 : 0.83), y: s.y + Math.max(unit * 10, s.h * 0.17), r: Math.max(14 * this.dpr, unit * (tall ? 6.5 : 5.2)) };
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
-      this.flash.setPosition(this.sunPos.x, this.sunPos.y).setRadius(this.sunPos.r * 2.6);
+      // Names the purple particles, so nobody takes them for rain. Shown while radiation is raised.
+      const rfs = Math.round(13 * this.dpr);
+      this.radLabel.setStyle({
+        fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${rfs}px`, fontStyle: '600', color: '#e3c8ff',
+        backgroundColor: 'rgba(40,18,70,0.8)', padding: { x: 7 * this.dpr, y: 3 * this.dpr },
+      }).setPosition(this.sunPos.x + this.sunPos.r * 1.8, this.sunPos.y + this.sunPos.r * 1.5);
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
@@ -380,6 +384,7 @@ export function createMoonScene() {
       this.shieldAlpha += (target - this.shieldAlpha) * Math.min(1, dt * 4);
       this.drawDome();
       this.updateParticles(dt, v);
+      this.radLabel.setVisible((v.radiation || 1) >= 2);
     }
 
     drawDome() {
@@ -482,18 +487,8 @@ export function createMoonScene() {
 
     // ------------------------------------------------------------------ effects
 
-    flare(score) {
-      // Only the Sun glows, once and softly (no full-screen flash, no shake).
-      if (this.view && this.view.daylight === false) return;
-      const big = score >= 400; // X class
-      this.tweens.killTweensOf(this.flash);
-      this.flash.setAlpha(0).setScale(1);
-      this.tweens.add({
-        targets: this.flash, alpha: big ? 0.8 : 0.5, scale: big ? 1.6 : 1.3,
-        duration: this.reduced ? 400 : 260, ease: 'Quad.easeOut', yoyo: true, hold: 200,
-        onComplete: () => this.flash.setAlpha(0).setScale(1),
-      });
-    }
+    /** A real flare happened. No visual on purpose: the full-screen flash confused players. The card and Sam explain it. */
+    flare() {}
 
     burst() {
       for (let i = 0; i < (this.reduced ? 6 : 24); i++) this.parts.push(this.spawn(true));
