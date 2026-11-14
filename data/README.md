@@ -2,8 +2,8 @@
 
 This game uses real NASA data in two ways:
 
-1. **Live space weather.** At game start the game may fetch the last 30 days of solar activity straight from NASA DONKI. If that fails (offline, slow Wi-Fi), it uses the saved copy in `donki/`.
-2. **Archived measurements.** Real radiation that NASA spacecraft measured during six past solar storms, bundled in `storms/`. These measurements are historical by nature. NASA's radiation archive ends in November 2025.
+1. **Archived measurements (what the game plays today).** Real radiation that NASA spacecraft measured during six past solar storms, plus the DONKI flares and particle events of those weeks, bundled in `storms/`. These measurements are historical by nature. NASA's radiation archive ends in November 2025.
+2. **Live space weather (planned, not built yet).** A live mission could fetch the last 30 days of solar activity straight from NASA DONKI, falling back to the saved copy in `donki/` when offline. The game does not load `donki/` yet.
 
 ## Words we use (in the game and in all docs)
 

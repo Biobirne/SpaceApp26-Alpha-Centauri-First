@@ -6,7 +6,7 @@ Read this file fully before every task. If a request conflicts with this file, s
 ## Project
 - Event: NASA Space Apps Challenge 2026, Vienna (14–15 Nov 2026).
 - Challenge: "Build a Junior Astronaut Mission Trainer".
-- Product: a browser game for kids aged 7–12 who run a lunar/Martian outpost and make trade-off decisions (power, life support, radiation shielding, food, communication delay). Every choice must cost something. Not a quiz, not a slideshow.
+- Product: a browser game for kids aged 7–12 who run a Moon base for 30 days during a real solar storm and make trade-off decisions (power, air and life support, radiation shielding, science, communication delay). Every choice must cost something. Not a quiz, not a slideshow. Working title: "Moon Base Commander". Design: `GAME_DESIGN.md`.
 - Time budget: ~15 hours of building in total. Scope small, ship often.
 
 ## Hard requirements (do not break)
@@ -14,7 +14,7 @@ Read this file fully before every task. If a request conflicts with this file, s
 2. **Runs in the browser**: no install, no login, no accounts, no personal data. Players are children.
 3. **Static site** deployable on **GitHub Pages** from `main`. No backend, no server code, no secrets in the repo.
 4. **Mobile-friendly**: must work on a phone (judges scan a QR code). Touch input, responsive layout.
-5. **NASA data with visible attribution** in the game. If data is a snapshot, label it as such; never present a snapshot as live.
+5. **NASA data with visible attribution** in the game. Archived or saved data is labelled as such (wording rules in `data/README.md`); never present it as live.
 6. **No SI-generated images** in the final game. Space Apps calls these tools Super Intelligence (SI) and requires a visible watermark on SI-generated images and videos. Use self-made art or assets with a clear free license, and record the license in `CREDITS.md`. Always write "SI", never "AI", in docs and in the game. How to label SI use: `SI_DISCLOSURE.md`.
 7. **No NASA logos or insignia** anywhere.
 8. **License: MIT** (`LICENSE` file in repo root).
@@ -26,16 +26,21 @@ Read this file fully before every task. If a request conflicts with this file, s
 - Max **30 days** per request. Useful types: `FLR` (solar flares), `CME`, `SEP`, `GST`.
 - The old URLs (`api.nasa.gov/DONKI/...`, `kauai.ccmc.gsfc.nasa.gov/...`) are dead. Do not use them.
 - Browser `fetch` works (CORS OK, tested).
-- Always ship a **snapshot JSON in `/data`** as fallback. Live fetch is optional; the game must work offline from the snapshot.
+- The game plays from the data shipped in `/data` (the storm library in `data/storms/`). A live DONKI fetch is optional and not built yet; the game must always work without it.
 
 ## Repo structure
 ```
 /index.html        entry point
-/src/              game code (modules, see ownership)
-/assets/           sprites, icons, sounds
-/data/             DONKI snapshot + event/content JSON + texts
+/src/              game code: rules/, ui/, scene/, audio/, main.js, progress.js
+/assets/           art hook (art/manifest.json) and the Lexend font
+/data/             storm library (storms/) and saved DONKI copies (donki/)
+/tests/            rule tests (npm test)
+/tools/            dev server (serve.py) and storm library builder
 AGENTS.md          this file
 CLAUDE.md          imports this file
+README.md          what the project is and how to run it
+GAME_DESIGN.md     design, real vs. game rules, build status
+RESEARCH.md        how the game teaches: learning goals, teaching test, realism check
 FEEDBACK.md        all feedback (mentors, SI review, team) and what we did with it
 SI_USAGE.md        log of SI tool usage (required for submission)
 SI_DISCLOSURE.md   how SI use is labelled (watermarks, text, metadata)
@@ -51,12 +56,13 @@ Only change files in your own module unless the task explicitly says otherwise.
 - **Data + content** (DONKI loader, snapshot, events JSON, learning texts, end screen facts): _TBD Saturday_
 
 ## Interfaces
-First version from the foundation build (14 Nov). Change it here when the team decides otherwise.
+Current state (14 Nov, evening). Change it here when the team decides otherwise.
 - **Rules** (`src/rules/`, plain JS, no Phaser, no DOM, tested with `npm test`):
-  - `createMission(stormDoc, { seed })` returns the whole game state.
+  - `createMission(stormDoc, { seed, config, script })` returns the whole game state. `config` comes from `configFor('easy' | 'normal' | 'hard')`; `script` holds the guided first leak.
   - `tick(state, dtDays)` advances it.
   - Player actions: `setShield`, `setShelter`, `chooseOption`, `repairFor` / `completeRepair`, `buyUpgrade`, `callEarth` / `applyAdvice`.
-  - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `particles`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
+  - Read-only helpers for the UI: `powerBreakdown`, `airBreakdown`, `doseNow`, `describeAdvice`, `explainSetup`, `summarize` (end screen: stars, badges, lessons).
+  - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `particles`, `radiation`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
 - **Controller** (`src/main.js`):
   - Runs the clock, calls `tick`, drains the outbox, and pauses on cards and sheets.
   - Hands the scene a plain `view` object every frame.

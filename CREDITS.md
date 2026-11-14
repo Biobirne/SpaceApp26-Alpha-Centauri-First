@@ -3,7 +3,7 @@
 ## Data
 | What | Source | License / terms | Used in |
 |------|--------|-----------------|---------|
-| Space weather events (solar flares, CMEs, SEP, geomagnetic storms) | NASA Community Coordinated Modeling Center (CCMC), DONKI – https://ccmc.gsfc.nasa.gov/tools/DONKI/ | NASA data, public; attribution shown in game. See https://www.nasa.gov/nasa-brand-center/images-and-media/ | `/data/donki/` (snapshots fetched 2026-11-12) |
+| Space weather events (solar flares, CMEs, SEP, geomagnetic storms) | NASA Community Coordinated Modeling Center (CCMC), DONKI – https://ccmc.gsfc.nasa.gov/tools/DONKI/ | NASA data, public; attribution shown in game. See https://www.nasa.gov/nasa-brand-center/images-and-media/ | Trimmed events inside `/data/storms/`; full saved copies in `/data/donki/` (fetched 2026-11-12, for the planned live mission) |
 | Radiation dose rates (ISS, BioSentinel, LRO, Curiosity) for six historical solar storms, 2017–2025 | NASA Open Science Data Repository (OSDR), RadLab – https://visualization.osdr.nasa.gov/radlab/ (plus trimmed DONKI events) | NASA data, public; attribution shown in game | `/data/storms/` (archived measurements, built 2026-11-14, see `data/README.md`) |
 
 ## Assets
