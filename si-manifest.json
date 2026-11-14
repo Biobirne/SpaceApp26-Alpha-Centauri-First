@@ -32,6 +32,7 @@
     { "path": "CREDITS.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "SI_USAGE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "FEEDBACK.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Feedback from mentors and the team, with our decisions; written down with SI help." },
     { "path": ".claude/skills/{kids-ux,playtest,ship-task}/SKILL.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "assets/fonts/*", "kind": "font", "si": "none", "notes": "Lexend, SIL Open Font License, see CREDITS.md" },
     { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "generated", "tool": "gemini", "notes": "Research summary on game design for kids aged 7-12, gathered from the web by Gemini at the team's request. German. Used as background; the game ideas are the team's." }

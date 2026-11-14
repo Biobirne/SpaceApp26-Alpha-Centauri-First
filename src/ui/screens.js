@@ -2,7 +2,7 @@
 // Start screen (mission select) and end screen (debrief). Plain DOM, no game rules.
 
 import { icon, soundButton } from './icons.js';
-import { BADGES } from '../rules/content.js';
+import { BADGES, DIFFICULTY } from '../rules/content.js';
 import { esc } from './overlays.js';
 import { LEVEL_ORDER, isUnlocked, rankFor } from '../progress.js';
 import { fmtTimes } from '../rules/mission.js';
@@ -32,7 +32,16 @@ function badgeShelf(have) {
   </section>`;
 }
 
-export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp }) {
+function difficultyPicker(current) {
+  return `<section class="difficulty" aria-label="Difficulty">
+    <div class="diff-seg" role="radiogroup">
+      ${Object.entries(DIFFICULTY).map(([k, d]) => `<button type="button" role="radio" data-diff="${k}" aria-checked="${k === current}">${esc(d.label)}</button>`).join('')}
+    </div>
+    <p class="diff-text">${esc(DIFFICULTY[current].text)}</p>
+  </section>`;
+}
+
+export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp, onDifficulty }) {
   const byId = Object.fromEntries(index.storms.map((s) => [s.id, s]));
   const nextStorm = byId[next];
   const el = document.createElement('div');
@@ -41,6 +50,7 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart, o
     <h1 class="title">${esc(GAME_TITLE)}</h1>
     <p class="pitch">Run a base on the Moon for 30 days. A real solar storm is on its way. Keep your crew safe, and keep the science going.</p>
     <p class="real-note">${icon('check')}<span>The storms really happened. The radiation numbers were measured by NASA spacecraft.</span></p>
+    ${difficultyPicker(DIFFICULTY[progress.difficulty] ? progress.difficulty : 'normal')}
     <button type="button" class="btn primary big-start" data-id="${esc(next)}">${icon('rocket')}Start: ${esc(nextStorm?.title ?? next)}</button>
     <button type="button" class="btn quiet howto">${icon('book')}How it works</button>
     <p class="credit">Your rank: <b>${rankFor(progress)}</b>. Each finished storm unlocks the next one.</p>
@@ -62,6 +72,13 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart, o
   </div>`;
   root.appendChild(el);
   el.querySelector('.howto').addEventListener('click', () => onHelp());
+  for (const b of el.querySelectorAll('[data-diff]')) {
+    b.addEventListener('click', () => {
+      for (const x of el.querySelectorAll('[data-diff]')) x.setAttribute('aria-checked', String(x === b));
+      el.querySelector('.diff-text').textContent = DIFFICULTY[b.dataset.diff].text;
+      onDifficulty(b.dataset.diff);
+    });
+  }
   el.addEventListener('click', (e) => {
     const b = e.target.closest('[data-id]');
     if (b && !b.disabled) onStart(b.dataset.id);
@@ -103,7 +120,11 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
         ${s.sameDay?.iss != null ? 'The space station is inside Earth’s magnetic field, which bends the particles away.' : ''}
         The Moon has neither, so it gets the full storm.</p>
     </section>` : ''}
-    <div class="tip">${icon('star')}<span>${esc(s.tip)}</span></div>
+    ${s.difficulty !== 'normal' ? `<p class="diff-done">Played on ${esc(DIFFICULTY[s.difficulty].label)}.</p>` : ''}
+    ${s.lessons?.length ? `<section class="lessons"><h2>What went wrong, and why</h2>
+      <ul>${s.lessons.map((l) => `<li><b>Day ${l.day}: ${esc(l.title)}</b><span>${esc(l.why)}</span><span class="next">${icon('star')}Next time: ${esc(l.next)}</span></li>`).join('')}</ul>
+      <p class="lessons-note">Mistakes are how real mission teams learn. Try again and see what changes!</p></section>`
+    : `<div class="tip">${icon('star')}<span>${esc(s.tip)}</span></div>`}
     ${badgeList ? `<section class="shelf"><h2>Badges this mission</h2><ul class="badges">${badgeList}</ul></section>` : ''}
     ${s.words.length ? `<section><h2 style="margin:0 0 8px;font-size:20px">Words you learned</h2>
       <ul class="words">${s.words.map((w) => `<li><b>${icon('check')} ${esc(w.word)}</b><span>${esc(w.text)}</span></li>`).join('')}</ul></section>` : ''}
