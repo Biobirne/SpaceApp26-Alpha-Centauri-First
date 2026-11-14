@@ -10,13 +10,15 @@ export const LEVEL_ORDER = ['oct2021', 'may2024', 'mar2024', 'sep2017', 'feb2022
 // Without storage we still keep progress for this page visit.
 let memory = null;
 
+const DEFAULTS = () => ({ stars: {}, hints: true, seen: {}, sound: true, readAloud: false, badges: {} });
+
 export function loadProgress() {
   try {
     const raw = localStorage.getItem(KEY);
     const data = raw ? JSON.parse(raw) : null;
-    if (data && typeof data.stars === 'object') return { hints: true, seen: {}, ...data };
+    if (data && typeof data.stars === 'object') return { ...DEFAULTS(), ...data };
   } catch { /* storage unavailable: play without saving */ }
-  return memory ? structuredClone(memory) : { stars: {}, hints: true, seen: {} };
+  return memory ? structuredClone(memory) : DEFAULTS();
 }
 
 function save(p) {
@@ -43,6 +45,22 @@ export function setHints(on) {
   p.hints = on;
   if (on) p.seen = {};
   return save(p);
+}
+
+/** Simple on/off settings: sound, readAloud. */
+export function setPref(key, value) {
+  const p = loadProgress();
+  p[key] = value;
+  return save(p);
+}
+
+/** Add badges to the collection; returns the ones that are new. */
+export function saveBadges(ids) {
+  const p = loadProgress();
+  const fresh = ids.filter((id) => !p.badges[id]);
+  for (const id of ids) p.badges[id] = true;
+  save(p);
+  return fresh;
 }
 
 export function isUnlocked(id, progress, unlockAll = false) {

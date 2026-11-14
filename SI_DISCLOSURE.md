@@ -52,6 +52,8 @@ Do this for every file that an SI tool generated (picture, sound, voice line, vi
 
 ## Voices and sounds: the plan
 
+Status 14 Nov: the sound effects and voice option 1 (read aloud with the device's own voice) are built. Options 2 and 3 are open for the team.
+
 Sound must stay small (venue Wi-Fi), safe for kids and easy to switch off. The kids-ux rules apply: sound starts only after the first tap, and a mute button is visible on every screen.
 
 ### Sound effects: made in the browser, no files

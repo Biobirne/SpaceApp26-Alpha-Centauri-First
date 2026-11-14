@@ -3,7 +3,7 @@
 // elapsed game days and drains state.outbox to update the screen.
 
 import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './config.js';
-import { CREWMATE_NAME, ROOMS, GLOSSARY, CHATTER } from './content.js';
+import { CREWMATE_NAME, ROOMS, GLOSSARY, CHATTER, BADGES } from './content.js';
 import { buildTimeline, moonTimesNormal, flareScore, peakDay } from './storm.js';
 import { isDaylight, sunElevation, earthLitFraction } from './sky.js';
 import { createRng } from './rng.js';
@@ -59,7 +59,9 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     chatterOrder: shuffle([...CHATTER.keys()], rng),
     chatterIdx: 0,
     warned: {},
-    stats: { blockedDose: 0, totalDose: 0, leaksFixed: 0, roomsLost: 0, setbacks: 0, cardsAnswered: 0 },
+    stats: { blockedDose: 0, totalDose: 0, leaksFixed: 0, repairs: 0, roomsLost: 0, setbacks: 0, cardsAnswered: 0 },
+    // Difficulty level: 0 normal, above 0 the kid is struggling, below 0 it's too easy.
+    dda: { level: 0, lastTroubleT: 0, lastEaseT: 0 },
   };
   updateSky(state, true);
   emit(state, 'crew', {
@@ -203,6 +205,7 @@ export function completeRepair(state, roomId, kind) {
     emit(state, 'room', { roomId: 'hab', status: 'ok' });
     emit(state, 'crew', { mood: 'happy', text: 'New filter in. The air is fresh again!' });
   } else return false;
+  state.stats.repairs++;
   return true;
 }
 
@@ -361,6 +364,7 @@ function step(state, h) {
     state.powerEmergency = true;
     state.shield = 0;
     state.stats.setbacks++;
+    trouble(state);
     emit(state, 'setback', { kind: 'power' });
     emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield and the lab. Only life support runs now.' });
   } else if (state.powerEmergency && state.power > cfg.power.recoverAbove) {
@@ -381,6 +385,7 @@ function step(state, h) {
     state.air = cfg.air.emergencyRefill;
     state.science = Math.max(0, state.science - 10);
     state.stats.setbacks++;
+    trouble(state);
     emit(state, 'setback', { kind: 'air' });
     emit(state, 'crew', { mood: 'alert', text: 'Air ran out, so we opened the emergency oxygen tanks. Everyone is fine, but we lost some science.' });
   }
@@ -392,6 +397,7 @@ function step(state, h) {
     if (room.status === 'leak' && state.t - room.since > cfg.events.leakToLostDays) {
       room.status = 'lost';
       state.stats.roomsLost++;
+      trouble(state);
       emit(state, 'room', { roomId: id, status: 'lost' });
       emit(state, 'crew', { mood: 'alert', text: `We sealed the ${ROOMS[id].name.toLowerCase()} to save the air. You can rebuild it later with science points.` });
     }
@@ -408,6 +414,7 @@ function step(state, h) {
     state.forcedShelter = true;
     if (!state.doseLimitHit) state.stats.setbacks++;
     state.doseLimitHit = true;
+    trouble(state);
     emit(state, 'setback', { kind: 'dose' });
     emit(state, 'crew', { mood: 'alert', text: 'Our radiation dose hit the safety limit. Everyone into the shelter until the storm calms down!' });
   } else if (state.forcedShelter && rad <= 3) {
@@ -584,10 +591,38 @@ function particleCard(state) {
   };
 }
 
+/** Something went wrong for the player: random problems slow down. */
+function trouble(state) {
+  const d = state.dda;
+  d.level = Math.min(state.cfg.dda.max, d.level + state.cfg.dda.upOnTrouble);
+  d.lastTroubleT = state.t;
+}
+
+/** How much longer (or shorter) the gap to the next random problem is right now. */
+export function randomGapScale(state) {
+  const { level } = state.dda;
+  const c = state.cfg.dda;
+  return level >= 0 ? 1 + level * c.slowerPerLevel : 1 + level * c.fasterPerLevel;
+}
+
+const hasOpenProblem = (state) => state.dust || state.filter || ROOM_IDS.some((id) => state.rooms[id].status === 'leak');
+
 function randomEvent(state) {
   const cfg = state.cfg.events;
+  const c = state.cfg.dda;
+  const d = state.dda;
   const rng = state.rng;
-  state.nextRandomAt = state.t + rng.range(cfg.randomGapDays[0], cfg.randomGapDays[1]);
+  // Calm stretch: the player is doing fine, so the level drifts down step by step.
+  if (state.t - Math.max(d.lastTroubleT, d.lastEaseT) >= c.calmDaysToEase) {
+    d.level = Math.max(c.min, d.level - c.easeStep);
+    d.lastEaseT = state.t;
+  }
+  // A struggling player gets one problem at a time.
+  if (d.level > 0 && hasOpenProblem(state)) {
+    state.nextRandomAt = state.t + c.waitWhileOpenDays;
+    return;
+  }
+  state.nextRandomAt = state.t + rng.range(cfg.randomGapDays[0], cfg.randomGapDays[1]) * randomGapScale(state);
   const leakable = ['lab', 'greenhouse', 'hab'].filter((id) => state.rooms[id].status === 'ok');
   const options = [];
   if (leakable.length) options.push('leak', 'leak');
@@ -651,7 +686,31 @@ export function summarize(state) {
   else if (!roomsOk) tip = 'Next time, fix leaks quickly so no room gets sealed.';
   else if (state.science < target) tip = 'Next time, keep the lab running on calm days to reach the science goal.';
   else tip = 'You managed power, air and radiation like a real mission team!';
+  const upgrades = Object.values(state.upgrades).filter(Boolean).length;
+  const calls = state.callEarth.calls;
+  const st = state.stats;
+  // Badges reward ways of playing, not talent (Brain Points idea from the team's guide).
+  const earned = {
+    fixer: st.repairs >= 3,
+    allRooms: st.roomsLost === 0,
+    steady: st.setbacks === 0,
+    shield: blockedPct >= 60,
+    team: calls >= 1,
+    builder: upgrades >= 1,
+    science: state.science >= target,
+  };
+  const badges = Object.keys(BADGES).filter((k) => earned[k]);
+  // Praise the effort or the strategy the kid actually used.
+  let praise;
+  if (st.setbacks > 0 && stars >= 2) praise = 'Things went wrong and you kept going. That is what real crews do.';
+  else if (st.repairs >= 3) praise = `You fixed ${st.repairs} problems. Quick repairs keep a base alive.`;
+  else if (calls >= 2) praise = 'You asked Mission Control for advice. Smart crews ask for help.';
+  else if (blockedPct >= 60 && state.science >= target / 2) praise = 'You raised the shield at the right times. Good planning!';
+  else if (state.science >= target) praise = 'You kept the lab busy on calm days. Smart timing!';
+  else praise = 'You stayed with your crew for all 30 days. Well done!';
   return {
+    badges,
+    praise,
     stormTitle: tl.title,
     displayLabel: tl.displayLabel,
     stars,

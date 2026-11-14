@@ -317,7 +317,7 @@ export function showData(state, doc) {
 
 // ------------------------------------------------------------------ pause
 
-export function showPause({ onResume, onRestart, onMenu, hints, onHints }) {
+export function showPause({ onResume, onRestart, onMenu, hints, onHints, readAloud = null, onReadAloud }) {
   const html = `
     <h2>Paused</h2>
     <p>The Moon base waits for you.</p>
@@ -325,6 +325,7 @@ export function showPause({ onResume, onRestart, onMenu, hints, onHints }) {
       <button type="button" class="btn primary resume">${icon('play')}Keep playing</button>
     </div>
     <button type="button" class="btn quiet small hints" aria-pressed="${hints}">${icon('info')}<span></span></button>
+    ${readAloud === null ? '' : `<button type="button" class="btn quiet small hints readaloud" aria-pressed="${readAloud}">${icon('speak')}<span></span></button>`}
     <div class="row">
       <button type="button" class="btn quiet small restart">${icon('restart')}Start this storm again</button>
       <button type="button" class="btn quiet small menu">${icon('back')}All missions</button>
@@ -344,6 +345,20 @@ export function showPause({ onResume, onRestart, onMenu, hints, onHints }) {
     onHints(on);
     renderHints(on);
   });
+  // Read aloud: the device's own voice reads every crew line (for kids who are still learning to read).
+  const readBtn = sheet.el.querySelector('.readaloud');
+  if (readBtn) {
+    const renderRead = (on) => {
+      readBtn.setAttribute('aria-pressed', String(on));
+      readBtn.querySelector('span').textContent = on ? 'Sam reads every line aloud. Tap to stop.' : 'Tap to let Sam read every line aloud.';
+    };
+    renderRead(readAloud);
+    readBtn.addEventListener('click', () => {
+      const on = readBtn.getAttribute('aria-pressed') !== 'true';
+      onReadAloud(on);
+      renderRead(on);
+    });
+  }
   sheet.el.querySelector('.restart').addEventListener('click', () => { picked = onRestart; sheet.close(); });
   sheet.el.querySelector('.menu').addEventListener('click', () => { picked = onMenu; sheet.close(); });
   return sheet;

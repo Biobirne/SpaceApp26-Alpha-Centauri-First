@@ -69,6 +69,19 @@ export const CONFIG = {
     chatterEveryDays: 1.6,
   },
 
+  // Invisible difficulty adjustment (Guide_Gamedesign_Attention.md, DDA). Only the random
+  // problems (leaks, dust, filters) adapt. The real NASA storm data never changes.
+  dda: {
+    min: -1,                 // flawless play: problems come a bit sooner
+    max: 2,                  // struggling: problems come much later
+    upOnTrouble: 1,          // each setback or sealed room
+    calmDaysToEase: 4,       // this long without trouble lowers the level by easeStep
+    easeStep: 0.5,
+    slowerPerLevel: 0.35,    // gap × (1 + 0.35 × level) when level > 0
+    fasterPerLevel: 0.15,    // gap × (1 + 0.15 × level) when level < 0
+    waitWhileOpenDays: 1,    // when struggling, no new problem while one is still open
+  },
+
   radiation: {
     announceAtLeast: 10,      // times normal; crewmate announces new levels above this
   },

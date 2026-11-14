@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import {
   createMission, tick, chooseOption, setShield, setShelter, getAdvice, callEarth, callEarthReady,
-  repairFor, completeRepair, radiationNow, buyUpgrade,
+  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize,
 } from '../src/rules/mission.js';
 import { isDaylight } from '../src/rules/sky.js';
 import { buildTimeline, flareScore } from '../src/rules/storm.js';
@@ -122,4 +122,54 @@ test('guided first steps: a scripted leak comes first, random problems wait', ()
   assert.deepEqual(problems[0][0], 'hab');
   assert.ok(problems[0][1] >= 0.7 && problems[0][1] < 0.8);
   assert.ok(problems.slice(1).every(([, t]) => t >= 0.7 + s.cfg.events.randomGapDays[0]), JSON.stringify(problems));
+});
+
+/** Count the random problems (leaks, dust, filters) a whole mission throws at the player. */
+function problemsIn(id, policy, seed) {
+  let n = 0;
+  const s = createMission(load(id), { seed });
+  let guard = 0;
+  while (!s.ended && guard++ < 100000) {
+    for (const e of s.outbox) if (e.type === 'room' && ['leak', 'dust', 'filter'].includes(e.status)) n++;
+    s.outbox.length = 0;
+    if (s.pendingCard) { chooseOption(s, policy.card(s, s.pendingCard)); continue; }
+    policy.each?.(s);
+    tick(s, 0.05);
+  }
+  return { n, s };
+}
+
+test('difficulty adapts: a struggling player gets fewer random problems, real data stays the same', () => {
+  let struggling = 0;
+  let sensibleN = 0;
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const a = problemsIn('may2024', passive, seed);
+    const b = problemsIn('may2024', sensible, seed);
+    assert.ok(a.s.dda.level > 0, `seed ${seed}: passive play should raise the level`);
+    assert.ok(b.s.dda.level <= 0, `seed ${seed}: good play should not raise it (got ${b.s.dda.level})`);
+    struggling += a.n;
+    sensibleN += b.n;
+    // The storm itself is the same NASA data for everyone.
+    assert.deepEqual(a.s.timeline.days.map((d) => d.radiation), b.s.timeline.days.map((d) => d.radiation));
+  }
+  assert.ok(struggling < sensibleN, `struggling ${struggling} vs sensible ${sensibleN}`);
+});
+
+test('difficulty scale: slower when struggling, a bit faster when flawless', () => {
+  const s = createMission(load('oct2021'), { seed: 1 });
+  assert.equal(randomGapScale(s), 1);
+  s.dda.level = 2;
+  assert.ok(randomGapScale(s) > 1.5);
+  s.dda.level = -1;
+  assert.ok(randomGapScale(s) < 1 && randomGapScale(s) >= 0.8);
+});
+
+test('badges and praise reward how the kid played', () => {
+  const good = play('oct2021', sensible);
+  const sum = summarize(good);
+  assert.ok(sum.badges.includes('allRooms'));
+  assert.ok(sum.badges.includes('fixer') === good.stats.repairs >= 3);
+  assert.ok(typeof sum.praise === 'string' && sum.praise.length > 10);
+  const lazy = play('may2024', passive);
+  assert.ok(!summarize(lazy).badges.includes('steady'));
 });
