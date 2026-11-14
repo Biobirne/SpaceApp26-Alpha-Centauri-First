@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import {
   createMission, tick, chooseOption, setShield, setShelter, getAdvice, callEarth, callEarthReady,
-  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize,
+  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize, evaCost,
 } from '../src/rules/mission.js';
 import { isDaylight } from '../src/rules/sky.js';
 import { configFor } from '../src/rules/config.js';
@@ -128,16 +128,18 @@ test('guided first steps: a scripted leak comes first, random problems wait', ()
 /** Count the random problems (leaks, dust, filters) a whole mission throws at the player. */
 function problemsIn(id, policy, seed) {
   let n = 0;
+  let maxLevel = 0;
   const s = createMission(load(id), { seed });
   let guard = 0;
   while (!s.ended && guard++ < 100000) {
+    maxLevel = Math.max(maxLevel, s.dda.level);
     for (const e of s.outbox) if (e.type === 'room' && ['leak', 'dust', 'filter'].includes(e.status)) n++;
     s.outbox.length = 0;
     if (s.pendingCard) { chooseOption(s, policy.card(s, s.pendingCard)); continue; }
     policy.each?.(s);
     tick(s, 0.05);
   }
-  return { n, s };
+  return { n, s, maxLevel };
 }
 
 test('difficulty adapts: a struggling player gets fewer random problems, real data stays the same', () => {
@@ -146,7 +148,8 @@ test('difficulty adapts: a struggling player gets fewer random problems, real da
   for (const seed of [1, 2, 3, 4, 5]) {
     const a = problemsIn('may2024', passive, seed);
     const b = problemsIn('may2024', sensible, seed);
-    assert.ok(a.s.dda.level > 0, `seed ${seed}: passive play should raise the level`);
+    // It may ease off again after calm days, so look at the highest level during the mission.
+    assert.ok(a.maxLevel > 0, `seed ${seed}: passive play should raise the level`);
     assert.ok(b.s.dda.level <= 0, `seed ${seed}: good play should not raise it (got ${b.s.dda.level})`);
     struggling += a.n;
     sensibleN += b.n;
@@ -212,4 +215,63 @@ test('every setback comes with a reason and a tip for next time', () => {
   }
   // one per kind on the end screen
   assert.equal(new Set(sum.lessons.map((l) => l.kind)).size, sum.lessons.length);
+});
+
+/** The day of a storm with the most radiation (mid-day). */
+function peakT(s) {
+  const rad = (t) => { s.t = t; return radiationNow(s); };
+  let best = 0.5;
+  for (let d = 1; d < 30; d++) if (rad(d + 0.5) > rad(best)) best = d + 0.5;
+  return best;
+}
+
+test('cleaning the panels is a spacewalk: no shield outside, so a storm costs dose', () => {
+  const s = createMission(load('may2024'), { seed: 3 });
+  s.t = peakT(s);
+  s.dust = true;
+  const job = repairFor(s, 'solar');
+  assert.equal(job.kind, 'dust');
+  assert.ok(job.eva.dose >= 2, `peak spacewalk dose ${job.eva.dose}`);
+  // the shield does not change what a spacewalk costs
+  setShield(s, 3);
+  assert.equal(evaCost(s).dose, job.eva.dose);
+  const before = s.dose;
+  completeRepair(s, 'solar', 'dust');
+  assert.ok(Math.abs(s.dose - before - job.eva.dose) < 0.11, `${s.dose - before} vs ${job.eva.dose}`);
+  // Mission Control says to wait instead of sending the crew out
+  assert.match(getAdvice(s).text, /Wait|shelter|shield/i);
+
+  // a quiet day costs almost nothing
+  const q = createMission(load('nov2025'), { seed: 3 });
+  q.dust = true;
+  assert.ok(repairFor(q, 'solar').eva.dose < 0.5);
+});
+
+test('Moon dust from a spacewalk can clog the air filter, unless suitports are built', () => {
+  let clogged = 0;
+  for (let seed = 1; seed <= 12; seed++) {
+    for (const ports of [false, true]) {
+      const s = createMission(load('nov2025'), { seed });
+      s.upgrades.suitport = ports;
+      const scripted = s.script.length;
+      s.dust = true;
+      completeRepair(s, 'solar', 'dust');
+      const dusty = s.script.filter((e) => e.cause === 'dust');
+      if (ports) assert.equal(dusty.length, 0);
+      else if (dusty.length) {
+        clogged++;
+        assert.equal(s.script.length, scripted + 1);
+        assert.ok(dusty[0].t > s.t);
+      }
+    }
+  }
+  assert.ok(clogged >= 3 && clogged <= 11, `clogged ${clogged} of 12`);
+});
+
+test('suitports can be bought like the other upgrades', () => {
+  const s = createMission(load('nov2025'), { seed: 1 });
+  s.science = 1000;
+  assert.equal(s.upgrades.suitport, false);
+  buyUpgrade(s, 'suitport');
+  assert.equal(s.upgrades.suitport, true);
 });

@@ -32,7 +32,15 @@ const data = { index: null, docs: {}, art: { rooms: {}, background: null } };
 // ------------------------------------------------------------------ sound and read-aloud
 const sfx = createSfx({ enabled: loadProgress().sound });
 let readAloud = loadProgress().readAloud && voice.available;
-const funIdx = { earth: 0, sun: 0 };
+const funIdx = { earth: 0, sun: 0, suit: 0 };
+
+/** Easter eggs: tap Earth, the Sun or Sam for the next true fact. */
+function funFact(id) {
+  if (!run || run.blockers.size || run.state.pendingCard) return;
+  const facts = FUN_FACTS[id];
+  sfx.play('fun');
+  run.hud.crew.say(facts[funIdx[id]++ % facts.length], 'happy', { tag: 'fun' });
+}
 
 // Browsers only allow audio after a tap, so the sound starts with the first one.
 document.addEventListener('pointerdown', () => sfx.unlock(), { capture: true });
@@ -130,12 +138,7 @@ function startPhaser() {
   game.scene.add('moon', MoonScene, true, { art: data.art, dpr });
   game.events.once('moon-ready', (s) => { scene = s; scene.view = idleView(); syncSlot(); });
   game.events.on('room-tap', (id) => run && actions.repair(id, true));
-  game.events.on('sky-tap', (id) => {
-    if (!run || run.blockers.size || run.state.pendingCard) return;
-    const facts = FUN_FACTS[id];
-    sfx.play('fun');
-    run.hud.crew.say(facts[funIdx[id]++ % facts.length], 'happy', { tag: 'fun' });
-  });
+  game.events.on('sky-tap', (id) => funFact(id));
   addEventListener('resize', onResize);
 }
 
@@ -218,6 +221,7 @@ function startMission(id) {
   const progress = loadProgress();
   const hud = createHud(app, actions, { sound: sfx.on, canSpeak: voice.available });
   hud.crew.onLine = (text) => { if (readAloud) voice.speak(text); };
+  hud.crew.onAvatar = () => funFact('suit');
   const guide = createGuide({
     root: hud.el, enabled: progress.hints, seen: progress.seen, markSeen: markHintSeen,
     say: (text, mood, opts) => hud.crew.say(text, mood, opts),

@@ -3,7 +3,7 @@
 // real data and pause. They never change state themselves; they call back into the controller.
 
 import { icon } from './icons.js';
-import { UPGRADES, ROOMS } from '../rules/content.js';
+import { UPGRADES, ROOMS, CREWMATE_NAME } from '../rules/content.js';
 import { SHIELD_LABELS } from '../rules/config.js';
 import { currentDayIndex, fmtTimes } from '../rules/mission.js';
 
@@ -84,13 +84,30 @@ const TASKS = {
   rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
 };
 
+function evaPanel(eva) {
+  const risky = eva.dose >= 2;
+  return `<div class="eva ${risky ? 'risky' : ''}">
+    ${icon('rocket')}<div><b>This is a spacewalk.</b>
+    <p>The panels are outside. ${CREWMATE_NAME} puts on a spacesuit with oxygen, cooling water and 30 minutes of spare air.</p>
+    <p>Out there, the shield can’t help. ${eva.dose < 0.5
+    ? `Radiation is low now (${fmtTimes(eva.rad)} normal), so that is okay.`
+    : `Radiation is ${fmtTimes(eva.rad)} normal: <b>+${eva.dose} dose</b>.`}</p>
+    ${eva.dose >= 5 ? '<p><b>That is a lot.</b> Waiting a day or two is safer. The panels make less power until then.</p>' : ''}</div>
+  </div>
+  ${risky ? `<div class="row eva-choice">
+    <button type="button" class="btn go eva-go">${icon('check')}Go outside now</button>
+    <button type="button" class="btn quiet eva-wait">Wait for the storm to calm</button>
+  </div>` : ''}`;
+}
+
 export function showRepair(job, onDone, onCancel) {
   const t = TASKS[job.kind];
   const room = ROOMS[job.roomId];
   const html = `
     <h2>${icon(t.icon)}${esc(t.title)}</h2>
     <p class="tgoal">${esc(room.name)}: ${esc(t.goal(job.taps))}</p>
-    <div class="board" data-kind="${job.kind}"></div>
+    ${job.eva ? evaPanel(job.eva) : ''}
+    <div class="board" data-kind="${job.kind}" ${job.eva && job.eva.dose >= 2 ? 'hidden' : ''}></div>
     <div class="progress">${'<i></i>'.repeat(job.taps)}</div>`;
   let finished = false;
   const sheet = openSheet(html, { className: 'task-sheet', onClose: () => { if (!finished) onCancel?.(); } });
@@ -116,6 +133,15 @@ export function showRepair(job, onDone, onCancel) {
     b.setAttribute('aria-label', t.steps ? t.steps[i] : `${t.title} ${i + 1} of ${job.taps}`);
     board.appendChild(b);
   });
+  // In a storm, going outside is a real choice: show the dose first and let the kid decide.
+  const go = sheet.el.querySelector('.eva-go');
+  if (go) {
+    go.addEventListener('click', () => {
+      board.hidden = false;
+      sheet.el.querySelector('.eva-choice').remove();
+    });
+    sheet.el.querySelector('.eva-wait').addEventListener('click', () => sheet.close());
+  }
   const all = [...board.querySelectorAll('.spot')];
   const markNext = () => { if (ordered) all.forEach((b, i) => b.classList.toggle('next', i === done)); };
   markNext();

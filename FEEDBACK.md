@@ -4,6 +4,17 @@ Every piece of feedback we got, what we decided and where it stands. Newest roun
 **Top priority for every change: the game must teach.** If a child plays one mission and cannot say why we clean the panels, why the crew goes to the shelter, or where the oxygen comes from, we have failed the challenge, however good it looks. Research and proposals: `RESEARCH.md`.
 
 
+## Mentor who worked on Apollo (14 Nov 2026)
+
+Facts about the Moon to make the game more real, or to use as fun facts. He stressed the spacesuits and Moon dust most.
+
+| # | Feedback | What we do | Status |
+|---|----------|-----------|--------|
+| A1 | Radiation limits a stay on the Moon to about one year | Fun fact from Sam, and on the dose bar's info sheet. Checked: China's Chang'e 4 lander measured about 1.4 mSv a day on the surface, so a year is about 500 mSv; NASA's career limit is 600 mSv | Done |
+| A2 | Radiation is central for a lunar base | It already drives the game (real storms, shield, shelter, dose). New: spacewalks happen outside the shield, so in a storm they cost dose | Done |
+| A3 | Moon dust is a main danger: it gets everywhere and harms the lungs | Cleaning the solar panels is now a spacewalk. Dust carried back inside can clog the air filter a day later, and Sam says why. New upgrade "Suitports" keeps the dust outside. Facts: "lunar hay fever" (Apollo 17), dust wore through boot layers | Done |
+| A4 | Apollo suits: oxygen tanks, water for drinking and cooling, about 30 minutes of emergency oxygen | Tap Sam for spacesuit facts; the spacewalk panel names what the suit carries; Sam's chatter tells the Apollo versions | Done |
+
 ## Mentors (14 Nov 2026)
 
 | # | Feedback | What we do | Status |
@@ -62,7 +73,7 @@ Claude Code (SI) playing the game and reviewing it.
 - Result: "Perfect mission", 3 stars, 132 science (goal 120), crew dose 9/100, 68% radiation blocked. No console errors.
 
 #### What works well
-- **The first minute.** You land straight in the base. Sam talks, and the first leak holds the clock ("Clock waits for you") until it is fixed. This matches the "First 60 seconds" rule in `Guide_Gamedesign_Attention.md`.
+- **The first minute.** You land straight in the base. Sam talks, and the first leak holds the clock ("Clock waits for you") until it is fixed. This matches the "first 60 seconds" finding in `GAME_DESIGN.md` ("Designing for kids aged 7–12").
 - **Costs before the tap.** Shield Off/Low/Mid/Max shows "−1.5 ⚡/day" and so on. This is the core requirement of the challenge.
 - **Real data feels real.** There are badges ("Real solar flare", "Real particle storm"), a radiation chip ("9.1× normal") and a data button. The end screen compares the same day: "Near the Moon 42×, On Mars 2.1×". Strong for the jury.
 - **"Words you learned"** turns 8 science words into trophies. The idea is great.

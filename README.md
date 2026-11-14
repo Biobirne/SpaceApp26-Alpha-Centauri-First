@@ -11,10 +11,10 @@ A browser game for kids aged 7–12. You run a small base on the Moon for 30 day
 ## What's in the game
 - **Six real storms (2017–2025)** as levels, unlocked one after the other. Easy, Normal or Hard, each explained on the start screen.
 - **Three bars:** power, air and the crew's radiation dose. Science points are the score.
-- **Choices with a cost:** the shield (a magnet shield, labelled as test tech), the storm shelter, repairs, upgrades, fast-forward.
+- **Choices with a cost:** the shield (a magnet shield, labelled as test tech), the storm shelter, repairs, spacewalks (no shield outside, and Moon dust comes back in), upgrades, fast-forward.
 - **Call Earth:** Mission Control gives one tip with the reason behind it, after a real 2.6 s radio round trip.
 - **Sam, the crewmate:** guided first steps, the story, lessons after mistakes, and read-aloud with the device's voice.
-- **Learn more on tap:** every building, every bar, a "How it works" sheet, and a panel with the real NASA numbers.
+- **Learn more on tap:** every building, every bar, Sam (spacesuit facts from Apollo), a "How it works" sheet, and a panel with the real NASA numbers.
 - **Rewards:** stars, ranks and badges. Sound effects are synthesized in the browser.
 
 Design, decisions and build status: [GAME_DESIGN.md](GAME_DESIGN.md). Feedback and what we did with it: [FEEDBACK.md](FEEDBACK.md).
@@ -56,7 +56,6 @@ npm test
 | [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
 | [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |
 | [SI_USAGE.md](SI_USAGE.md), [SI_DISCLOSURE.md](SI_DISCLOSURE.md), [si-manifest.json](si-manifest.json) | Where SI tools (Super Intelligence, the Space Apps term) were used, and how it is labelled |
-| `Guide_Gamedesign_Attention.md` | Background research on game design for kids (German, gathered with Gemini) |
 
 ## License
 MIT, see [LICENSE](LICENSE). The NASA data stays NASA's; see [CREDITS.md](CREDITS.md).

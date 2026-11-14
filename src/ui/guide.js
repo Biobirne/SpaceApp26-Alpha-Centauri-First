@@ -1,5 +1,5 @@
 // SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
-// Guided first steps (scaffolding and fading, see Guide_Gamedesign_Attention.md 3.2 and 3.3).
+// Guided first steps (scaffolding and fading, see GAME_DESIGN.md, "Designing for kids").
 // One new thing at a time: the crewmate says one short line and the matching control glows.
 // Each hint shows once. A kid who already did the thing never gets the hint ("don't teach what
 // they already know"). Hints can be switched back on in the pause menu (help on demand).

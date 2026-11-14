@@ -37,7 +37,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     <div class="stage">
       <div class="tasks" aria-label="Repairs"></div>
       <div class="crew" aria-live="polite">
-        <div class="av-wrap"></div>
+        <button type="button" class="av-wrap" aria-label="Ask ${CREWMATE_NAME} about the spacesuit"></button>
         <button type="button" class="bubble"><span class="who">${CREWMATE_NAME}</span><span class="say"></span><span class="word" hidden>${icon('book')}<span>New word: <b></b><br><span class="w-text"></span></span></span><span class="more"></span></button>
         ${canSpeak ? `<button type="button" class="speak" aria-label="Read aloud">${icon('speak')}</button>` : ''}
       </div>
@@ -283,9 +283,12 @@ function createCrew(node) {
   }
 
   bubble.addEventListener('click', next);
+  avWrap.addEventListener('click', () => api.onAvatar?.());
 
   const api = {
     now: () => null,
+    /** Called when the player taps the crewmate (fun facts about the spacesuit). */
+    onAvatar: null,
     /** Called with the text of every line that appears (read-aloud). */
     onLine: null,
     /** The line on screen right now. */
