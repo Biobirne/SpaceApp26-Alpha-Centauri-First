@@ -64,6 +64,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
   let spotEl = null;
   let stopped = false;
   let lastUpgrade = null;
+  let call = null; // set while the kid's first call to Earth is open
 
   root.classList.add('intro');
   const card = document.createElement('section');
@@ -365,20 +366,21 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
     });
 
     add('call', {
+      doneOn: 'call', // the step ends when the call sheet is closed again (see update)
       enter: () => {
         show('call');
         spotlight('.callbtn');
         render({
           title: 'Stuck? Call Earth',
-          text: ['Mission Control tells you the most important thing to do, and why.', 'The radio signal needs 1.3 seconds to reach Earth.'],
-          button: { label: 'Got it', go: next },
+          text: ['Mission Control tells you the most important thing to do, and why.', 'Try it once now.'],
+          todo: 'Tap Call Earth at the bottom.',
         });
       },
     });
 
     add('done', {
       enter: () => render({
-        kind: 'done', title: 'Training complete!',
+        kind: 'done', praise: 'You called Earth. They always tell you why.', title: 'Training complete!',
         text: ['You built the base and fixed every problem once.', 'Now a real solar storm is waiting, measured by NASA spacecraft.'],
         button: { label: 'Choose a mission', go: () => onDone({ skipped: false }) },
       }),
@@ -442,11 +444,18 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
     },
 
     onAction(name) {
-      if (steps[idx]?.doneOn === name) next();
+      if (steps[idx]?.doneOn !== name) return;
+      // A call opens a sheet with the answer. The lesson is over when the kid has read it and closed it.
+      if (name === 'call') call = { seen: false, frames: 0 };
+      else next();
     },
 
     update() {
       applySpot(); // repair buttons are re-rendered, so the glow is re-applied
+      if (!call) return;
+      const open = Boolean(document.querySelector('.call-sheet'));
+      if (open) call.seen = true;
+      else if (call.seen || ++call.frames > 60) { call = null; next(); }
     },
 
     /** Room the coach card needs inside the stage: on top on phones, at the bottom on wide screens. */
