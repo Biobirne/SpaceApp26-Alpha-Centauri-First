@@ -44,23 +44,29 @@ export function loopHTML(state) {
       ${node('plants', 'plant', l.plants)}
       ${node('algae', 'science', l.algae)}
     </div>
-    ${l.leak ? `<p class="ls-leak">${icon('drop')}<span><b>Leak in the ${esc(l.leak.toLowerCase())}!</b> ${esc(LIFE_LOOP.leak)}</span></p>` : ''}
+    ${l.leak ? `<button type="button" class="ls-leak" data-key="leak">${icon('drop')}<span><b>Leak in the ${esc(l.leak.toLowerCase())}!</b> ${esc(LIFE_LOOP.leak)}</span></button>` : ''}
     <p class="ls-detail" aria-live="polite">Tap a step to learn what it does.</p>
   </div>`;
 }
 
-/** Tap a step: its sentence appears below the loop. */
-export function wireLoop(root) {
+/**
+ * Tap a step: its sentence appears below the loop. If that step is broken (`fixFor(key)` returns a job),
+ * a repair button appears with it, so the kid can fix it right there (`onFix(roomId)`).
+ */
+export function wireLoop(root, fixFor = () => null, onFix = () => {}) {
   const detail = root.querySelector('.ls-detail');
-  root.querySelectorAll('.ls-node').forEach((b) => b.addEventListener('click', () => {
+  root.querySelectorAll('.ls-node, .ls-leak').forEach((b) => b.addEventListener('click', () => {
     root.querySelectorAll('.ls-node.sel').forEach((x) => x.classList.remove('sel'));
     b.classList.add('sel');
-    const e = LIFE_LOOP[b.dataset.key];
-    detail.innerHTML = `<b>${esc(e.name)}:</b> ${esc(e.text)}`;
+    const key = b.dataset.key;
+    const e = key === 'leak' ? { name: 'Leak', text: LIFE_LOOP.leak } : LIFE_LOOP[key];
+    const fix = fixFor(key);
+    detail.innerHTML = `<b>${esc(e.name)}:</b> ${esc(e.text)}${fix
+      ? `<button type="button" class="btn go fix ls-fix" data-room="${fix.roomId}">${icon('wrench')}${esc(fix.label)}</button>` : ''}`;
+    detail.querySelector('.ls-fix')?.addEventListener('click', () => onFix(fix.roomId));
   }));
 }
 
-/** The lamp switch in the greenhouse sheet: what it gives and what it costs, before the tap. */
 /**
  * The plant lamp switch at the top of the greenhouse sheet: the one thing the kid can change here,
  * so it comes first, and it looks like the switches in the pause menu. It flips in place.

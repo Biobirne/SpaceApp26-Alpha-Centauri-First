@@ -34,6 +34,11 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~23:00)
+- With an air problem the Air bar lights up and says "Clogged" in red. Tapping it (what you'd do by instinct) only opens the explanation. Tapping the broken part there only explains it too. There is no way to repair it from there.
+
+**Status: done** (branch `fix/repair-from-sheets`): the bar sheets now put the fix first. Air shows "Swap the air filter", "Patch the leak in the …" or "Rebuild the greenhouse" as a big green button at the top; Power shows "Clean the solar panels"; Crew dose shows "Build the storm fort" before a storm. In the life support loop, tapping a broken step (the clogged filter, a leak) shows its sentence and a repair button right under it. Each button closes the sheet and opens the repair. No button when nothing is broken.
+
 ### Florian (14 Nov, ~22:30)
 - The light in the greenhouse info sheet looks a bit random. Remove it or place it better.
 

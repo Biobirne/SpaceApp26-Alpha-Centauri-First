@@ -7,7 +7,8 @@ import { icon } from './icons.js';
 import { openSheet, esc } from './overlays.js';
 import { ROOMS, ROOM_INFO, CREWMATE_NAME } from '../rules/content.js';
 import { SHIELD_INFO } from '../rules/content.js';
-import { shieldOptions, noteShieldSeen } from '../rules/mission.js';
+import { shieldOptions, noteShieldSeen, repairFor } from '../rules/mission.js';
+import { ROOM_IDS } from '../rules/config.js';
 import { powerBreakdown, airBreakdown, doseNow, fmtTimes } from '../rules/mission.js';
 import { loopHTML, wireLoop, lampHTML } from './loop.js';
 import { powerMeaning, airMeaning, doseMeaning } from './numbers.js';
@@ -96,19 +97,62 @@ function shieldHTML(state) {
     <div class="sh-sources"><b>Sources</b><ul>${SHIELD_INFO.sources.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
 }
 
+/** What a repair is called on its button: the job, in the kid's words. */
+export function jobName(job) {
+  const room = ROOMS[job.roomId].name.toLowerCase();
+  return {
+    leak: `Patch the leak in the ${room}`,
+    filter: 'Swap the air filter',
+    dust: 'Clean the solar panels',
+    fort: 'Build the storm fort',
+    rebuild: `Rebuild the ${room}`,
+  }[job.kind] || `Fix the ${room}`;
+}
+
+/** Which open repairs belong to which bar: the problems that make this number go down. */
+const FIXES_FOR = {
+  air: (j) => j.kind === 'leak' || j.kind === 'filter' || (j.kind === 'rebuild' && j.roomId === 'greenhouse'),
+  power: (j) => j.kind === 'dust',
+  dose: (j) => j.kind === 'fort',
+};
+
+function openJobs(state, kind) {
+  const fits = FIXES_FOR[kind];
+  return fits ? ROOM_IDS.map((id) => repairFor(state, id)).filter((j) => j && fits(j)) : [];
+}
+
+/** The fix comes first: a kid who tapped a red bar wants to repair it, the explanation can wait. */
+function fixesHTML(jobs) {
+  if (!jobs.length) return '';
+  return `<div class="fixes">${jobs.map((j) => `
+    <button type="button" class="btn go fix" data-room="${j.roomId}">${icon('wrench')}<span>${esc(jobName(j))}<small class="sub">${j.kind === 'rebuild' ? `Costs ${j.cost} science points` : j.kind === 'dust' ? 'A short spacewalk' : 'Opens the repair'}</small></span></button>`).join('')}
+  </div>`;
+}
+
+/** A fix button in a sheet: close the sheet, then open the repair. */
+function wireFixes(sheet) {
+  sheet.el.querySelectorAll('.fix[data-room]').forEach((b) => b.addEventListener('click', () => {
+    sheet.close();
+    infoActions.repair?.(b.dataset.room);
+  }));
+}
+
 export function showMeterInfo(kind, state) {
   let html;
+  const jobs = openJobs(state, kind);
   if (kind === 'shield') {
     html = shieldHTML(state);
     noteShieldSeen(state);
   } else if (kind === 'power') {
     html = `<h2>${icon('bolt')} Power</h2>
+      ${fixesHTML(jobs)}
       <p>The battery stores electricity from the solar panels. Everything in the base needs some.</p>
       ${powerMeaning(state)}
       <h3>Where it goes, every day</h3>${table(powerBreakdown(state), '⚡')}
       <div class="fact">${icon('info')}<span>A night on the Moon lasts about 2 weeks. Real bases need big batteries, or a small nuclear power unit.</span></div>`;
   } else if (kind === 'air') {
     html = `<h2>${icon('air')} Air</h2>
+      ${fixesHTML(jobs)}
       ${airMeaning(state)}
       ${loopHTML(state)}
       <h3>Where it goes, every day</h3>${table(airBreakdown(state), '%')}
@@ -117,6 +161,7 @@ export function showMeterInfo(kind, state) {
   } else {
     const d = doseNow(state);
     html = `<h2>${icon('radiation')} Crew dose</h2>
+      ${fixesHTML(jobs)}
       <p>All the radiation your crew has taken on this mission. If it reaches ${state.cfg.dose.limit}, ${esc(CREWMATE_NAME)} sends everyone into the shelter.</p>
       ${doseMeaning(state)}
       <h3>Right now</h3>
@@ -130,9 +175,21 @@ export function showMeterInfo(kind, state) {
   html += `<div class="row"><button type="button" class="btn primary ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'info-sheet' });
   sheet.el.querySelector('.ok').addEventListener('click', () => sheet.close());
+  wireFixes(sheet);
   const ls = sheet.el.querySelector('.ls');
-  if (ls) wireLoop(ls);
+  // A broken step in the loop offers its repair right where the kid tapped it.
+  if (ls) wireLoop(ls, (key) => fixForStep(state, key), (roomId) => { sheet.close(); infoActions.repair?.(roomId); });
   return sheet;
+}
+
+/** The repair behind a broken loop step, if there is one. */
+function fixForStep(state, key) {
+  let job = null;
+  if (key === 'filter') job = repairFor(state, 'hab');
+  else if (key === 'plants') job = repairFor(state, 'greenhouse');
+  else if (key === 'leak') job = ROOM_IDS.map((id) => repairFor(state, id)).find((j) => j?.kind === 'leak');
+  if (key === 'filter' && job?.kind !== 'filter') job = null;
+  return job ? { roomId: job.roomId, label: jobName(job) } : null;
 }
 
 /** Story at the start of a mission (mentor feedback: storytelling). */
