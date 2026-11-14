@@ -8,7 +8,7 @@ import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
-import { setGrowLights, noteLoopSeen } from './rules/mission.js';
+import { setGrowLights, noteLoopSeen, isCalm } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
 import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
 import { createHud } from './ui/hud.js';
@@ -267,11 +267,14 @@ function loop(now) {
   const s = r.state;
   // The guide can hold the clock (not the controls) while a kid learns something new.
   const blocked = r.blockers.size > 0 || r.speed === 'pause' || r.guide.hold || s.pendingCard || s.ended;
-  if (!blocked) tick(s, dtSec / s.cfg.secondsPerDay[r.speed]);
+  // Calm days fly by, but only once the guided first steps are over.
+  r.calm = !blocked && !r.guide.busy && isCalm(s);
+  const secPerDay = (r.calm ? s.cfg.calmSecondsPerDay : s.cfg.secondsPerDay)[r.speed];
+  if (!blocked) tick(s, dtSec / secPerDay);
   drain();
   if (run !== r) return; // the mission ended inside drain()
   r.guide.update(s);
-  r.hud.update(s, r.blockers.has('pause') ? 'pause' : r.guide.hold ? 'wait' : r.speed);
+  r.hud.update(s, r.blockers.has('pause') ? 'pause' : r.guide.hold ? 'wait' : r.calm ? `calm-${r.speed}` : r.speed);
   if (scene) scene.view = viewOf(s);
   r.raf = requestAnimationFrame(loop);
 }

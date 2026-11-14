@@ -66,6 +66,8 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     lessons: [],
   };
   updateSky(state, true);
+  const storm = firstStormDay(state);
+  state.forecastT = storm != null && storm - state.cfg.forecastDaysAhead >= 1 ? storm - state.cfg.forecastDaysAhead : null;
   emit(state, 'crew', {
     mood: 'happy',
     text: `Hi Commander, I'm ${CREWMATE_NAME}! Real NASA data decides our space weather.`,
@@ -432,6 +434,7 @@ function step(state, h) {
   const dayIdx = currentDayIndex(state);
   if (dayIdx !== state.dayIndex) onNewDay(state, dayIdx);
   updateSky(state, false);
+  checkForecast(state);
   processDataEvents(state);
   if (state.pendingCard) return;
   while (state.script.length && state.script[0].t <= state.t) {
@@ -561,6 +564,39 @@ function updateSky(state, initial) {
   state.earthLit = earthLitFraction(ms);
 }
 
+/** The first day the storm gets announced (same rule as onNewDay), or null. */
+function firstStormDay(state) {
+  const cfg = state.cfg.radiation;
+  let prev = moonTimesNormal(state.timeline, 0);
+  for (let d = 1; d < state.cfg.missionDays; d++) {
+    const rad = moonTimesNormal(state.timeline, d);
+    if (rad >= cfg.announceAtLeast && rad >= prev * 1.5) return d;
+    prev = rad;
+  }
+  return null;
+}
+
+/** Nothing needs the player right now, so the clock may run faster (see calmSecondsPerDay). */
+export function isCalm(state) {
+  if (state.pendingCard || state.stormActive || state.stormSoon || state.powerEmergency) return false;
+  if (radiationNow(state) >= 3 || state.dust || state.filter) return false;
+  if (ROOM_IDS.some((id) => state.rooms[id].status === 'leak')) return false;
+  if (state.power / state.capacity * 100 < state.cfg.power.warnBelow || state.air < state.cfg.air.warnBelow) return false;
+  return true;
+}
+
+/** Space weather forecasters watch the Sun: pass on a warning before the first storm. */
+function checkForecast(state) {
+  if (state.forecastT == null || state.forecastGiven || state.t < state.forecastT) return;
+  state.forecastGiven = true;
+  state.stormSoon = true;
+  emit(state, 'forecast', {});
+  emit(state, 'crew', {
+    mood: 'alert',
+    text: 'Forecast from Earth: the Sun has a big, busy sunspot. A storm may come soon. Charge the battery!',
+  });
+}
+
 function onNewDay(state, dayIdx) {
   state.dayIndex = dayIdx;
   const rad = moonTimesNormal(state.timeline, dayIdx);
@@ -571,6 +607,7 @@ function onNewDay(state, dayIdx) {
   if (rad >= cfg.announceAtLeast && rad >= yesterday * 1.5) {
     learn(state, 'radiation');
     state.stormActive = true;
+    state.stormSoon = false;
     emit(state, 'crew', {
       mood: 'alert',
       text: `Real NASA data: radiation near the Moon is ${fmtTimes(rad)} normal today!`,

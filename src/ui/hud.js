@@ -118,10 +118,13 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
       refs.skyText.textContent = !inDays ? (state.daylight ? 'Sun is up' : 'No sun') : state.daylight ? `Sunset in ${d}` : `Sunrise in ${d}`;
     }
 
-    for (const b of refs.speed) b.setAttribute('aria-pressed', String(b.dataset.speed === speed));
+    for (const b of refs.speed) b.setAttribute('aria-pressed', String(b.dataset.speed === speed.replace('calm-', '')));
     // Say openly how fast time runs (GAME_DESIGN.md: never pretend it is real time).
     set('speedNote', refs.speedNote, speed, (n, v) => {
-      n.textContent = v === 'pause' ? 'Paused' : v === 'wait' ? 'Clock waits for you' : `1 day = ${cfg.secondsPerDay[v]} s`;
+      if (v === 'pause') n.textContent = 'Paused';
+      else if (v === 'wait') n.textContent = 'Clock waits for you';
+      else if (v.startsWith('calm-')) n.textContent = `Calm days: 1 day = ${cfg.calmSecondsPerDay[v.slice(5)]} s`;
+      else n.textContent = `1 day = ${cfg.secondsPerDay[v]} s`;
     });
 
     // radiation chip
