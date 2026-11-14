@@ -176,6 +176,10 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Fix: every sheet ignores clicks for 0.45 s after it opens.
 - Still there after that fix (18:35): a tap even hit the leak panel and jumped to the patch. Second fix: a sheet counts a click only when the finger went down on the sheet first. Also possible: the phone still ran the old files, because GitHub Pages lets browsers keep them for 10 minutes.
 
+### Florian (14 Nov, ~18:40)
+- On a phone held sideways the game looks bad: in the intro, Sam's card becomes a tall narrow column and its button is off the screen; the mini-games need scrolling.
+- Decision: no landscape layout for phones. A phone on its side gets a note to hold it upright, with "Play sideways anyway" in case a device reports its shape wrongly. Tablets and computers keep the wide layout.
+
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.

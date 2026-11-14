@@ -53,3 +53,4 @@ One line per task: date, SI tool, what it did. The team reviewed and merged ever
 | 2026-11-14 | Claude Code (Claude Opus 5.5) | Greenhouse sheet: the plant lamp control became an On/Off switch at the top that flips in place, without a pop-up over the sheet; playtested on phone and desktop. |
 | 2026-11-14 | Claude Code (Claude Fable 5.2) | Double taps on phones, second fix: a sheet counts a click only after its own press (pointerdown), so the late click of the opening touch is ignored at any delay. |
 | 2026-11-14 | Claude Code (Claude Opus 5.5) | Repair from the bar sheets: fix buttons at the top of the Air, Power and Crew dose sheets and on broken steps of the life support loop; playtested filter, leak, dust and the loop step on phone. |
+| 2026-11-14 | Claude Code (Claude Fable 5.2) | Note for phones held sideways ("Please hold your phone upright", with "Play sideways anyway"); a running mission pauses while it shows. Tablets and computers are not affected. |

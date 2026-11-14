@@ -24,6 +24,7 @@ import { voice } from './audio/voice.js';
 import { createGuide } from './ui/guide.js';
 import { createIntro } from './ui/intro.js';
 import { createMoonScene } from './scene/MoonScene.js';
+import { watchPortrait } from './ui/portrait.js';
 
 const params = new URLSearchParams(location.search);
 const UNLOCK_ALL = params.get('all') === '1';
@@ -621,6 +622,9 @@ addEventListener('keydown', (e) => {
   else if (k === 'c') actions.call();
   else if (k === 'f') actions.speed(run.speed === 'fast' ? 'normal' : 'fast');
 });
+
+// A phone on its side gets a note to hold it upright; a running mission pauses meanwhile.
+watchPortrait({ onShow: () => { if (run && !run.blockers.size && !run.state.ended) actions.pause(); } });
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) voice.stop();

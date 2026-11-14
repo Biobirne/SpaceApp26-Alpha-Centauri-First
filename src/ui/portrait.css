@@ -1,0 +1,22 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* The note for a phone held sideways (portrait.js). It covers the game until the phone is upright again. */
+
+.portrait-note {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 16px calc(env(safe-area-inset-right, 0px) + 24px) 16px calc(env(safe-area-inset-left, 0px) + 24px);
+  background: #070b18; color: #f3f0e8; text-align: center;
+  font-family: var(--font, system-ui, sans-serif);
+}
+.portrait-note h2 { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 700; }
+.portrait-note p { margin: 0; font-size: 17px; color: #b9c0d8; }
+/* A small upright phone, as a picture of how to hold it. */
+.pn-phone {
+  width: 44px; height: 76px; border-radius: 9px; border: 3px solid #5edcf0; position: relative;
+}
+.pn-phone::after { content: ''; position: absolute; left: 50%; bottom: 5px; width: 12px; height: 3px; margin-left: -6px; border-radius: 2px; background: #5edcf0; }
+.pn-anyway {
+  min-height: 48px; margin-top: 6px; padding: 0 18px; border: 0; border-radius: 12px; cursor: pointer;
+  font: 600 16px/1 var(--font, system-ui, sans-serif); background: transparent; color: #f3f0e8; box-shadow: inset 0 0 0 2px #3a4775;
+}
+.pn-anyway:focus-visible { outline: 3px solid #5edcf0; outline-offset: 3px; }
