@@ -55,8 +55,9 @@ export function createMoonScene() {
       this.domeG = this.add.graphics();
       this.fxG = this.add.graphics();
       this.badgeLayer = this.add.container(0, 0);
+      this.radLabel = this.add.text(0, 0, 'Radiation from the Sun', {}).setOrigin(0, 0).setVisible(false);
+      this.solarLabel = this.add.text(0, 0, '', {}).setOrigin(0.5, 1).setVisible(false);
       this.labelLayer = this.add.container(0, 0);
-      this.flash = this.add.rectangle(0, 0, 10, 10, 0xfff2c4, 1).setOrigin(0).setAlpha(0);
       this.zones = {};
       // A tap counts only if it started and ended on the same spot, and not on an HTML control.
       // Phaser hears every press on the page, so without this a tap on a button above the base
@@ -131,12 +132,14 @@ export function createMoonScene() {
         // Earth and the Sun live in the whole stage, so the base may fill its own part:
         // pick one row or two rows, whichever draws the buildings bigger, and centre it.
         // The bottom strip stays free for the SI watermark.
-        const bh = bs.h - 20 * this.dpr;
+        // The top strip stays free for the labels above the base (solar output, radiation).
+        const labels = 26 * this.dpr;
+        const bh = bs.h - 20 * this.dpr - labels;
         const rowU = Math.min(bs.w / 108, bh / 22);
         const tallU = Math.min(bs.w / 66, bh / 42);
         tall = tallU > rowU * 1.1;
         unit = tall ? tallU : rowU;
-        this.groundY = bs.y + bh / 2 + (tall ? -6.5 : 4.5) * unit;
+        this.groundY = bs.y + labels + bh / 2 + (tall ? -6.5 : 4.5) * unit;
       } else {
         tall = bs.w / bs.h < 1.15;
         // Ground line: the base stands on it. Leave room above for Earth and the Sun.
@@ -169,7 +172,22 @@ export function createMoonScene() {
       this.earth = { x: s.x + s.w * (tall ? 0.78 : 0.83), y: s.y + Math.max(unit * 10, s.h * 0.17), r: Math.max(14 * this.dpr, unit * (tall ? 6.5 : 5.2)) };
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
-      this.flash.setSize(W, H);
+      // Names the purple particles, so nobody takes them for rain. Shown while radiation is raised.
+      const rfs = Math.round(15 * this.dpr);
+      this.radLabel.setStyle({
+        fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${rfs}px`, fontStyle: '600', color: '#e3c8ff',
+        backgroundColor: 'rgba(60,28,104,0.92)',
+      }).setPadding(8 * this.dpr, 4 * this.dpr);
+      // Phones: Sam's bubble covers the top of the stage, so the label sits just above the base, on the right
+      // (the solar label is on the left). Wide screens: top centre, between the Sun and Earth.
+      if (this.tight) this.radLabel.setOrigin(1, 1).setPosition(Math.min(maxX + unit * 3, s.x + s.w - 4 * this.dpr), Math.max(bs.y + this.radLabel.height, minY - unit * 1.2));
+      else this.radLabel.setOrigin(0.5, 0).setPosition(s.x + s.w * 0.47, s.y + 6 * this.dpr);
+      // How much power the panels make right now, always visible above them.
+      const sb = this.boxes.solar;
+      this.solarLabel.setStyle({
+        fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${Math.round(13 * this.dpr)}px`, fontStyle: '700', color: '#1d1503',
+        backgroundColor: '#ffbf3c',
+      }).setPadding(6 * this.dpr, 3 * this.dpr).setPosition(sb.x + sb.w / 2, sb.y - unit * (this.tight ? 0.4 : 1.2));
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
@@ -191,7 +209,8 @@ export function createMoonScene() {
       this.labelLayer.removeAll(true);
       this.badgeLayer.removeAll(true);
       this.badges = {};
-      const fs = Math.round(Math.max(12 * this.dpr, Math.min(16 * this.dpr, this.u * 2.6)));
+      this.roomLabels = {};
+      const fs = Math.round(Math.max((this.tall ? 12 : 10) * this.dpr, Math.min(16 * this.dpr, this.u * 2.6)));
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const t = this.add.text(b.x + b.w / 2, b.y + b.h + this.u * 1.2, ROOMS[id].short, {
@@ -202,6 +221,7 @@ export function createMoonScene() {
         const maxW = b.w + this.u * 2.4;
         if (t.width > maxW) t.setScale(maxW / t.width);
         this.labelLayer.add(t);
+        this.roomLabels[id] = t;
         const r = Math.max(13 * this.dpr, this.u * 2.6);
         const badge = this.add.container(b.x + b.w * 0.82, b.y + b.h * 0.12);
         const disc = this.add.circle(0, 0, r, C.alert).setStrokeStyle(r * 0.18, 0x2b0a00);
@@ -355,12 +375,31 @@ export function createMoonScene() {
           const a = this.boxes[order[i - 1]];
           const b = this.boxes[order[i]];
           if (order[i - 1] === 'solar') continue;
+          if (!this.isBuilt(v, order[i - 1]) || !this.isBuilt(v, order[i])) continue;
           g.fillRect(a.x + a.w - u, this.groundY - u * 4, b.x - a.x - a.w + u * 2, u * 2.6);
         }
       }
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const status = v?.rooms?.[id] ?? 'ok';
+        if (!this.isBuilt(v, id)) {
+          // The free spot for the next building: a dashed outline on the ground.
+          if (v.buildNext === id) {
+            g.lineStyle(Math.max(2, u * 0.45), 0xffbf3c, 0.95);
+            const step = u * 2.2;
+            for (let x = b.x; x < b.x + b.w - step * 0.5; x += step) {
+              g.lineBetween(x, b.y, Math.min(b.x + b.w, x + step * 0.55), b.y);
+              g.lineBetween(x, b.y + b.h, Math.min(b.x + b.w, x + step * 0.55), b.y + b.h);
+            }
+            for (let y = b.y; y < b.y + b.h - step * 0.5; y += step) {
+              g.lineBetween(b.x, y, b.x, Math.min(b.y + b.h, y + step * 0.55));
+              g.lineBetween(b.x + b.w, y, b.x + b.w, Math.min(b.y + b.h, y + step * 0.55));
+            }
+            g.fillStyle(0xffbf3c, 0.12);
+            g.fillRect(b.x, b.y, b.w, b.h);
+          }
+          continue;
+        }
         // shadow
         g.fillStyle(0x000000, 0.22);
         g.fillEllipse(b.x + b.w / 2, b.y + b.h, b.w * 1.05, u * 2.2);
@@ -391,7 +430,7 @@ export function createMoonScene() {
       const v = this.view;
       if (!v || !this.boxes) return;
       const dt = Math.min(0.05, deltaMs / 1000);
-      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}`;
+      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}|${JSON.stringify(v.built || 0)}|${v.buildNext || ''}`;
       if (sig !== this.last.sig) {
         if (this.last.daylight !== v.daylight) { this.drawSky(); this.drawGround(!v.daylight); this.drawSun(v.daylight); }
         this.drawBase(v);
@@ -405,13 +444,14 @@ export function createMoonScene() {
       if (!this.last.starsAt || time - this.last.starsAt > 120) { this.drawStars(time); this.last.starsAt = time; }
 
       for (const id of ROOM_IDS) {
-        const kind = v.repairs?.[id];
+        const kind = v.buildNext === id ? 'build' : this.isBuilt(v, id) ? v.repairs?.[id] : null;
         const badge = this.badges[id];
         badge.setVisible(Boolean(kind));
         if (kind) {
           const rebuild = kind === 'rebuild';
-          badge.disc.setFillStyle(rebuild ? 0x2c3863 : C.alert);
-          badge.mark.setText(rebuild ? '+' : '!').setColor(rebuild ? '#f3f0e8' : '#2b0a00');
+          const build = kind === 'build' || kind === 'fort'; // something to build, not something broken
+          badge.disc.setFillStyle(build ? 0xffbf3c : rebuild ? 0x2c3863 : C.alert);
+          badge.mark.setText(rebuild || build ? '+' : '!').setColor(rebuild ? '#f3f0e8' : '#2b0a00');
         }
       }
 
@@ -420,6 +460,23 @@ export function createMoonScene() {
       this.shieldAlpha += (target - this.shieldAlpha) * Math.min(1, dt * 4);
       this.drawDome();
       this.updateParticles(dt, v);
+      this.radLabel.setVisible((v.radiation || 1) >= 2);
+      const solarText = this.isBuilt(v, 'solar') ? v.solarText : '';
+      if (solarText !== this.last.solarText) {
+        this.solarLabel.setText(solarText || '').setVisible(Boolean(solarText));
+        this.solarLabel.setBackgroundColor(v.solarLow ? '#c9c5bb' : '#ffbf3c');
+        // Keep the whole label on screen, even when the panels stand at the edge.
+        const sb = this.boxes.solar;
+        const half = this.solarLabel.width / 2 + 4 * this.dpr;
+        this.solarLabel.setX(Math.min(Math.max(sb.x + sb.w / 2, this.slot.x + half), this.slot.x + this.slot.w - half));
+        this.last.solarText = solarText;
+      }
+      for (const id of ROOM_IDS) this.roomLabels[id].setVisible(this.isBuilt(v, id));
+    }
+
+    /** During the intro, buildings appear one by one (`view.built`). In a mission, all are built. */
+    isBuilt(v, id) {
+      return !v?.built || Boolean(v.built[id]);
     }
 
     drawDome() {
@@ -448,14 +505,13 @@ export function createMoonScene() {
       if (this.parts.length > want) this.parts.length = want;
       const g = this.fxG.clear();
       const d = this.dome;
-      const speed = H * (0.55 + Math.min(0.6, Math.log10(times) * 0.15));
-      const len = 12 * this.dpr;
-      const dir = { x: 0.42, y: 0.91 };
-      g.lineStyle(Math.max(1.5, this.dpr * 1.6), C.particle, 0.85);
+      const speed = H * (0.32 + Math.min(0.4, Math.log10(times) * 0.1));
+      const len = 16 * this.dpr;
+      const head = Math.max(1.6, this.dpr * 1.7);
       for (let i = 0; i < this.parts.length; i++) {
         const p = this.parts[i];
-        p.x += dir.x * speed * dt;
-        p.y += dir.y * speed * dt;
+        p.x += p.dx * speed * p.v * dt;
+        p.y += p.dy * speed * p.v * dt;
         if (!p.checked && v.blockShield > 0) {
           const nx = (p.x - d.cx) / d.rx;
           const ny = (p.y - d.cy) / d.ry;
@@ -472,7 +528,16 @@ export function createMoonScene() {
           this.parts[i] = this.spawn(false);
           continue;
         }
-        g.lineBetween(p.x, p.y, p.x - dir.x * len, p.y - dir.y * len);
+        // Particles from the Sun: a bright dot with a short fading tail, not a rain streak.
+        const hs = head * p.s;
+        g.lineStyle(hs * 0.9, C.particle, 0.4);
+        g.lineBetween(p.x, p.y, p.x - p.dx * len * p.s, p.y - p.dy * len * p.s);
+        g.fillStyle(C.particle, 0.3);
+        g.fillCircle(p.x, p.y, hs * 2.1);
+        g.fillStyle(C.particle, 1);
+        g.fillCircle(p.x, p.y, hs * 1.2);
+        g.fillStyle(C.spark, 1);
+        g.fillCircle(p.x, p.y, hs * 0.55);
       }
       // sparks where the shield stopped a particle
       for (let i = this.sparks.length - 1; i >= 0; i--) {
@@ -503,26 +568,22 @@ export function createMoonScene() {
     }
 
     spawn(anywhere) {
+      // One steady stream from the Sun's side (upper left), the same by day and by night.
       const W = this.scale.width;
       const H = this.scale.height;
-      // Enter from the top edge (and a bit of the left edge), travelling down-right.
-      const x = anywhere ? Math.random() * W : Math.random() * (W * 1.1) - W * 0.3;
-      const y = anywhere ? Math.random() * this.groundY : -Math.random() * H * 0.2;
-      return { x, y, checked: false };
+      const a = (27 + Math.random() * 8) * Math.PI / 180; // gently down to the right
+      const dx = Math.cos(a), dy = Math.sin(a);
+      let x, y;
+      if (anywhere) { x = Math.random() * W; y = Math.random() * this.groundY; }
+      else if (Math.random() < 0.6) { x = Math.random() * W * 0.9 - W * 0.1; y = -10; } // top edge
+      else { x = -10; y = Math.random() * this.groundY * 0.8; } // left edge
+      return { x, y, dx, dy, v: 0.8 + Math.random() * 0.4, s: 0.7 + Math.random() * 0.6, checked: false };
     }
 
     // ------------------------------------------------------------------ effects
 
-    flare(score) {
-      const big = score >= 400; // X class
-      const peak = this.reduced ? 0.18 : big ? 0.55 : 0.28;
-      this.tweens.killTweensOf(this.flash);
-      this.flash.setAlpha(0);
-      // One soft glow (no strobe): well under 3 flashes per second.
-      this.tweens.add({ targets: this.flash, alpha: peak, duration: this.reduced ? 300 : 160, ease: 'Quad.easeOut', yoyo: true, hold: 120,
-        onComplete: () => this.flash.setAlpha(0) });
-      if (!this.reduced && big) this.cameras.main.shake(260, 0.004);
-    }
+    /** A real flare happened. No visual on purpose: the full-screen flash confused players. The card and Sam explain it. */
+    flare() {}
 
     burst() {
       for (let i = 0; i < (this.reduced ? 6 : 24); i++) this.parts.push(this.spawn(true));

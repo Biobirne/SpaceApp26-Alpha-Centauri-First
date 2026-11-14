@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. -->
+  <!-- Test page: plays one mini-game straight away, without a mission.
+       minigame.html?game=dust            low radiation
+       minigame.html?game=dust&risky=1    high radiation, the kid decides first
+       minigame.html?game=fort            build the storm fort -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Mini-game test</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="assets/fonts/lexend-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="src/ui/styles.css">
+  <style>
+    body { background: #000; }
+    .again { position: fixed; inset: 0; display: grid; place-content: center; gap: 16px; text-align: center; color: #f5f1e8; font-family: var(--font); }
+    .again[hidden] { display: none; }
+    .again button { min-height: 56px; padding: 0 28px; border: 0; border-radius: 14px; background: #ffc94a; color: #1d1b18; font: 700 20px/1 var(--font); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main class="again" hidden>
+    <p class="msg"></p>
+    <button type="button">Play again</button>
+  </main>
+  <script type="module">
+    import { showRepair } from './src/ui/overlays.js';
+
+    const q = new URLSearchParams(location.search);
+    const game = q.get('game') || 'dust';
+    const eva = q.has('risky') ? { rad: 9.1, dose: 4.2, hours: 6 } : { rad: 1, dose: 0.1, hours: 6 };
+    const jobs = {
+      dust: { kind: 'dust', roomId: 'solar', taps: 5, eva },
+      fort: { kind: 'fort', roomId: 'shelter', taps: 5 },
+    };
+    const again = document.querySelector('.again');
+
+    function play() {
+      again.hidden = true;
+      showRepair(jobs[game],
+        () => { again.querySelector('.msg').textContent = 'Done! The game would now continue.'; again.hidden = false; },
+        () => { again.querySelector('.msg').textContent = 'Closed without finishing.'; again.hidden = false; });
+    }
+    again.querySelector('button').addEventListener('click', play);
+    play();
+  </script>
+</body>
+</html>

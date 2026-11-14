@@ -4,8 +4,10 @@
 
 import { icon } from './icons.js';
 import { UPGRADES, ROOMS, CREWMATE_NAME } from '../rules/content.js';
-import { SHIELD_LABELS } from '../rules/config.js';
+import { SHIELD_LABELS, CONFIG } from '../rules/config.js';
 import { currentDayIndex, fmtTimes } from '../rules/mission.js';
+import { mountDust } from './minigames/dust.js';
+import { mountFort } from './minigames/fort.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -79,7 +81,8 @@ function blockText(fx) {
 
 const TASKS = {
   leak: { title: 'Patch the leak', goal: (n) => `Tap the ${n} cracks to seal them.`, icon: 'drop', spot: 'wrench' },
-  dust: { title: 'Clean the solar panels', goal: () => 'Wipe each dusty panel. You can also swipe over them.', icon: 'sun', spot: null },
+  dust: { title: 'Clean the solar panels', icon: 'sun', game: mountDust },
+  fort: { title: 'Build the storm fort', icon: 'shelter', game: mountFort },
   filter: { title: 'Swap the air filter', goal: () => 'Do the steps in order.', icon: 'filter', steps: ['Pull out old filter', 'Put in new filter', 'Lock it'] },
   rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
 };
@@ -103,13 +106,28 @@ function evaPanel(eva) {
 export function showRepair(job, onDone, onCancel) {
   const t = TASKS[job.kind];
   const room = ROOMS[job.roomId];
+  let finished = false;
+  if (t.game) {
+    // Full-screen mini-games with their own rules and styles live in src/ui/minigames/.
+    const sheet = openSheet('<div class="mg-root"></div>', {
+      className: 'game-sheet',
+      onClose: () => { if (!finished) onCancel?.(); },
+    });
+    t.game(sheet.el.querySelector('.mg-root'), {
+      eva: job.eva,
+      dustyFactor: CONFIG.power.dustySolarFactor,
+      reducedMotion: reducedMotion(),
+      onFinish: () => { finished = true; sheet.close(); onDone(); },
+      onWait: () => sheet.close(),
+    });
+    return sheet;
+  }
   const html = `
     <h2>${icon(t.icon)}${esc(t.title)}</h2>
     <p class="tgoal">${esc(room.name)}: ${esc(t.goal(job.taps))}</p>
     ${job.eva ? evaPanel(job.eva) : ''}
     <div class="board" data-kind="${job.kind}" ${job.eva && job.eva.dose >= 2 ? 'hidden' : ''}></div>
     <div class="progress">${'<i></i>'.repeat(job.taps)}</div>`;
-  let finished = false;
   const sheet = openSheet(html, { className: 'task-sheet', onClose: () => { if (!finished) onCancel?.(); } });
   const board = sheet.el.querySelector('.board');
   const bars = [...sheet.el.querySelectorAll('.progress i')];
@@ -133,15 +151,7 @@ export function showRepair(job, onDone, onCancel) {
     b.setAttribute('aria-label', t.steps ? t.steps[i] : `${t.title} ${i + 1} of ${job.taps}`);
     board.appendChild(b);
   });
-  // In a storm, going outside is a real choice: show the dose first and let the kid decide.
-  const go = sheet.el.querySelector('.eva-go');
-  if (go) {
-    go.addEventListener('click', () => {
-      board.hidden = false;
-      sheet.el.querySelector('.eva-choice').remove();
-    });
-    sheet.el.querySelector('.eva-wait').addEventListener('click', () => sheet.close());
-  }
+  wireEva(sheet, board);
   const all = [...board.querySelectorAll('.spot')];
   const markNext = () => { if (ordered) all.forEach((b, i) => b.classList.toggle('next', i === done)); };
   markNext();
@@ -161,23 +171,22 @@ export function showRepair(job, onDone, onCancel) {
     }
   };
   board.addEventListener('click', (e) => hit(e.target.closest('.spot')));
-  // swipe shortcut for wiping panels (tapping still works)
-  let down = false;
-  board.addEventListener('pointerdown', () => { down = true; });
-  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) board.addEventListener(ev, () => { down = false; });
-  board.addEventListener('pointermove', (e) => {
-    if (!down || job.kind !== 'dust') return;
-    hit(document.elementFromPoint(e.clientX, e.clientY)?.closest('.spot'));
-  });
   return sheet;
+}
+
+/** In a storm, going outside is a real choice: show the dose first and let the kid decide. */
+function wireEva(sheet, board) {
+  const go = sheet.el.querySelector('.eva-go');
+  if (!go) return;
+  go.addEventListener('click', () => {
+    board.hidden = false;
+    sheet.el.querySelector('.eva-choice').remove();
+  });
+  sheet.el.querySelector('.eva-wait').addEventListener('click', () => sheet.close());
 }
 
 function layoutSpots(kind, n) {
   if (kind === 'filter') return Array.from({ length: n }, (_, i) => ({ x: 50, y: 20 + i * 30 }));
-  if (kind === 'dust') {
-    const cols = 3;
-    return Array.from({ length: n }, (_, i) => ({ x: 20 + (i % cols) * 30 + (Math.floor(i / cols) ? 15 : 0), y: 32 + Math.floor(i / cols) * 38 }));
-  }
   if (kind === 'rebuild') return Array.from({ length: n }, (_, i) => ({ x: 20 + (i % 3) * 30, y: 30 + Math.floor(i / 3) * 40 }));
   // leak: scattered, but never on top of each other
   const pts = [];

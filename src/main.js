@@ -8,7 +8,7 @@ import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
-import { setGrowLights, noteLoopSeen, isCalm } from './rules/mission.js';
+import { setGrowLights, noteLoopSeen, isCalm, powerBreakdown } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
 import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
 import { showData, scienceMeaning } from './ui/numbers.js';
@@ -22,6 +22,7 @@ import {
 import { createSfx } from './audio/sfx.js';
 import { voice } from './audio/voice.js';
 import { createGuide } from './ui/guide.js';
+import { createIntro } from './ui/intro.js';
 import { createMoonScene } from './scene/MoonScene.js';
 
 const params = new URLSearchParams(location.search);
@@ -117,7 +118,9 @@ async function boot() {
   startPhaser();
 
   const direct = params.get('storm');
-  if (direct && data.docs[direct] && isUnlocked(direct, loadProgress(), UNLOCK_ALL)) startMission(direct);
+  if (params.has('intro')) startTraining(params.get('intro')); // ?intro=1, or ?intro=dust to jump to one lesson
+  else if (direct && data.docs[direct] && isUnlocked(direct, loadProgress(), UNLOCK_ALL)) startMission(direct);
+  else if (!loadProgress().seen.intro) startTraining(); // first visit: build the base and learn each event once
   else showStart();
 }
 
@@ -139,7 +142,11 @@ function startPhaser() {
   });
   game.scene.add('moon', MoonScene, true, { art: data.art, dpr });
   game.events.once('moon-ready', (s) => { scene = s; scene.view = idleView(); syncSlot(); });
-  game.events.on('room-tap', (id) => run && actions.repair(id, true));
+  game.events.on('room-tap', (id) => {
+    if (!run) return;
+    if (run.guide.onRoomTap?.(id)) return; // the intro uses the tap to place a building
+    actions.repair(id, true);
+  });
   game.events.on('sky-tap', (id) => funFact(id));
   addEventListener('resize', onResize);
 }
@@ -164,7 +171,10 @@ function syncSlot() {
     const cs = getComputedStyle(stage);
     let top = parseFloat(cs.getPropertyValue('--reserve-top')) || 0;
     let bottom = parseFloat(cs.getPropertyValue('--reserve-bottom')) || 0;
-    const fit = Math.min(1, (r.height * 0.5) / Math.max(1, top + bottom));
+    // The intro has its own coach card instead of Sam's bubble, and says how much room that needs.
+    const pad = run.guide.stagePad?.();
+    if (pad) { top = pad.top; bottom = pad.bottom; }
+    const fit = Math.min(1, (r.height * (pad ? 0.72 : 0.5)) / Math.max(1, top + bottom));
     top *= fit;
     bottom *= fit;
     const full = { x: r.left, y: r.top, w: r.width, h: r.height };
@@ -194,6 +204,7 @@ function showStart() {
   renderStart(app, {
     index: data.index, progress, unlockAll: UNLOCK_ALL, next: nextLevel(progress, UNLOCK_ALL),
     onStart: (id) => startMission(id),
+    onTraining: () => startTraining(),
     onHelp: () => showHelp(configFor(loadProgress().difficulty)),
     onDifficulty: (level) => setPref('difficulty', level),
   });
@@ -224,7 +235,21 @@ function showEnd(summary) {
 
 // ------------------------------------------------------------------ mission run
 
-function startMission(id) {
+/** The intro: build the base piece by piece, then meet each event once. The clock waits the whole time. */
+function startTraining(startAt) {
+  // Any storm works as the backdrop: the clock never runs, and the only alarm is a labelled drill.
+  const id = LEVEL_ORDER.find((x) => data.docs[x]) ?? Object.keys(data.docs)[0];
+  startMission(id, { training: startAt || '1' });
+}
+
+function endTraining() {
+  // What the intro taught does not need the in-mission hints again.
+  for (const key of ['intro', 'bars', 'leak', 'shield', 'shelter', 'shelterOut']) markHintSeen(key);
+  history.replaceState(null, '', location.pathname);
+  showStart();
+}
+
+function startMission(id, { training = null } = {}) {
   stopRun();
   clearApp();
   const doc = data.docs[id];
@@ -233,12 +258,20 @@ function startMission(id) {
   const hud = createHud(app, actions, { sound: sfx.on, canSpeak: voice.available });
   hud.crew.onLine = (text) => { if (readAloud) voice.speak(text); };
   hud.crew.onAvatar = () => funFact('suit');
-  const guide = createGuide({
-    root: hud.el, enabled: progress.hints, seen: progress.seen, markSeen: markHintSeen,
-    say: (text, mood, opts) => hud.crew.say(text, mood, opts),
-    unsay: (tag) => hud.crew.drop(tag),
-  });
-  const state = createMission(doc, { seed, config: configFor(progress.difficulty), script: guide.script() });
+  const guide = training
+    ? createIntro({
+      hud, startAt: training,
+      repair: (roomId) => actions.repair(roomId),
+      speak: (text) => { if (readAloud) voice.speak(text); },
+      relayout: () => syncSlot(),
+      onDone: endTraining,
+    })
+    : createGuide({
+      root: hud.el, enabled: progress.hints, seen: progress.seen, markSeen: markHintSeen,
+      say: (text, mood, opts) => hud.crew.say(text, mood, opts),
+      unsay: (tag) => hud.crew.drop(tag),
+    });
+  const state = createMission(doc, { seed, config: configFor(training ? 'easy' : progress.difficulty), script: guide.script() });
   run = {
     id, doc, state, hud, guide,
     speed: 'normal',
@@ -252,6 +285,10 @@ function startMission(id) {
   run.ro = ro;
   requestAnimationFrame(syncSlot);
   run.raf = requestAnimationFrame(loop);
+  if (training) {
+    guide.begin(state);
+    return;
+  }
   // The story first: where we are, and which real storm is coming. The clock waits.
   block('brief', true);
   const date = new Date(state.timeline.startMs).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -284,7 +321,8 @@ function loop(now) {
   drain();
   if (run !== r) return; // the mission ended inside drain()
   r.guide.update(s);
-  r.hud.update(s, r.blockers.has('pause') ? 'pause' : r.guide.hold ? 'wait' : r.calm ? `calm-${r.speed}` : r.speed);
+  // Any open sheet (repair, card, info) stops the clock, and the HUD says so.
+  r.hud.update(s, r.blockers.has('pause') ? 'pause' : (r.guide.hold || r.blockers.size) ? 'wait' : r.calm ? `calm-${r.speed}` : r.speed);
   if (scene) scene.view = viewOf(s);
   r.raf = requestAnimationFrame(loop);
 }
@@ -307,7 +345,17 @@ function viewOf(s) {
     radiation: radiationNow(s),
     blockShield: s.cfg.dose.shieldBlock[s.shield],
     repairs,
+    ...solarView(s),
+    ...run?.guide.view?.(s),
   };
+}
+
+/** What the solar panels make right now, shown above them in the scene. */
+function solarView(s) {
+  if (s.rooms.solar.status === 'lost') return { solarText: '', solarLow: true };
+  const perDay = Math.round(powerBreakdown(s)[0].perDay * 10) / 10;
+  if (!s.daylight) return { solarText: 'Night: 0 power', solarLow: true };
+  return { solarText: `${s.dust ? 'Dusty: ' : ''}+${perDay} power a day`, solarLow: Boolean(s.dust) };
 }
 
 /** Something happened that needs attention: drop out of fast-forward. */
@@ -333,10 +381,12 @@ function drain() {
     r.guide.onEvent(e);
     switch (e.type) {
       case 'crew':
+        if (r.guide.quiet) break; // the intro explains everything on its own cards
         r.hud.crew.say(e.text, e.mood, { chatter: e.chatter, keep: e.keep, word });
         word = null;
         break;
       case 'word':
+        if (r.guide.quiet) break;
         if (word) r.hud.crew.say(`New word for your log: ${word.word}!`, 'happy', { word });
         word = { word: e.word, text: e.text };
         break;

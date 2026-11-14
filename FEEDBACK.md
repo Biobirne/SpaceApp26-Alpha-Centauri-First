@@ -25,10 +25,10 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M4 | Rewarding system | Badges and stars exist; add a badge for hard mode | Done (round 1) |
 | M5 | Increasing difficulty, maybe 3 levels, explain each | Easy, Normal, Hard on the start screen, each with one sentence; adaptive difficulty stays on top | Done (round 1) |
 | M6 | Improve storytelling | Mission briefing at the start; history and "how it could look for real" lines from Sam (Project Horizon 1959, the August 1972 storm between Apollo 16 and 17, Artemis) | Done (round 1) |
-| M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Round 3 |
+| M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Done (intro: `?intro=1`, also the first visit and the Training button). The kid places the five buildings one by one, each with its job and its power cost, then meets dust, leak, filter and a storm drill once, with problem and fix before each. |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
-| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Round 2 |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (rub the dust off; the battery switches air, water, lab and radio back on). Storm fort done (stack heavy supplies on the shelter wall; it makes the shelter block more). Test page `minigame.html?game=dust` or `fort`. Leak and filter next. |
 
 ## Team
 
@@ -100,6 +100,29 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Resources on the Moon are limited. Science could be open-ended, but repairs could use up limited materials.
 
 **Look:** the UI colours feel generic, like the cheap SI style. This shows most in the bars and on the end/results screen. We should stand out from that.
+
+### Florian (14 Nov, ~15:30)
+- Device / build: laptop, Brave, `main` after the mentor rounds 1 and 2 (#13–#17), plus the first dust mini-game (#19).
+
+**P1: The game stresses me out instead of teaching me.**
+- I nearly lost the base before I even got to the solar panel task.
+- It feels like a website with more tabs and a cleaner look. I can't see where the learning happens.
+- There is too much to read, and I don't read it all. I doubt any kid will.
+- Idea: when Sam gives a tip, pause the game until the player has done it.
+
+**P1: Testing must be quick.** Open a mini-game directly, without playing a whole mission first. Done: `minigame.html?game=dust`.
+
+### Florian (14 Nov, ~16:15)
+- The full-screen flash on every flare is just annoying. Removed.
+- The radiation particles looked like rain, then like a "mini gun" from the Sun by day and from a corner at night. Now one steady stream, the same by day and night, with a label.
+- It is not clear where the power goes: sometimes −6 a day, sometimes −12, then +15 in sunlight. Now the panels show what they make right now, and the intro adds up each building's power use.
+- The game must pause during every repair. It already did; the HUD now says "Clock waits for you" while any sheet is open.
+- Waiting five minutes for an event to test it is too slow. Now `?intro=dust` (or `leak`, `filter`, `storm`, `night`) jumps straight to that lesson.
+
+### Florian (14 Nov, ~16:50)
+- In the intro, the kid must place each building on the Moon. A button on the card that builds it is too easy to click through. Done: the card has no build button any more.
+- Is the shield real? It is test tech (magnet shields are research only), so the intro now says so, and the new storm fort teaches what really protects astronauts: mass.
+- Only three kinds of events exist (dust, leak, filter), and the shelter has none. Done for the shelter: the storm fort. Greenhouse and lab still only get leaks.
 
 ## Automatic SI review
 
