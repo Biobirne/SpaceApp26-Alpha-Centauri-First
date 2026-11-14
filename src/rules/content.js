@@ -4,12 +4,14 @@
 
 export const CREWMATE_NAME = 'Sam'; // (open) final name decided with the art
 
+// One name per room: the label on the base, the info sheet and every sentence use the same word
+// (playtest: "Plants" on the base opened a sheet called "Greenhouse"). `short` stays for older callers.
 export const ROOMS = {
-  solar: { name: 'Solar panels', short: 'Solar' },
-  lab: { name: 'Science lab', short: 'Lab' },
-  hab: { name: 'Living quarters', short: 'Home' },
-  greenhouse: { name: 'Greenhouse', short: 'Plants' },
-  shelter: { name: 'Storm shelter', short: 'Shelter' },
+  solar: { name: 'Solar panels', short: 'Solar panels' },
+  lab: { name: 'Science lab', short: 'Science lab' },
+  hab: { name: 'Home', short: 'Home' },
+  greenhouse: { name: 'Greenhouse', short: 'Greenhouse' },
+  shelter: { name: 'Shelter', short: 'Shelter' },
 };
 
 /** Science words the player can earn. Each explanation stays under 15 words. */
@@ -65,7 +67,7 @@ export const CHATTER = [
 export const UPGRADES = {
   battery: {
     name: 'Bigger battery',
-    text: 'Store more power for the long lunar night.',
+    text: 'Store more power for the long lunar night. The new cells arrive fully charged.',
     fact: 'Real Moon bases must survive about 14 days of darkness.',
   },
   walls: {
@@ -159,7 +161,7 @@ export const ROOM_INFO = {
     fact: 'One astronaut would need about 200 space-station salad gardens to make enough oxygen. That is why machines do most of it.',
   },
   hab: {
-    does: 'The crew lives, sleeps and eats here. The air and water machines are here too.',
+    does: 'The crew lives, sleeps and eats here. The air and water machines are here too, with the CO₂ filter.',
     real: 'On the space station, machines recycle about 98% of the water, even sweat.',
     built: 'Metal modules launched from Earth, or inflatable ones. An inflatable test room has been on the space station since 2016.',
     fact: 'Water is heavy to launch, so every drop gets cleaned and used again.',
@@ -203,7 +205,8 @@ export const LESSONS = {
     title: 'The crew got too much radiation',
     why: sheltered ? 'The crew had already taken a lot of radiation earlier in the storm.'
       : shieldLabel === 'Off' ? 'A strong storm hit while the shield was off and the crew was outside the shelter.'
-        : `A strong storm hit while the shield was only on ${shieldLabel}.`,
+        : shieldLabel === 'Max' ? 'A very strong storm hit while the crew was outside the shelter. Even the Max shield lets a little through.'
+          : `A strong storm hit while the shield was only on ${shieldLabel}.`,
     next: 'When a big flare or particle storm is announced, raise the shield or go to the shelter right away.',
   }),
   roomLost: ({ room, days }) => ({

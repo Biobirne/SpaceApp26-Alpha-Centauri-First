@@ -8,6 +8,7 @@ import { openSheet, esc } from './overlays.js';
 import { ROOMS, ROOM_INFO, CREWMATE_NAME } from '../rules/content.js';
 import { powerBreakdown, airBreakdown, doseNow, fmtTimes } from '../rules/mission.js';
 import { loopHTML, wireLoop, lampHTML } from './loop.js';
+import { powerMeaning, airMeaning, doseMeaning } from './numbers.js';
 
 // Controller actions the sheets can call. main.js sets them once (keeps showRoomInfo's signature stable).
 let infoActions = {};
@@ -26,6 +27,8 @@ export function showRoomInfo(roomId, state) {
   if (room.status === 'lost') status = 'Sealed after a leak. Tap it again to rebuild it with science points.';
   else if (roomId === 'shelter' && (state.sheltered || state.forcedShelter)) status = 'The crew is inside right now.';
   else if (roomId === 'lab' && state.powerEmergency) status = 'Paused: the battery is empty.';
+  else if (roomId === 'lab' && (state.sheltered || state.forcedShelter)) status = 'Paused: the crew is in the shelter.';
+  else if (room.status === 'leak') status = 'Leaking! Tap the red ! to fix it.';
   const html = `
     <h2>${icon(ROOM_ICON[roomId])} ${esc(ROOMS[roomId].name)}</h2>
     <p class="info-status">${esc(status)}</p>
@@ -62,22 +65,25 @@ export function showMeterInfo(kind, state) {
   if (kind === 'power') {
     html = `<h2>${icon('bolt')} Power</h2>
       <p>The battery stores electricity from the solar panels. Everything in the base needs some.</p>
-      <h3>Right now</h3>${table(powerBreakdown(state), '⚡')}
+      ${powerMeaning(state)}
+      <h3>Where it goes, every day</h3>${table(powerBreakdown(state), '⚡')}
       <div class="fact">${icon('info')}<span>A night on the Moon lasts about 2 weeks. Real bases need big batteries, or a small nuclear power unit.</span></div>`;
   } else if (kind === 'air') {
     html = `<h2>${icon('air')} Air</h2>
+      ${airMeaning(state)}
       ${loopHTML(state)}
-      <h3>Right now</h3>${table(airBreakdown(state), '%')}
+      <h3>Where it goes, every day</h3>${table(airBreakdown(state), '%')}
       <div class="fact">${icon('info')}<span>On the space station, oxygen is made from water: electricity splits it into hydrogen and oxygen.</span></div>`;
     infoActions.loopSeen?.();
   } else {
     const d = doseNow(state);
     html = `<h2>${icon('radiation')} Crew dose</h2>
       <p>All the radiation your crew has taken on this mission. If it reaches ${state.cfg.dose.limit}, ${esc(CREWMATE_NAME)} sends everyone into the shelter.</p>
+      ${doseMeaning(state)}
       <h3>Right now</h3>
       <ul class="flow">
         <li><span>Radiation outside (real NASA data)</span><b>${fmtTimes(d.rad)} normal</b></li>
-        <li class="in"><span>Your shield and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
+        <li class="in"><span>Shield, shelter and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
         <li class="total"><span>Gets to the crew every day</span><b>+${(Math.round(d.perDay * 10) / 10)}</b></li>
       </ul>
       <div class="fact">${icon('info')}<span>Without thick walls, about one year on the Moon would give an astronaut a whole career’s worth of radiation. That is why a Moon base needs shielding.</span></div>`;

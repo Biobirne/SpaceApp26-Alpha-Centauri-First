@@ -1,0 +1,14 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* "What the numbers mean" blocks in the info sheets (src/ui/numbers.js).
+   A separate file so it never collides with changes to styles.css. */
+
+.nm { margin: 10px 0 14px; padding: 12px 14px; border-radius: var(--r-m); background: var(--panel-2); }
+.nm h3 { display: flex; gap: 8px; align-items: center; margin: 0 0 8px !important; font-size: 16px !important; }
+.nm h3 .ic { width: 18px; height: 18px; color: var(--air); }
+.nm dl { display: grid; gap: 8px; margin: 0; }
+.nm-row { display: grid; grid-template-columns: minmax(64px, auto) 1fr; gap: 12px; align-items: baseline; }
+.nm dt { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nm dd { margin: 0; font-size: 15px; line-height: 1.4; color: var(--text-2); }
+.sheet .nm-real { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; padding-top: 10px; border-top: 2px dashed var(--line); font-size: 15px !important; line-height: 1.4; color: var(--text-2); }
+.nm-real .ic { flex: none; width: 18px; height: 18px; color: var(--science); }
+.nm-real b { color: var(--text); }

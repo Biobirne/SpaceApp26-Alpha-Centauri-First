@@ -18,7 +18,7 @@ export function showHelp(cfg, { onClose } = {}) {
       ${row('bolt', 'power', 'Power', 'Solar panels charge the battery in daylight. A night on the Moon lasts about 2 weeks, so save power before dark.')}
       ${row('air', 'air', 'Air', 'Leaks and a clogged filter let air drop. Tap a room with a red ! to fix it.')}
       ${row('radiation', 'dose', 'Crew dose', `All the radiation your crew has taken. Keep it below ${cfg.dose.limit}.`)}
-      ${row('science', 'science', 'Science', 'The lab earns points while the crew works. Spend them on upgrades like walls of Moon soil.')}
+      ${row('science', 'science', 'Science', 'The lab earns points while the crew works. Spend them on upgrades like Regolith walls (Moon soil).')}
     </ul>
 
     <h3>Your choices (each one costs something)</h3>
@@ -28,7 +28,7 @@ export function showHelp(cfg, { onClose } = {}) {
       ${row('dish', 'air', 'Call Earth', `Mission Control looks at the real space weather and at your base. They tell you the most important thing to do now and why. The radio signal needs ${cfg.callEarth.roundTripSeconds} seconds there and back. Then they need ${cfg.callEarth.cooldownDays} days before the next call.`)}
       ${row('air', 'air', 'The air loop', 'Air and water get cleaned and used again. The oxygen machine makes most of the oxygen from water, with power. Plants and algae help a little. Tap the air bar to see the loop.')}
       ${row('rocket', 'dose', 'Spacewalks', 'Cleaning the solar panels means going outside in a spacesuit. Out there the shield can’t help, so during a storm it costs radiation. Moon dust you bring back in can clog the air filter, unless you build suitports.')}
-      ${row('fast', 'power', 'Time', `One day of the mission passes in ${cfg.secondsPerDay.normal} seconds. Fast-forward on calm days. The game slows down by itself when something happens.`)}
+      ${row('fast', 'power', 'Time', `One day of the mission passes in ${cfg.secondsPerDay.normal} seconds. Calm days speed up by themselves, and the fast-forward button makes it even quicker. The game slows down when something happens.`)}
     </ul>
 
     <h3>Want to know more?</h3>
