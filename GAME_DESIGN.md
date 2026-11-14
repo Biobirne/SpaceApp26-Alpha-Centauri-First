@@ -25,6 +25,28 @@ Status: agreed direction, Saturday 14 Nov 2026, updated to what is built. Detail
    - The radiation chip in the HUD opens the real numbers: a chart of the 30 days, today's µGy/h, the instrument and spacecraft, the normal level, and the biggest flares so far.
    - The end screen names the NASA sources for every number (see `data/README.md`).
 
+## Designing for kids aged 7–12 (research summary)
+Key findings from a research summary the team asked Gemini to gather (the German original was removed once its points were in the game). The studies are named as the summary gave them; we did not check each one.
+
+| Finding | What it means for us | In the game |
+|---------|----------------------|-------------|
+| **Concrete thinking.** Kids aged 7–11 reason well about cause and effect, but only with things they can see. Two groups behave differently: 6–8 (slow readers, less precise taps) and 9–12 (want to be taken seriously, no "baby design"). (Piaget; Nielsen Norman Group) | Every number has a bar or icon. Short sentences. Test with both age groups. | Bars with icons, read-aloud, 44 px tap targets |
+| **Autonomy, competence, relatedness** keep kids playing (self-determination theory; Ryan, Rigby & Przybylski 2006). | Real choices, clear feedback, a friendly character. | Shield/shelter/repair choices, Sam |
+| **Praise effort and strategy, not talent** ("Brain Points"; O'Rourke, Dweck & Popović). Weaker players stay longer. | Rewards for ways of playing. | Badges, effort praise on the end screen |
+| **Safe to fail** with quick, informative feedback that shows why (productive failure; Kapur 2008). | No game over; explain the cause. | Setbacks instead of losing, "Why did that happen?" lessons |
+| **Goals in three time spans:** seconds (micro-wins), minutes (a mission), long term (a growing collection). | Visible milestones. | Repairs, 30-day mission, levels, ranks, badge shelf |
+| **Intrinsic integration:** the thing to learn is the game mechanic, not a quiz (Habgood & Ainsworth 2011). | No quiz questions. | Radiation, power and the lunar night are the mechanics |
+| **Cognitive load:** show, don't tell; reveal UI step by step; offer audio for weak readers (Sweller). | One new thing at a time. | Guided first steps, glowing controls, read-aloud |
+| **Scaffolding and fading, help on demand** (Vygotsky's zone of proximal development). Kids must be able to switch help back on themselves. | Hints fade, a switch brings them back. | Guided steps, hints switch in the pause menu, "How it works" |
+| **Stealth assessment:** measure understanding through play, never through tests (Shute). | No tests. | The adaptive difficulty reads setbacks, not answers |
+| **Low floor, high ceiling, wide walls** (Papert, Resnick, MIT Media Lab). | Easy to start, deep for experts, room for different interests. | One star is easy, three are hard; Hard level; info sheets for explorers |
+| **Invisible difficulty adjustment** keeps challenge and skill matched (Csikszentmihalyi's flow). The summary advises *against* a visible easy/hard menu: kids avoid "easy" and overrate themselves. | Adapt quietly. | Adaptive random problems. **Open:** the mentors asked for visible levels, so we have both. Consider friendlier names than "Easy". |
+| **Mixed-ability co-op with different roles** (Gonçalves et al., CHI 2021). | Only if we add a co-op mode. | Not planned |
+| **Emergence and rule twists** stop boredom; kids love systems they can experiment with. | Systems that interact, surprises. | Power, air and radiation affect each other; every storm is different |
+| **Humour, easter eggs, meaningful customization.** | Reward curiosity. | Tap Earth, the Sun or Sam for facts. Placing your own buildings is mentor round 3 |
+| **The first 60 seconds** decide if a game feels like school. Start in the action, never with a long intro. | Get to the first tap fast. | Start button on top, first leak within seconds. **Open:** the mission briefing is a short text before play; keep it short or show it only once per storm |
+| **Playtest with 7–8 and 11–12 year olds separately**, and let two kids play together and talk. | Our playtest plan. | – |
+
 ## Your crewmate (the guide)
 An astronaut character **pops in from the side** with a speech bubble. They are the voice of the game:
 - They announce events: "Whoa, a big flare just went off on the Sun!"
@@ -184,7 +206,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
   - The scale is shown under the speed buttons.
   - Fast-forward drops back to normal when something happens.
   - The game pauses on cards, repairs, calls, menus and when the tab is hidden.
-- **Guided first steps** (scaffolding and fading, from `Guide_Gamedesign_Attention.md` 3.2 and 3.3):
+- **Guided first steps** (scaffolding and fading, see "Designing for kids aged 7–12"):
   - A new player meets one thing at a time: the bars, then a safe first leak (the clock waits until it is fixed), then the shield, then fast-forward.
   - Later, when it fits: Call Earth after the first hard moment, and the real-data chip when radiation is high.
   - The control to try glows together with the crewmate's sentence about it.
@@ -198,7 +220,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
   - 3 for the full goal (120) with no room lost.
   - Hiding in the shelter all month is safe but earns one star.
 - **Progress** is saved in `localStorage` only: stars, badges, hints on/off, sound, read-aloud and difficulty. Levels unlock in order. `?all=1` unlocks everything for judges. `?storm=<id>` starts a storm directly. `?debug=1` exposes a skip helper for playtests.
-- **From the team's kids game design guide:**
+- **From the kids game design research** (see "Designing for kids aged 7–12"):
   - **Invisible difficulty adjustment.** Only the random problems (leaks, dust, filters) adapt; the NASA storm data never changes. Each setback or sealed room raises a level (max 2): problems come later, and only one at a time. Four calm days lower it again, down to −1 (problems come about 15 % sooner). Tuning: `dda` in `src/rules/config.js`.
   - **Badges** for ways of playing (fix 3 problems, no sealed room, no emergency, block most radiation, ask Mission Control, build an upgrade, reach the science goal). The collection is on the start screen. The end screen praises the effort or strategy the kid actually used.
   - **Easter eggs:** tap Earth or the Sun for true fun facts (`FUN_FACTS` in `src/rules/content.js`).
@@ -211,7 +233,7 @@ Everything below runs on placeholder art, marked in the game as "SI-generated pl
 ## Still to decide (team)
 - Interfaces: a first version is in `AGENTS.md`. Change it there if the team wants something else.
 - Mentor rounds 2 and 3, and the playtest feedback in PR #12: what comes first (`FEEDBACK.md`).
-- `Guide_Gamedesign_Attention.md` is German: translate it, or keep only English key findings here and delete it.
+- Easy/Normal/Hard names and the briefing length (see the two **Open** rows in "Designing for kids aged 7–12").
 - Game title: "Moon Base Commander" is a placeholder (`GAME_TITLE` in `src/ui/screens.js`). The crewmate's name "Sam" is a placeholder too (`CREWMATE_NAME`).
 - Art style and who draws (no SI images; `CREDITS.md` for everything).
 - Exact numbers: costs, cooldown length, shield levels. Tune them by playtesting, not on paper.

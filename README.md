@@ -55,7 +55,6 @@ npm test
 | [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
 | [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |
 | [SI_USAGE.md](SI_USAGE.md), [SI_DISCLOSURE.md](SI_DISCLOSURE.md), [si-manifest.json](si-manifest.json) | Where SI tools (Super Intelligence, the Space Apps term) were used, and how it is labelled |
-| `Guide_Gamedesign_Attention.md` | Background research on game design for kids (German, gathered with Gemini) |
 
 ## License
 MIT, see [LICENSE](LICENSE). The NASA data stays NASA's; see [CREDITS.md](CREDITS.md).

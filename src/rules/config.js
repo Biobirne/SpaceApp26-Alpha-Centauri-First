@@ -69,7 +69,7 @@ export const CONFIG = {
     chatterEveryDays: 1.6,
   },
 
-  // Invisible difficulty adjustment (Guide_Gamedesign_Attention.md, DDA). Only the random
+  // Invisible difficulty adjustment (GAME_DESIGN.md, "Designing for kids"). Only the random
   // problems (leaks, dust, filters) adapt. The real NASA storm data never changes.
   dda: {
     min: -1,                 // flawless play: problems come a bit sooner
