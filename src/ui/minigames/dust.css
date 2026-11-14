@@ -190,6 +190,21 @@
 @media (min-width: 700px) {
   .dg-head h2 { font-size: 34px; }
 }
+/* Wide screens: the words stand on the left, the panel on the right. */
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .dg {
+    display: grid; align-items: center; justify-content: center;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 520px); column-gap: 56px;
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas: '. rig' 'head rig' 'sam rig' '. rig';
+  }
+  .dg-head { grid-area: head; padding-right: 0; }
+  .dg-head .dg-why { font-size: 20px; margin-top: 8px; }
+  .dg-sam { grid-area: sam; margin-top: 22px; }
+  .dg-rig { grid-area: rig; }
+  .dg-panel { max-height: 52vh; }
+  .dg-win { left: auto; right: 0; width: min(520px, 50%); border-radius: 26px 0 0 0; }
+}
 @media (max-height: 640px) {
   .dg-panel { max-height: 34vh; }
   .dg-head h2 { font-size: 22px; }

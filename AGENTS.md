@@ -69,6 +69,7 @@ Current state (14 Nov, evening). Change it here when the team decides otherwise.
 - **Presentation:**
   - `src/ui/` is the HTML/CSS HUD, sheets and screens. It reads state and calls controller actions.
   - `src/scene/MoonScene.js` is the Phaser canvas. It only draws `scene.view` and emits `room-tap` and `sky-tap` (Earth or Sun, for fun facts).
+  - `src/ui/intro.js` is the intro (training): build the base piece by piece, then each event once. It has the same interface as the guide (`src/ui/guide.js`) and holds the clock. Test one lesson with `?intro=dust`, `leak`, `filter`, `storm` or `night`; test one mini-game with `minigame.html?game=dust`.
   - `src/audio/` has the synthesized sound effects (`sfx.js`) and read-aloud with the device voice (`voice.js`). The controller plays them.
 - **Data:** storms in `data/storms/*.json` (format in `data/README.md`). Tuning numbers live in `src/rules/config.js`, and kid-facing text in `src/rules/content.js`.
 - **Sprites:** listed in `assets/art/manifest.json`, with sizes and anchors in `assets/art/README.md`.

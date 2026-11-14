@@ -41,7 +41,7 @@ function difficultyPicker(current) {
   </section>`;
 }
 
-export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp, onDifficulty }) {
+export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp, onDifficulty, onTraining }) {
   const byId = Object.fromEntries(index.storms.map((s) => [s.id, s]));
   const nextStorm = byId[next];
   const el = document.createElement('div');
@@ -53,6 +53,7 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart, o
     ${difficultyPicker(DIFFICULTY[progress.difficulty] ? progress.difficulty : 'normal')}
     <button type="button" class="btn primary big-start" data-id="${esc(next)}">${icon('rocket')}Start: ${esc(nextStorm?.title ?? next)}</button>
     <button type="button" class="btn quiet howto">${icon('book')}How it works</button>
+    <button type="button" class="btn quiet training">${icon('wrench')}Training: build the base</button>
     <p class="credit">Your rank: <b>${rankFor(progress)}</b>. Each finished storm unlocks the next one.</p>
     <ul class="levels">
       ${LEVEL_ORDER.filter((id) => byId[id]).map((id, i) => {
@@ -72,6 +73,7 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart, o
   </div>`;
   root.appendChild(el);
   el.querySelector('.howto').addEventListener('click', () => onHelp());
+  el.querySelector('.training').addEventListener('click', () => onTraining?.());
   for (const b of el.querySelectorAll('[data-diff]')) {
     b.addEventListener('click', () => {
       for (const x of el.querySelectorAll('[data-diff]')) x.setAttribute('aria-checked', String(x === b));

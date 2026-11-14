@@ -102,7 +102,8 @@ function learn(state, key) {
 
 export const dateMsAt = (state, t = state.t) => state.timeline.startMs + t * DAY_MS;
 export const currentDayIndex = (state) => Math.min(state.cfg.missionDays - 1, Math.floor(state.t));
-export const radiationNow = (state) => moonTimesNormal(state.timeline, currentDayIndex(state));
+// `drillRadiation` is set only by the training intro (a practice alarm, labelled as not real data).
+export const radiationNow = (state) => state.drillRadiation ?? moonTimesNormal(state.timeline, currentDayIndex(state));
 export const isWorking = (state) => !state.sheltered && !state.forcedShelter && !state.powerEmergency;
 
 /** Fraction of incoming radiation that the current setup blocks (0..1). */

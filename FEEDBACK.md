@@ -25,7 +25,7 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M4 | Rewarding system | Badges and stars exist; add a badge for hard mode | Done (round 1) |
 | M5 | Increasing difficulty, maybe 3 levels, explain each | Easy, Normal, Hard on the start screen, each with one sentence; adaptive difficulty stays on top | Done (round 1) |
 | M6 | Improve storytelling | Mission briefing at the start; history and "how it could look for real" lines from Sam (Project Horizon 1959, the August 1972 storm between Apollo 16 and 17, Artemis) | Done (round 1) |
-| M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Round 3 |
+| M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Done (intro: `?intro=1`, also the first visit and the Training button). The kid places the five buildings one by one, each with its job and its power cost, then meets dust, leak, filter and a storm drill once, with problem and fix before each. |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
 | M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (#19: rub the dust off, the battery switches air, water, lab and radio back on, real 2025 dust shield fact; test page `minigame.html`); leak, filter and storm fort next |
@@ -93,6 +93,13 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Idea: when Sam gives a tip, pause the game until the player has done it.
 
 **P1: Testing must be quick.** Open a mini-game directly, without playing a whole mission first. Done: `minigame.html?game=dust`.
+
+### Florian (14 Nov, ~16:15)
+- The full-screen flash on every flare is just annoying. Removed.
+- The radiation particles looked like rain, then like a "mini gun" from the Sun by day and from a corner at night. Now one steady stream, the same by day and night, with a label.
+- It is not clear where the power goes: sometimes −6 a day, sometimes −12, then +15 in sunlight. Now the panels show what they make right now, and the intro adds up each building's power use.
+- The game must pause during every repair. It already did; the HUD now says "Clock waits for you" while any sheet is open.
+- Waiting five minutes for an event to test it is too slow. Now `?intro=dust` (or `leak`, `filter`, `storm`, `night`) jumps straight to that lesson.
 
 ## Automatic SI review
 

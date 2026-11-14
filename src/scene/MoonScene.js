@@ -56,6 +56,7 @@ export function createMoonScene() {
       this.fxG = this.add.graphics();
       this.badgeLayer = this.add.container(0, 0);
       this.radLabel = this.add.text(0, 0, 'Radiation from the Sun', {}).setOrigin(0, 0).setVisible(false);
+      this.solarLabel = this.add.text(0, 0, '', {}).setOrigin(0.5, 1).setVisible(false);
       this.labelLayer = this.add.container(0, 0);
       this.zones = {};
       // A tap counts only if it started and ended on the same spot, and not on an HTML control.
@@ -137,7 +138,13 @@ export function createMoonScene() {
       this.radLabel.setStyle({
         fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${rfs}px`, fontStyle: '600', color: '#e3c8ff',
         backgroundColor: 'rgba(60,28,104,0.92)',
-      }).setPadding(8 * this.dpr, 4 * this.dpr).setPosition(this.sunPos.x + this.sunPos.r * 1.8, this.sunPos.y + this.sunPos.r * 1.5);
+      }).setPadding(8 * this.dpr, 4 * this.dpr).setOrigin(0.5, 0).setPosition(s.x + s.w * 0.47, s.y + 6 * this.dpr);
+      // How much power the panels make right now, always visible above them.
+      const sb = this.boxes.solar;
+      this.solarLabel.setStyle({
+        fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${Math.round(13 * this.dpr)}px`, fontStyle: '700', color: '#1d1503',
+        backgroundColor: '#ffbf3c',
+      }).setPadding(6 * this.dpr, 3 * this.dpr).setPosition(sb.x + sb.w / 2, sb.y - unit * 1.2);
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
@@ -158,7 +165,8 @@ export function createMoonScene() {
       this.labelLayer.removeAll(true);
       this.badgeLayer.removeAll(true);
       this.badges = {};
-      const fs = Math.round(Math.max(12 * this.dpr, Math.min(16 * this.dpr, this.u * 2.6)));
+      this.roomLabels = {};
+      const fs = Math.round(Math.max((this.tall ? 12 : 10) * this.dpr, Math.min(16 * this.dpr, this.u * 2.6)));
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const t = this.add.text(b.x + b.w / 2, b.y + b.h + this.u * 1.2, ROOMS[id].short, {
@@ -166,6 +174,7 @@ export function createMoonScene() {
           stroke: '#070b18', strokeThickness: Math.round(fs * 0.3),
         }).setOrigin(0.5, 0);
         this.labelLayer.add(t);
+        this.roomLabels[id] = t;
         const r = Math.max(13 * this.dpr, this.u * 2.6);
         const badge = this.add.container(b.x + b.w * 0.82, b.y + b.h * 0.12);
         const disc = this.add.circle(0, 0, r, C.alert).setStrokeStyle(r * 0.18, 0x2b0a00);
@@ -319,12 +328,31 @@ export function createMoonScene() {
           const a = this.boxes[order[i - 1]];
           const b = this.boxes[order[i]];
           if (order[i - 1] === 'solar') continue;
+          if (!this.isBuilt(v, order[i - 1]) || !this.isBuilt(v, order[i])) continue;
           g.fillRect(a.x + a.w - u, this.groundY - u * 4, b.x - a.x - a.w + u * 2, u * 2.6);
         }
       }
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const status = v?.rooms?.[id] ?? 'ok';
+        if (!this.isBuilt(v, id)) {
+          // The free spot for the next building: a dashed outline on the ground.
+          if (v.buildNext === id) {
+            g.lineStyle(Math.max(2, u * 0.45), 0xffbf3c, 0.95);
+            const step = u * 2.2;
+            for (let x = b.x; x < b.x + b.w - step * 0.5; x += step) {
+              g.lineBetween(x, b.y, Math.min(b.x + b.w, x + step * 0.55), b.y);
+              g.lineBetween(x, b.y + b.h, Math.min(b.x + b.w, x + step * 0.55), b.y + b.h);
+            }
+            for (let y = b.y; y < b.y + b.h - step * 0.5; y += step) {
+              g.lineBetween(b.x, y, b.x, Math.min(b.y + b.h, y + step * 0.55));
+              g.lineBetween(b.x + b.w, y, b.x + b.w, Math.min(b.y + b.h, y + step * 0.55));
+            }
+            g.fillStyle(0xffbf3c, 0.12);
+            g.fillRect(b.x, b.y, b.w, b.h);
+          }
+          continue;
+        }
         // shadow
         g.fillStyle(0x000000, 0.22);
         g.fillEllipse(b.x + b.w / 2, b.y + b.h, b.w * 1.05, u * 2.2);
@@ -355,7 +383,7 @@ export function createMoonScene() {
       const v = this.view;
       if (!v || !this.boxes) return;
       const dt = Math.min(0.05, deltaMs / 1000);
-      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}`;
+      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}|${JSON.stringify(v.built || 0)}|${v.buildNext || ''}`;
       if (sig !== this.last.sig) {
         if (this.last.daylight !== v.daylight) { this.drawSky(); this.drawGround(!v.daylight); this.drawSun(v.daylight); }
         this.drawBase(v);
@@ -369,13 +397,14 @@ export function createMoonScene() {
       if (!this.last.starsAt || time - this.last.starsAt > 120) { this.drawStars(time); this.last.starsAt = time; }
 
       for (const id of ROOM_IDS) {
-        const kind = v.repairs?.[id];
+        const kind = v.buildNext === id ? 'build' : this.isBuilt(v, id) ? v.repairs?.[id] : null;
         const badge = this.badges[id];
         badge.setVisible(Boolean(kind));
         if (kind) {
           const rebuild = kind === 'rebuild';
-          badge.disc.setFillStyle(rebuild ? 0x2c3863 : C.alert);
-          badge.mark.setText(rebuild ? '+' : '!').setColor(rebuild ? '#f3f0e8' : '#2b0a00');
+          const build = kind === 'build';
+          badge.disc.setFillStyle(build ? 0xffbf3c : rebuild ? 0x2c3863 : C.alert);
+          badge.mark.setText(rebuild || build ? '+' : '!').setColor(rebuild ? '#f3f0e8' : '#2b0a00');
         }
       }
 
@@ -385,6 +414,22 @@ export function createMoonScene() {
       this.drawDome();
       this.updateParticles(dt, v);
       this.radLabel.setVisible((v.radiation || 1) >= 2);
+      const solarText = this.isBuilt(v, 'solar') ? v.solarText : '';
+      if (solarText !== this.last.solarText) {
+        this.solarLabel.setText(solarText || '').setVisible(Boolean(solarText));
+        this.solarLabel.setBackgroundColor(v.solarLow ? '#c9c5bb' : '#ffbf3c');
+        // Keep the whole label on screen, even when the panels stand at the edge.
+        const sb = this.boxes.solar;
+        const half = this.solarLabel.width / 2 + 4 * this.dpr;
+        this.solarLabel.setX(Math.min(Math.max(sb.x + sb.w / 2, this.slot.x + half), this.slot.x + this.slot.w - half));
+        this.last.solarText = solarText;
+      }
+      for (const id of ROOM_IDS) this.roomLabels[id].setVisible(this.isBuilt(v, id));
+    }
+
+    /** During the intro, buildings appear one by one (`view.built`). In a mission, all are built. */
+    isBuilt(v, id) {
+      return !v?.built || Boolean(v.built[id]);
     }
 
     drawDome() {
@@ -413,8 +458,8 @@ export function createMoonScene() {
       if (this.parts.length > want) this.parts.length = want;
       const g = this.fxG.clear();
       const d = this.dome;
-      const speed = H * (0.5 + Math.min(0.6, Math.log10(times) * 0.15));
-      const len = 14 * this.dpr;
+      const speed = H * (0.32 + Math.min(0.4, Math.log10(times) * 0.1));
+      const len = 16 * this.dpr;
       const head = Math.max(1.6, this.dpr * 1.7);
       for (let i = 0; i < this.parts.length; i++) {
         const p = this.parts[i];
@@ -437,14 +482,15 @@ export function createMoonScene() {
           continue;
         }
         // Particles from the Sun: a bright dot with a short fading tail, not a rain streak.
-        g.lineStyle(head * 1.1, C.particle, 0.5);
-        g.lineBetween(p.x, p.y, p.x - p.dx * len, p.y - p.dy * len);
-        g.fillStyle(C.particle, 0.35);
-        g.fillCircle(p.x, p.y, head * 2.2);
+        const hs = head * p.s;
+        g.lineStyle(hs * 0.9, C.particle, 0.4);
+        g.lineBetween(p.x, p.y, p.x - p.dx * len * p.s, p.y - p.dy * len * p.s);
+        g.fillStyle(C.particle, 0.3);
+        g.fillCircle(p.x, p.y, hs * 2.1);
         g.fillStyle(C.particle, 1);
-        g.fillCircle(p.x, p.y, head * 1.3);
+        g.fillCircle(p.x, p.y, hs * 1.2);
         g.fillStyle(C.spark, 1);
-        g.fillCircle(p.x, p.y, head * 0.6);
+        g.fillCircle(p.x, p.y, hs * 0.55);
       }
       // sparks where the shield stopped a particle
       for (let i = this.sparks.length - 1; i >= 0; i--) {
@@ -475,14 +521,16 @@ export function createMoonScene() {
     }
 
     spawn(anywhere) {
-      // Particles stream out of the Sun in a fan towards the base and the ground.
-      // At night the Sun is below the horizon, so they come in from the top-left corner instead.
-      const night = this.view && this.view.daylight === false;
-      const s = !night && this.sunPos ? this.sunPos : { x: -this.scale.width * 0.15, y: -this.scale.height * 0.1, r: 0 };
-      const a = (8 + Math.random() * 62) * Math.PI / 180; // between almost flat and steeply down
+      // One steady stream from the Sun's side (upper left), the same by day and by night.
+      const W = this.scale.width;
+      const H = this.scale.height;
+      const a = (27 + Math.random() * 8) * Math.PI / 180; // gently down to the right
       const dx = Math.cos(a), dy = Math.sin(a);
-      const d = s.r + (anywhere ? Math.random() * this.scale.width * 0.9 : 0);
-      return { x: s.x + dx * d, y: s.y + dy * d, dx, dy, v: 0.75 + Math.random() * 0.5, checked: false };
+      let x, y;
+      if (anywhere) { x = Math.random() * W; y = Math.random() * this.groundY; }
+      else if (Math.random() < 0.6) { x = Math.random() * W * 0.9 - W * 0.1; y = -10; } // top edge
+      else { x = -10; y = Math.random() * this.groundY * 0.8; } // left edge
+      return { x, y, dx, dy, v: 0.8 + Math.random() * 0.4, s: 0.7 + Math.random() * 0.6, checked: false };
     }
 
     // ------------------------------------------------------------------ effects
