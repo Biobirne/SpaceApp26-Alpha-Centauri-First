@@ -18,6 +18,8 @@ It works like `python -m http.server` but turns off caching, so a reload always 
 
 Useful URLs: `?storm=may2024` starts a storm directly, `?all=1` unlocks every storm, `?seed=5` makes random events repeatable, and `?debug=1` exposes `window.__moonbase.skip(days, pick)` to jump ahead (cards are answered with `pick(card)`, by default the first option). Progress lives in `localStorage` (`moonbase.progress.v1`): a fresh browser profile shows the guided first steps again.
 
+More test entry points: `?intro=1` runs the intro (training), and `?intro=dust`, `leak`, `filter`, `storm` or `night` jumps to one lesson. `minigame.html?game=dust` or `?game=fort` opens one mini-game on its own.
+
 ## 2. Look at it (Playwright MCP)
 Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailable, fall back to Claude in Chrome.
 
@@ -26,6 +28,7 @@ Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailab
 3. Run `browser_console_messages` and report every error or warning. 404s count as failures.
 4. Click through the flow you changed: start, make one choice, see what it costs, reach the next turn. Use clicks or taps only. No hover-only UI and no keyboard-only controls.
 5. Repeat at desktop size **1280x800**.
+   For layout or CSS changes, also check a small phone (**360x740**), a phone held sideways (**844x390**) and a tablet (**1024x768**).
 6. Close the browser when done.
 
 ## 3. Check against the hard rules
