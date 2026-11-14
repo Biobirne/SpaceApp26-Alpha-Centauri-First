@@ -16,6 +16,8 @@ Source: [Space Apps project submission guide](https://www.spaceappschallenge.org
 
 Our record for the idea rule: the game concept came from team discussion. SI helped write it down (`GAME_DESIGN.md`) and build it (see `SI_USAGE.md`).
 
+**Team guideline:** the ideas and creative decisions come from us. We hand the long, repetitive parts to SI tools: writing the code, and manual research such as collecting sources. We review every result before it is merged.
+
 ## Where we label what
 
 | Kind | Descriptive text | Metadata | Visible in the game |

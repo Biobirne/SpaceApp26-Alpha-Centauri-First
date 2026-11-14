@@ -2,7 +2,8 @@
   "about": "Machine-readable record of Super Intelligence (SI) tool use in this repo, as the NASA Space Apps submission guide asks. Human-readable log: SI_USAGE.md. Rules and labels: SI_DISCLOSURE.md.",
   "updated": "2026-11-14",
   "tools": {
-    "claude-code": { "name": "Claude Code", "model": "Claude Opus 5.5", "maker": "Anthropic", "kind": "large language model coding agent" }
+    "claude-code": { "name": "Claude Code", "model": "Claude Opus 5.5", "maker": "Anthropic", "kind": "large language model coding agent" },
+    "gemini": { "name": "Gemini", "maker": "Google", "kind": "large language model research assistant" }
   },
   "values": {
     "si": {
@@ -33,6 +34,6 @@
     { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": ".claude/skills/{kids-ux,playtest,ship-task}/SKILL.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "assets/fonts/*", "kind": "font", "si": "none", "notes": "Lexend, SIL Open Font License, see CREDITS.md" },
-    { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "unknown", "notes": "Added by a team member; fill in how it was made." }
+    { "path": "Guide_Gamedesign_Attention.md", "kind": "docs", "si": "generated", "tool": "gemini", "notes": "Research summary on game design for kids aged 7-12, gathered from the web by Gemini at the team's request. German. Used as background; the game ideas are the team's." }
   ]
 }
