@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Controller: loads data, runs the game clock, sends player actions to the rules and
 // routes the rules' outbox to the HUD, the overlays and the Phaser scene.
 

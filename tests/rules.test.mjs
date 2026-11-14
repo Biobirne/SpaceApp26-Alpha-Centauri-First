@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Run with: node --test tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -96,3 +96,7 @@ python tools/build_storm_library.py   # rebuilds storms/*.json (standard library
 - Space weather: NASA Community Coordinated Modeling Center (CCMC), DONKI, <https://ccmc.gsfc.nasa.gov/tools/DONKI/>
 - Radiation: NASA Open Science Data Repository, RadLab, <https://visualization.osdr.nasa.gov/radlab/>. Instruments: DosTel (DLR) on the ISS, BioSentinel BPD (NASA Ames), LRO CRaTER (NASA/Boston University), Curiosity MSL-RAD (NASA/JPL, SwRI).
 - Mars imagery (if used): NASA Mars Trek, <https://trek.nasa.gov/mars/>, Viking MDIM 2.1 mosaic (NASA/USGS).
+
+## SI note
+
+The numbers in `/data` are NASA's (DONKI and OSDR RadLab). SI tools (Claude Code) downloaded the snapshots, wrote the build script and helped write the kid-facing storm texts. JSON files cannot hold comments, so this is recorded in `si-manifest.json` and `SI_USAGE.md`. See `SI_DISCLOSURE.md`.

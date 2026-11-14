@@ -7,13 +7,13 @@
 | Radiation dose rates (ISS, BioSentinel, LRO, Curiosity) for six historical solar storms, 2017–2025 | NASA Open Science Data Repository (OSDR), RadLab – https://visualization.osdr.nasa.gov/radlab/ (plus trimmed DONKI events) | NASA data, public; attribution shown in game | `/data/storms/` (archived measurements, built 2026-11-14, see `data/README.md`) |
 
 ## Assets
-Every sprite, icon, sound or font needs a row here before it is merged. No AI-generated images. No NASA logos or insignia.
+Every sprite, icon, sound or font needs a row here before it is merged. No SI-generated images (SI = Super Intelligence, the Space Apps term for AI tools). No NASA logos or insignia.
 
 | File | Author / source | License | Link |
 |------|-----------------|---------|------|
 | `assets/fonts/lexend-latin-wght-normal.woff2` | Lexend by Bonnie Shaver-Troup, Thomas Jockin et al. (Latin subset of the variable font, from the `@fontsource-variable/lexend@5.2.8` package) | SIL Open Font License 1.1 (`assets/fonts/OFL.txt`) | https://github.com/googlefonts/lexend |
-| Icons and crewmate avatar (inline SVG in `src/ui/icons.js`) | Drawn for this project | MIT (this repo) | |
-| Placeholder Moon base, Earth, Sun and sky (drawn in code, `src/scene/MoonScene.js`) | Drawn for this project | MIT (this repo) | |
+| Icons and crewmate avatar (inline SVG in `src/ui/icons.js`) | Placeholder, **SI-generated** (written by Claude Code). Watermarked in game; to be replaced by team art | MIT (this repo) | |
+| Placeholder Moon base, Earth, Sun and sky (drawn in code, `src/scene/MoonScene.js`) | Placeholder, **SI-generated** (written by Claude Code). Watermarked in game; to be replaced by team art | MIT (this repo) | |
 | Phaser 3.90.0 (loaded from cdnjs, not in the repo) | Phaser Studio | MIT | https://phaser.io |
 
 ## Agent skills (`.claude/skills/`, development tooling, not shipped in the game)

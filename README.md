@@ -18,7 +18,7 @@ Test on a phone in the same Wi-Fi: `python -m http.server 8000 --bind 0.0.0.0`, 
 `/data/donki/` holds snapshot JSON from NASA CCMC DONKI (see `manifest.json`). The game works offline from these snapshots.
 
 ## Rules for contributors
-See [AGENTS.md](AGENTS.md). Game design: [GAME_DESIGN.md](GAME_DESIGN.md). Data: [data/README.md](data/README.md). Log AI tool usage in [AI_USAGE.md](AI_USAGE.md), asset licenses in [CREDITS.md](CREDITS.md).
+See [AGENTS.md](AGENTS.md). Game design: [GAME_DESIGN.md](GAME_DESIGN.md). Data: [data/README.md](data/README.md). Log SI tool usage in [SI_USAGE.md](SI_USAGE.md) (see [SI_DISCLOSURE.md](SI_DISCLOSURE.md)), asset licenses in [CREDITS.md](CREDITS.md).
 
 ## License
 MIT, see [LICENSE](LICENSE).

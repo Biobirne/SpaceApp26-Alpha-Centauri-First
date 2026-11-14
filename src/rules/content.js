@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Player-facing text that the rules produce. Plain English for ages 7–12 (see kids-ux skill).
 // Facts here must be true; if unsure, leave it out.
 

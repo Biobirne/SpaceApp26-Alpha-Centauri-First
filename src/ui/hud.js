@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // The in-game console (HTML on top of the Phaser canvas). It renders mission state and sends
 // player actions to the controller through `actions`. No game rules in here.
 

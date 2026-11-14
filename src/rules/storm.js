@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Turns a storm file from data/storms/ into a per-day timeline the mission can play.
 
 const DAY_MS = 86400000;

@@ -15,7 +15,7 @@ Read this file fully before every task. If a request conflicts with this file, s
 3. **Static site** deployable on **GitHub Pages** from `main`. No backend, no server code, no secrets in the repo.
 4. **Mobile-friendly**: must work on a phone (judges scan a QR code). Touch input, responsive layout.
 5. **NASA data with visible attribution** in the game. If data is a snapshot, label it as such; never present a snapshot as live.
-6. **No AI-generated images** in the game (Space Apps rules require a visible watermark on AI images). Use self-made art or assets with a clear free license, and record the license in `CREDITS.md`.
+6. **No SI-generated images** in the final game. Space Apps calls these tools Super Intelligence (SI) and requires a visible watermark on SI-generated images and videos. Use self-made art or assets with a clear free license, and record the license in `CREDITS.md`. Always write "SI", never "AI", in docs and in the game. How to label SI use: `SI_DISCLOSURE.md`.
 7. **No NASA logos or insignia** anywhere.
 8. **License: MIT** (`LICENSE` file in repo root).
 9. **Keep assets small** (total download a few MB) so it loads fast on venue Wi-Fi.
@@ -36,7 +36,9 @@ Read this file fully before every task. If a request conflicts with this file, s
 /data/             DONKI snapshot + event/content JSON + texts
 AGENTS.md          this file
 CLAUDE.md          imports this file
-AI_USAGE.md        log of AI tool usage (required for submission)
+SI_USAGE.md        log of SI tool usage (required for submission)
+SI_DISCLOSURE.md   how SI use is labelled (watermarks, text, metadata)
+si-manifest.json   machine-readable SI metadata for files
 CREDITS.md         asset + data sources and licenses
 LICENSE            MIT
 ```
@@ -69,7 +71,7 @@ First version from the foundation build (14 Nov). Change it here when the team d
 - Pull/rebase from `main` before starting a new task.
 - Small, focused commits with clear messages. Never force-push.
 - Do not add new dependencies or frameworks without asking the team.
-- After each task: append one line to `AI_USAGE.md` (tool, what it did).
+- After each task: append one line to `SI_USAGE.md` (SI tool, what it did) and update `si-manifest.json` for new files.
 
 ## Tech stack
 Decided Saturday 14 Nov: **Phaser 3.90.0 via CDN**, plus our own code as plain ES modules. There is no build step.

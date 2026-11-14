@@ -1,3 +1,4 @@
+// SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
 // Self-made line icons (24×24, stroke = currentColor). No third-party icon set, nothing to credit.
 
 const sector = (r1, r2, a0, a1) => {
