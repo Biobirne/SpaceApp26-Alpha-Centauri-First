@@ -6,6 +6,9 @@
 // - one astronaut uses about 0.84 kg of oxygen a day (NASA life support planning value, NASA RP-1324 tables)
 // - NASA Fission Surface Power: at least 40 kilowatts, enough for about 30 homes (nasa.gov, Fission Surface Power)
 // - NASA career limit 600 mSv (NASA-STD-3001, already used in FEEDBACK.md A1)
+// - sievert = dose equivalent, the absorbed dose in gray times a factor for the kind of radiation, because
+//   "different radiation types have different biological effects for the same deposited energy"
+//   (Wikipedia "Sievert", SI definition H = Q x D; US NRC glossary "sievert (Sv)")
 // Game numbers are called game numbers. Measured numbers say who measured them.
 
 import { icon } from './icons.js';
@@ -21,6 +24,9 @@ const days = (n) => {
   const d = Math.max(1, Math.round(n));
   return `${d} ${d === 1 ? 'day' : 'days'}`;
 };
+/** Gray or sievert? The Data sheet shows gray (what the detector measures), the dose bar speaks of sieverts (harm). */
+const GRAY_OR_SIEVERT = 'Gray (Gy) counts the energy the radiation leaves behind. Sievert (Sv) counts how much harm it can do to a body. Some kinds of radiation do more harm with the same energy. Then 1 gray counts as more than 1 sievert.';
+
 const signed = (x, unit = '') => `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(round1(x))}${unit}`;
 
 /** A block of "big number: what it means" lines, then an optional real-life line. */
@@ -77,6 +83,8 @@ export function doseMeaning(state) {
     [`${Math.round(state.dose)}/${limit}`, `Dose points the crew has collected on this mission. At ${limit}, everyone must stay in the shelter.`],
     [`+${round1(d.perDay)}/day`, rateText],
     ['1 point', `A game number: about ${calmDays} calm days with the shield off. In a big storm, it can be many points a day.`],
+    ['mSv', 'Millisievert: one thousandth of a sievert. Doctors use it for the harm radiation can do to a body.'],
+    ['Gy or Sv?', `${GRAY_OR_SIEVERT} NASA’s detector measures gray, so the Data sheet shows µGy/h.`],
   ], 'Doctors measure dose in millisieverts (mSv). NASA lets an astronaut collect at most 600 mSv in a whole career.');
 }
 
@@ -130,6 +138,7 @@ export function showData(state, doc) {
     rows.push([`${fmtTimes(todayV)}`, `Today the radiation near the Moon is ${times} times as strong as on a calm day. NASA measured ${ugy(todayMean)} µGy/h today. A calm day has ${ugy(moon.normal)} µGy/h.`]);
   }
   rows.push(['µGy/h', 'Microgray per hour: how much radiation energy something soaks up in one hour. A microgray is one millionth of a gray.']);
+  rows.push(['Gy or Sv?', `${GRAY_OR_SIEVERT} NASA’s limits for astronauts are in sieverts, because they are about the body.`]);
   rows.push([`+${round1(d.perDay)}/day`, `What gets to your crew: shield, shelter and walls block ${Math.round(d.block * 100)}%, the rest adds to the Crew dose.`]);
   const html = `
     <h2>Real NASA data</h2>
