@@ -29,6 +29,12 @@ export function showHelp(cfg, { onClose } = {}) {
       ${row('fast', 'power', 'Time', `One day of the mission passes in ${cfg.secondsPerDay.normal} seconds. Fast-forward on calm days. The game slows down by itself when something happens.`)}
     </ul>
 
+    <h3>Want to know more?</h3>
+    <ul class="hw-list">
+      ${row('info', 'air', 'Tap anything', 'Tap a building to see what it does, how it works for real and what it is built from. Tap a bar to see where your power and air go.')}
+      ${row('star', 'power', 'Easy, Normal, Hard', 'Pick how hard the mission is on the start screen. Easy has fewer problems and a bigger battery. Hard has more problems and less help.')}
+    </ul>
+
     <h3>What is real?</h3>
     <ul class="hw-list">
       ${row('check', 'science', 'Real', 'The storms really happened. Flares, particle storms and radiation levels come from NASA measurements (DONKI and RadLab archives, not live). Day and night follow the real dates. The radio delay is real too.')}

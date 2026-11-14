@@ -201,6 +201,7 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
   - **Easter eggs:** tap Earth or the Sun for true fun facts (`FUN_FACTS` in `src/rules/content.js`).
   - **Sound:** effects synthesized live with Web Audio (`src/audio/sfx.js`, no files). Starts with the first tap; a sound button sits in the top bar and on the start and end screens.
   - **Everything is explained:** a "How it works" sheet (start screen and pause menu) covers every bar and control, what is real and what is made up, plus a "For grown-ups" note for judges. Call Earth says what Mission Control sees, the "Do it for me" button names the exact change, and afterwards the crewmate says what is set now and what it costs.
+  - **Mentor feedback, round 1** (`FEEDBACK.md`): Easy/Normal/Hard (`DIFFICULTY_TUNING` in `config.js`, texts in `content.js`), a mission briefing, Sam's story and materials lines, an info sheet for every building (`ROOM_INFO`), live breakdowns behind the power, air and dose bars, and lessons: every setback says why it happened and what to try next time, and the end screen lists them.
   - **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
 
 ## Still to decide today (team)

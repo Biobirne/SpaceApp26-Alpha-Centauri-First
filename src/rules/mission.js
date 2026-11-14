@@ -3,7 +3,7 @@
 // elapsed game days and drains state.outbox to update the screen.
 
 import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './config.js';
-import { CREWMATE_NAME, ROOMS, GLOSSARY, CHATTER, BADGES } from './content.js';
+import { CREWMATE_NAME, ROOMS, GLOSSARY, CHATTER, BADGES, LESSONS, UPGRADES } from './content.js';
 import { buildTimeline, moonTimesNormal, flareScore, peakDay } from './storm.js';
 import { isDaylight, sunElevation, earthLitFraction } from './sky.js';
 import { createRng } from './rng.js';
@@ -62,6 +62,7 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     stats: { blockedDose: 0, totalDose: 0, leaksFixed: 0, repairs: 0, roomsLost: 0, setbacks: 0, cardsAnswered: 0 },
     // Difficulty level: 0 normal, above 0 the kid is struggling, below 0 it's too easy.
     dda: { level: 0, lastTroubleT: 0, lastEaseT: 0 },
+    lessons: [],
   };
   updateSky(state, true);
   emit(state, 'crew', {
@@ -388,12 +389,14 @@ function step(state, h) {
   const use = powerUsePerDay(state);
   state.power = clamp(state.power + (inflow - use) * h, 0, state.capacity);
   if (state.power <= 0 && !state.powerEmergency) {
+    const shieldWas = state.shield;
     state.powerEmergency = true;
     state.shield = 0;
     state.stats.setbacks++;
     trouble(state);
     emit(state, 'setback', { kind: 'power' });
     emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield and the lab. Only life support runs now.' });
+    lesson(state, 'power', { night: !state.daylight, shield: shieldWas > 0, dust: state.dust });
   } else if (state.powerEmergency && state.power > cfg.power.recoverAbove) {
     state.powerEmergency = false;
     emit(state, 'crew', { mood: 'happy', text: 'Power is back. The lab is running again.' });
@@ -415,6 +418,8 @@ function step(state, h) {
     trouble(state);
     emit(state, 'setback', { kind: 'air' });
     emit(state, 'crew', { mood: 'alert', text: 'Air ran out, so we opened the emergency oxygen tanks. Everyone is fine, but we lost some science.' });
+    const leakId = ROOM_IDS.find((id) => state.rooms[id].status === 'leak');
+    lesson(state, 'air', { leak: leakId ? ROOMS[leakId].name.toLowerCase() : null, filter: state.filter, noPower: !lifeSupportOn });
   }
   threshold(state, 'air', state.air < cfg.air.warnBelow, () => 'Air is getting low! Fix leaks and keep life support powered.');
 
@@ -427,6 +432,7 @@ function step(state, h) {
       trouble(state);
       emit(state, 'room', { roomId: id, status: 'lost' });
       emit(state, 'crew', { mood: 'alert', text: `We sealed the ${ROOMS[id].name.toLowerCase()} to save the air. You can rebuild it later with science points.` });
+      lesson(state, 'roomLost', { room: ROOMS[id].name.toLowerCase(), days: Math.round(state.t - room.since) });
     }
   }
 
@@ -444,6 +450,7 @@ function step(state, h) {
     trouble(state);
     emit(state, 'setback', { kind: 'dose' });
     emit(state, 'crew', { mood: 'alert', text: 'Our radiation dose hit the safety limit. Everyone into the shelter until the storm calms down!' });
+    lesson(state, 'dose', { shieldLabel: SHIELD_LABELS[state.shield], sheltered: state.sheltered });
   } else if (state.forcedShelter && rad <= 3) {
     state.forcedShelter = false;
     emit(state, 'crew', { mood: 'happy', text: 'Radiation has calmed down. We can leave the shelter.' });
@@ -618,6 +625,52 @@ function particleCard(state) {
   };
 }
 
+/** Explain a setback: why it happened and what to try next time. Collected for the end screen. */
+function lesson(state, kind, ctx) {
+  const l = LESSONS[kind](ctx);
+  state.lessons.push({ kind, day: Math.floor(state.t) + 1, ...l });
+  emit(state, 'crew', { mood: 'calm', text: `Why did that happen? ${l.why} Next time: ${l.next}` });
+}
+
+/** Where the power comes from and goes to, per day (for the power info sheet). */
+export function powerBreakdown(state) {
+  const p = state.cfg.power;
+  const fission = state.upgrades.fission ? p.fissionPerDay : 0;
+  const solar = powerInPerDay(state) - fission;
+  const rows = [];
+  let solarLabel = 'Solar panels';
+  if (state.rooms.solar.status === 'lost') solarLabel = 'Solar panels (sealed)';
+  else if (!state.daylight) solarLabel = 'Solar panels (night: no sunlight)';
+  else if (state.dust) solarLabel = 'Solar panels (dusty)';
+  rows.push({ label: solarLabel, perDay: solar });
+  if (fission) rows.push({ label: UPGRADES.fission.name, perDay: fission });
+  rows.push({ label: 'Air machines and lights', perDay: -p.lifeSupportPerDay });
+  if (isWorking(state)) rows.push({ label: 'Lab work', perDay: -p.sciencePerDay });
+  if (state.shield) rows.push({ label: `Shield on ${SHIELD_LABELS[state.shield]}`, perDay: -p.shieldPerDay[state.shield] });
+  if (!state.daylight) rows.push({ label: 'Heating in the cold night', perDay: -p.nightHeatingPerDay });
+  return rows;
+}
+
+/** Where the air comes from and goes to, per day (for the air info sheet). */
+export function airBreakdown(state) {
+  const a = state.cfg.air;
+  const on = state.power > 0 || powerInPerDay(state) >= state.cfg.power.lifeSupportPerDay;
+  const rows = [on
+    ? { label: 'Air machines (they need power)', perDay: a.regenPerDay }
+    : { label: 'Air machines are off: no power!', perDay: -a.noPowerPerDay }];
+  if (on && state.rooms.greenhouse.status === 'ok') rows.push({ label: 'Plants in the greenhouse', perDay: a.greenhouseBonusPerDay });
+  for (const id of ROOM_IDS) if (state.rooms[id].status === 'leak') rows.push({ label: `Leak in the ${ROOMS[id].name.toLowerCase()}`, perDay: -a.leakPerDay });
+  if (state.filter) rows.push({ label: 'Clogged CO₂ filter', perDay: -a.cloggedFilterPerDay });
+  return rows;
+}
+
+/** Radiation dose right now: outside level, what blocks it, what gets through per day. */
+export function doseNow(state) {
+  const rad = radiationNow(state);
+  const block = blockFraction(state);
+  return { rad, block, perDay: state.cfg.dose.perNormalDay * rad * (1 - block) };
+}
+
 /** Something went wrong for the player: random problems slow down. */
 function trouble(state) {
   const d = state.dda;
@@ -725,6 +778,7 @@ export function summarize(state) {
     team: calls >= 1,
     builder: upgrades >= 1,
     science: state.science >= target,
+    hardHero: cfg.difficulty === 'hard' && stars >= 2,
   };
   const badges = Object.keys(BADGES).filter((k) => earned[k]);
   // Praise the effort or the strategy the kid actually used.
@@ -735,9 +789,14 @@ export function summarize(state) {
   else if (blockedPct >= 60 && state.science >= target / 2) praise = 'You raised the shield at the right times. Good planning!';
   else if (state.science >= target) praise = 'You kept the lab busy on calm days. Smart timing!';
   else praise = 'You stayed with your crew for all 30 days. Well done!';
+  // One lesson per kind is enough on the end screen.
+  const lessons = [];
+  for (const l of state.lessons) if (!lessons.some((x) => x.kind === l.kind)) lessons.push(l);
   return {
     badges,
     praise,
+    lessons,
+    difficulty: cfg.difficulty || 'normal',
     stormTitle: tl.title,
     displayLabel: tl.displayLabel,
     stars,

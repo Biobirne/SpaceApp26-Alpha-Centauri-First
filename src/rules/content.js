@@ -38,6 +38,16 @@ export const CHATTER = [
   'Earth never sets in our sky. From this side of the Moon it is always up there.',
   'Radio signals to Earth take about 1.3 seconds. That’s how far away home is.',
   'Plants in our greenhouse make fresh oxygen for us to breathe.',
+  // Story and history (mentor feedback: storytelling)
+  'Apollo 11 landed near here in 1969. Their footprints are probably still there.',
+  'In 1959, the US Army planned a Moon base called Project Horizon. It was never built.',
+  'In August 1972, a giant solar storm hit between two Apollo missions. Luckily, nobody was on the Moon.',
+  'NASA’s Artemis missions plan to bring astronauts back to the Moon, near its south pole.',
+  // How a real base could be built (mentor feedback: materials)
+  'Real Moon bases may be 3D-printed from Moon soil, so less has to fly from Earth.',
+  'Every kilogram sent to the Moon costs a lot. That’s why a base recycles almost everything.',
+  'Dark craters near the south pole hide ice. It could give water, air and rocket fuel.',
+  'Some modules could be inflatable, like a big balloon with very strong walls.',
 ];
 
 export const UPGRADES = {
@@ -67,6 +77,7 @@ export const BADGES = {
   team: { title: 'Team player', text: 'Ask Mission Control for advice.' },
   builder: { title: 'Builder', text: 'Build an upgrade.' },
   science: { title: 'Science star', text: 'Reach the science goal.' },
+  hardHero: { title: 'Hard-mode hero', text: 'Get 2 stars or more on Hard.' },
 };
 
 /** Easter eggs: true facts when a kid taps Earth or the Sun. */
@@ -85,4 +96,80 @@ export const FUN_FACTS = {
     'A solar flare is a sudden flash of energy from the Sun. The biggest ones are X-class.',
     'The sky on the Moon is black even at noon, because there is no air to scatter the light.',
   ],
+};
+
+/** Info sheet for each building (tap it when nothing is broken). All facts are real. */
+export const ROOM_INFO = {
+  solar: {
+    does: 'Turns sunlight into electricity. The battery stores it for the night.',
+    real: 'Real Moon panels can turn to follow the low Sun. Near the south pole, some hills get sunlight almost all the time.',
+    built: 'Silicon solar cells, glass covers and light metal frames. Moon soil contains silicon, so one day panels could be made here.',
+    fact: 'There is no air on the Moon, so no clouds ever block the Sun.',
+  },
+  greenhouse: {
+    does: 'Plants turn the CO₂ the crew breathes out into fresh oxygen. They also grow food.',
+    real: 'Astronauts on the space station have grown lettuce, radishes and chili peppers.',
+    built: 'A sealed module with LED grow lights, water pipes, and trays where roots grow in water or soil.',
+    fact: 'Plants also “sweat” clean water vapour, which machines can collect and reuse.',
+  },
+  hab: {
+    does: 'The crew lives, sleeps and eats here. The air and water machines are here too.',
+    real: 'On the space station, machines recycle about 98% of the water, even sweat.',
+    built: 'Metal modules launched from Earth, or inflatable ones. An inflatable test room has been on the space station since 2016.',
+    fact: 'Water is heavy to launch, so every drop gets cleaned and used again.',
+  },
+  lab: {
+    does: 'The crew studies Moon rocks, plants and how space affects people. That earns science points.',
+    real: 'Apollo astronauts brought back 382 kg of Moon rocks. Scientists still study them today.',
+    built: 'A metal module with microscopes, freezers and computers.',
+    fact: 'Moon rocks showed that the Moon probably formed when a huge object hit the young Earth.',
+  },
+  shelter: {
+    does: 'A small room with extra-thick walls. The crew hides here during strong solar storms.',
+    real: 'NASA’s Orion capsule has a storm plan: the crew builds a shelter from bags of supplies.',
+    built: 'Moon soil piled on top, or water tanks in the walls. Using Moon soil means less to launch from Earth.',
+    fact: 'Water is great against radiation because it is full of light hydrogen atoms.',
+  },
+};
+
+/** Why a setback happened and what to try next time (mentor feedback: learn from mistakes). */
+export const LESSONS = {
+  power: ({ night, shield, dust }) => ({
+    title: 'The battery ran empty',
+    why: night && shield ? 'It was lunar night, so the panels made no power, but the shield kept using it.'
+      : night ? 'It was lunar night, so the solar panels made no power.'
+        : dust ? 'Moon dust covered the panels, so they made much less power.'
+          : 'The base used more power than the panels made.',
+    next: night ? 'Charge up before sunset, and keep the shield low when radiation is calm.'
+      : dust ? 'Clean the panels as soon as dust covers them.'
+        : 'Watch the power bar, and turn the shield down when it gets low.',
+  }),
+  air: ({ leak, filter, noPower }) => ({
+    title: 'The air ran out',
+    why: leak ? `Air escaped through the leak in the ${leak}.`
+      : filter ? 'The clogged filter stopped the air from being cleaned.'
+        : noPower ? 'With no power, the air machines stopped.'
+          : 'The base lost more air than it made.',
+    next: leak || filter ? 'Fix leaks and filters right away. If you are not sure, call Earth.'
+      : 'Keep some power in the battery for the air machines.',
+  }),
+  dose: ({ shieldLabel, sheltered }) => ({
+    title: 'The crew got too much radiation',
+    why: sheltered ? 'The crew had already taken a lot of radiation earlier in the storm.'
+      : shieldLabel === 'Off' ? 'A strong storm hit while the shield was off and the crew was outside the shelter.'
+        : `A strong storm hit while the shield was only on ${shieldLabel}.`,
+    next: 'When a big flare or particle storm is announced, raise the shield or go to the shelter right away.',
+  }),
+  roomLost: ({ room, days }) => ({
+    title: `The ${room} was sealed`,
+    why: `The leak in the ${room} was not fixed for ${days} days, so the crew closed it to save air.`,
+    next: 'Tap a room with a red ! as soon as you see it. You can rebuild sealed rooms with science points.',
+  }),
+};
+
+/** Difficulty levels on the start screen. The tuning is in config.js (DIFFICULTY_TUNING). */
+export const DIFFICULTY = {
+  easy: { label: 'Easy', text: 'Fewer problems, a bigger battery, and Mission Control answers more often. Good for your first missions.' },
+  normal: { label: 'Normal', text: 'The mission as we designed it. Things go wrong now and then, and you have time to fix them.' },
+  hard: { label: 'Hard', text: 'More problems, rooms get sealed sooner, weaker panels, and Mission Control is busy longer. For a real challenge.' },
 };

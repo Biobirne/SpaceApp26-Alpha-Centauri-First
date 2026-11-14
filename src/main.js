@@ -2,13 +2,14 @@
 // Controller: loads data, runs the game clock, sends player actions to the rules and
 // routes the rules' outbox to the HUD, the overlays and the Phaser scene.
 
-import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './rules/config.js';
+import { CONFIG, ROOM_IDS, SHIELD_LABELS, configFor } from './rules/config.js';
 import { UPGRADES, ROOMS, FUN_FACTS } from './rules/content.js';
 import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
+import { showRoomInfo, showMeterInfo, showBriefing } from './ui/info.js';
 import { createHud } from './ui/hud.js';
 import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
@@ -179,7 +180,8 @@ function showStart() {
   renderStart(app, {
     index: data.index, progress, unlockAll: UNLOCK_ALL, next: nextLevel(progress, UNLOCK_ALL),
     onStart: (id) => startMission(id),
-    onHelp: () => showHelp(CONFIG),
+    onHelp: () => showHelp(configFor(loadProgress().difficulty)),
+    onDifficulty: (level) => setPref('difficulty', level),
   });
   syncSoundButtons();
   if (scene) { scene.view = idleView(); syncSlot(); }
@@ -221,7 +223,7 @@ function startMission(id) {
     say: (text, mood, opts) => hud.crew.say(text, mood, opts),
     unsay: (tag) => hud.crew.drop(tag),
   });
-  const state = createMission(doc, { seed, config: CONFIG, script: guide.script() });
+  const state = createMission(doc, { seed, config: configFor(progress.difficulty), script: guide.script() });
   run = {
     id, doc, state, hud, guide,
     speed: 'normal',
@@ -235,6 +237,10 @@ function startMission(id) {
   run.ro = ro;
   requestAnimationFrame(syncSlot);
   run.raf = requestAnimationFrame(loop);
+  // The story first: where we are, and which real storm is coming. The clock waits.
+  block('brief', true);
+  const date = new Date(state.timeline.startMs).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  showBriefing(doc, state.cfg, date, () => block('brief', false));
   history.replaceState(null, '', `?storm=${id}${UNLOCK_ALL ? '&all=1' : ''}`);
 }
 
@@ -391,7 +397,7 @@ const actions = {
       },
       onResume: () => block('pause', false),
       // Help keeps the clock stopped until the sheet is closed.
-      onHelp: () => { block('pause', true); showHelp(CONFIG, { onClose: () => block('pause', false) }); },
+      onHelp: () => { block('pause', true); showHelp(run.state.cfg, { onClose: () => block('pause', false) }); },
       onRestart: () => startMission(run.id),
       onMenu: showStart,
     });
@@ -448,7 +454,11 @@ const actions = {
     if (!s || run.blockers.size) return;
     const job = repairFor(s, roomId);
     if (!job) {
-      if (fromScene) toast(`${icon('check')}<span>${esc(ROOMS[roomId].name)}: all good.</span>`, '', 1600);
+      // Nothing broken: show what this building is (curious players can learn more).
+      if (fromScene) {
+        block('info', true);
+        watchClose(showRoomInfo(roomId, s), 'info');
+      }
       return;
     }
     const doRepair = () => {
@@ -463,6 +473,13 @@ const actions = {
       block('rebuild', true);
       watchClose(showRebuild(job, s.science, doRepair), 'rebuild');
     } else doRepair();
+  },
+
+  info(kind) {
+    const s = run?.state;
+    if (!s || run.blockers.size) return;
+    block('info', true);
+    watchClose(showMeterInfo(kind, s), 'info');
   },
 
   shop() {

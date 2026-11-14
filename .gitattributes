@@ -4,3 +4,4 @@
 *.ogg binary
 *.mp3 binary
 *.woff2 binary
+SI_USAGE.md merge=union

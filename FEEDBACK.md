@@ -1,12 +1,29 @@
-# Playtest feedback
+# Feedback log
 
-Collected before we change anything. Feedback is split by source: **manual** (team members playing themselves) and **SI** (Super Intelligence, i.e. an AI agent playing and reviewing). Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
+Every piece of feedback we got, what we decided and where it stands. Newest round on top.
+**Top priority for every change: the game must teach.** If a child plays one mission and cannot say why we clean the panels, why the crew goes to the shelter, or where the oxygen comes from, we have failed the challenge, however good it looks. Research and proposals: `RESEARCH.md`.
 
-# Part 1: Manual feedback (team)
 
-_Add yours here: name, device, build, what you noticed._
+## Mentors (14 Nov 2026)
 
-## Florian (14 Nov, ~13:00)
+| # | Feedback | What we do | Status |
+|---|----------|-----------|--------|
+| M1 | Explain the materials needed to build an outpost like this | Sam explains materials and real plans in calm moments; every building's info sheet has a "Built from" part | Done (round 1) |
+| M2 | Focus on sustainability: resources in a recycling loop | A visible life support loop (crew → CO₂ → plants → oxygen, water recycling) with live status, and plants that need light and water | Round 2 |
+| M3 | Bio-based life support technologies | Part of the loop: plants and an algae bioreactor upgrade (real research, e.g. ESA MELiSSA) | Round 2 |
+| M4 | Rewarding system | Badges and stars exist; add a badge for hard mode | Done (round 1) |
+| M5 | Increasing difficulty, maybe 3 levels, explain each | Easy, Normal, Hard on the start screen, each with one sentence; adaptive difficulty stays on top | Done (round 1) |
+| M6 | Improve storytelling | Mission briefing at the start; history and "how it could look for real" lines from Sam (Project Horizon 1959, the August 1972 storm between Apollo 16 and 17, Artemis) | Done (round 1) |
+| M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Round 3 |
+| M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
+| M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Round 2 |
+
+## Team
+
+Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
+
+### Florian (14 Nov, ~13:00)
 - Device / build: laptop, Brave, `main` @ `d1d04ee` (after PR #9).
 
 **The biggest problem: the game is hard to follow.**
@@ -35,14 +52,16 @@ _Add yours here: name, device, build, what you noticed._
 
 **Look:** the UI colours feel generic, like the cheap SI style. This shows most in the bars and on the end/results screen. We should stand out from that.
 
-# Part 2: SI feedback (Claude Code)
+## Automatic SI review
 
-## SI playtest 1 (Claude Code, 14 Nov, ~12:00)
+Claude Code (SI) playing the game and reviewing it.
+
+### SI playtest 1 (Claude Code, 14 Nov, ~12:00)
 - Build: `main` @ `8ddf880` (after PRs #6–#8).
 - Played: October 2021 storm, fresh player (hints on), phone size 390×844. Mostly fast-forward. Card choices were deliberately mixed, including "Keep working (Risky)".
 - Result: "Perfect mission", 3 stars, 132 science (goal 120), crew dose 9/100, 68% radiation blocked. No console errors.
 
-### What works well
+#### What works well
 - **The first minute.** You land straight in the base. Sam talks, and the first leak holds the clock ("Clock waits for you") until it is fixed. This matches the "First 60 seconds" rule in `Guide_Gamedesign_Attention.md`.
 - **Costs before the tap.** Shield Off/Low/Mid/Max shows "−1.5 ⚡/day" and so on. This is the core requirement of the challenge.
 - **Real data feels real.** There are badges ("Real solar flare", "Real particle storm"), a radiation chip ("9.1× normal") and a data button. The end screen compares the same day: "Near the Moon 42×, On Mars 2.1×". Strong for the jury.
@@ -50,7 +69,7 @@ _Add yours here: name, device, build, what you noticed._
 - **Crisp on phone and laptop.** The canvas renders at device pixel ratio, and the HUD is HTML/CSS.
 - **SI labelling** is already handled.
 
-### Problems
+#### Problems
 
 **P1: Too easy, so the trade-off is not felt.**
 - A semi-random strategy got a perfect score, including choosing "Keep working (Risky)" during a particle storm.
