@@ -473,6 +473,36 @@ body.no-phaser #scene {
 .datalist li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: var(--r-s); background: var(--panel-2); }
 .datalist li span:last-child { color: var(--text-2); text-align: right; }
 
+/* sound on/off (topbar and screens) */
+.soundbtn {
+  width: 44px; height: 44px; flex: none; border: 0; border-radius: 12px;
+  display: grid; place-items: center; cursor: pointer;
+  background: rgb(22 30 56 / 0.82); color: var(--text); backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.soundbtn[aria-pressed='false'] { color: var(--text-2); }
+.topbar .soundbtn { align-self: flex-start; margin-top: 4px; }
+.screen-tools { position: absolute; top: calc(var(--safe-t) + 12px); right: calc(var(--safe-r) + 12px); z-index: 2; }
+
+/* read a crew line aloud */
+.crew .speak {
+  flex: none; align-self: flex-end; width: 44px; height: 44px; border: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: #f6f3ec; color: #5a4d8a; box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+}
+
+/* badges and praise */
+.praise { margin: 0; font-size: 19px; color: var(--science); font-weight: 600; max-width: 40ch; }
+.shelf h2 { margin: 0 0 8px; font-size: 20px; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(160px, 45%), 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.badges li { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--panel); box-shadow: inset 0 0 0 1.5px var(--line); color: var(--text-2); }
+.badges li .ic { width: 26px; height: 26px; flex: none; color: var(--panel-3); }
+.badges li b { display: block; font-size: 15px; }
+.badges li small { display: block; font-size: 12px; line-height: 1.25; }
+.badges li.got { color: var(--text); background: var(--panel-2); }
+.badges li.got .ic { color: var(--power); }
+.badges li.new { box-shadow: inset 0 0 0 2px var(--power); }
+
 /* pause */
 .pause-sheet { text-align: center; }
 .pause-sheet .hints { margin-top: 14px; width: 100%; }

@@ -34,7 +34,16 @@ const PATHS = {
   filter: '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 5v14M12 5v14M16 5v14"/>',
   plant: '<path d="M12 21v-9M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 15c0-3-2.5-5.5-6-5.5 0 3.5 2.5 5.5 6 5.5z"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  sound: '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute: '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>',
+  speak: '<path d="M4.5 5h11A2.5 2.5 0 0 1 18 7.5v5a2.5 2.5 0 0 1-2.5 2.5H10l-4 3.5V15H4.5A2.5 2.5 0 0 1 2 12.5v-5A2.5 2.5 0 0 1 4.5 5z"/><path d="M20.5 8a5 5 0 0 1 0 4"/>',
+  medal: '<path d="M8 2.5h8l-2 6h-4z"/><circle cx="12" cy="15" r="6"/><path d="m12 12 1 2 2 .3-1.5 1.4.4 2.1-1.9-1-1.9 1 .4-2.1L9 14.3l2-.3z" fill="currentColor" stroke="none"/>',
 };
+
+/** Sound on/off button. The controller keeps every copy in sync (topbar, start and end screens). */
+export function soundButton(on) {
+  return `<button type="button" class="soundbtn" data-sound aria-pressed="${on}" aria-label="Sound">${icon(on ? 'sound' : 'mute')}</button>`;
+}
 
 export function icon(name, cls = '') {
   return `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${PATHS[name] || ''}</svg>`;

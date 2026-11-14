@@ -61,7 +61,8 @@ First version from the foundation build (14 Nov). Change it here when the team d
   - Hands the scene a plain `view` object every frame.
 - **Presentation:**
   - `src/ui/` is the HTML/CSS HUD, sheets and screens. It reads state and calls controller actions.
-  - `src/scene/MoonScene.js` is the Phaser canvas. It only draws `scene.view` and emits `room-tap`.
+  - `src/scene/MoonScene.js` is the Phaser canvas. It only draws `scene.view` and emits `room-tap` and `sky-tap` (Earth or Sun, for fun facts).
+  - `src/audio/` has the synthesized sound effects (`sfx.js`) and read-aloud with the device voice (`voice.js`). The controller plays them.
 - **Data:** storms in `data/storms/*.json` (format in `data/README.md`). Tuning numbers live in `src/rules/config.js`, and kid-facing text in `src/rules/content.js`.
 - **Sprites:** listed in `assets/art/manifest.json`, with sizes and anchors in `assets/art/README.md`.
 

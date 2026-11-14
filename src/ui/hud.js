@@ -2,7 +2,7 @@
 // The in-game console (HTML on top of the Phaser canvas). It renders mission state and sends
 // player actions to the controller through `actions`. No game rules in here.
 
-import { icon, crewAvatar } from './icons.js';
+import { icon, crewAvatar, soundButton } from './icons.js';
 import { SHIELD_LABELS, ROOM_IDS } from '../rules/config.js';
 import { CREWMATE_NAME, ROOMS } from '../rules/content.js';
 import {
@@ -15,12 +15,13 @@ const DAY_MS = 86400000;
 const fmtDate = (ms) => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const BLOCK_SHORT = ['none', 'half', 'most', 'all'];
 
-export function createHud(root, actions) {
+export function createHud(root, actions, { sound = true, canSpeak = false } = {}) {
   const el = document.createElement('div');
   el.className = 'game';
   el.innerHTML = `
     <header class="topbar">
       <div class="clock" aria-live="off"><span class="clock-day"></span><span class="clock-date"></span></div>
+      ${soundButton(sound)}
       <div class="speedbox"><div class="speed" role="group" aria-label="Game speed">
         <button type="button" data-speed="pause" aria-label="Pause">${icon('pause')}</button>
         <button type="button" data-speed="normal" aria-label="Normal speed">${icon('play')}</button>
@@ -38,6 +39,7 @@ export function createHud(root, actions) {
       <div class="crew" aria-live="polite">
         <div class="av-wrap"></div>
         <button type="button" class="bubble"><span class="who">${CREWMATE_NAME}</span><span class="say"></span><span class="word" hidden>${icon('book')}<span>New word: <b></b><br><span class="w-text"></span></span></span><span class="more"></span></button>
+        ${canSpeak ? `<button type="button" class="speak" aria-label="Read aloud">${icon('speak')}</button>` : ''}
       </div>
     </div>
     <section class="meters" aria-label="Base status">
@@ -267,6 +269,7 @@ function createCrew(node) {
     node.classList.add('show');
     schedule();
     showing.onShow?.();
+    api.onLine?.(showing.text);
   }
 
   function schedule() {
@@ -281,6 +284,10 @@ function createCrew(node) {
 
   const api = {
     now: () => null,
+    /** Called with the text of every line that appears (read-aloud). */
+    onLine: null,
+    /** The line on screen right now. */
+    current: () => showing?.text ?? null,
     /**
      * `tag` groups lines that replace each other (the guide's hints): a new one removes older
      * queued ones and takes over the bubble. `onShow` runs when the line actually appears.

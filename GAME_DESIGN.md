@@ -193,6 +193,12 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
   - 3 for the full goal (120) with no room lost.
   - Hiding in the shelter all month is safe but earns one star.
 - **Progress** is saved in `localStorage` only. Levels unlock in order. `?all=1` unlocks everything for judges. `?storm=<id>` starts a storm directly. `?debug=1` exposes a skip helper for playtests.
+- **From the team's kids game design guide (second round):**
+  - **Invisible difficulty adjustment.** Only the random problems (leaks, dust, filters) adapt; the NASA storm data never changes. Each setback or sealed room raises a level (max 2): problems come later, and only one at a time. Four calm days lower it again, down to −1 (problems come about 15 % sooner). Tuning: `dda` in `src/rules/config.js`.
+  - **Badges** for ways of playing (fix 3 problems, no sealed room, no emergency, block most radiation, ask Mission Control, build an upgrade, reach the science goal). The collection is on the start screen. The end screen praises the effort or strategy the kid actually used.
+  - **Easter eggs:** tap Earth or the Sun for true fun facts (`FUN_FACTS` in `src/rules/content.js`).
+  - **Sound:** effects synthesized live with Web Audio (`src/audio/sfx.js`, no files). Starts with the first tap; a sound button sits in the top bar and on the start and end screens.
+  - **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
 
 ## Still to decide today (team)
 - Interfaces: a first version is in `AGENTS.md` (from the foundation build). Change it there if the team wants something else.

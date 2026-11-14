@@ -63,6 +63,13 @@ export function createMoonScene() {
         z.on('pointerup', () => this.game.events.emit('room-tap', id));
         this.zones[id] = z;
       }
+      // Easter eggs: tapping Earth or the Sun gives a fun fact.
+      this.skyZones = {};
+      for (const id of ['earth', 'sun']) {
+        const z = this.add.zone(0, 0, 10, 10).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        z.on('pointerup', () => this.game.events.emit('sky-tap', id));
+        this.skyZones[id] = z;
+      }
       this.stars = Array.from({ length: 140 }, () => ({
         x: this.rnd.frac(), y: this.rnd.frac(), r: 0.6 + this.rnd.frac() * 1.3, a: 0.35 + this.rnd.frac() * 0.65, p: this.rnd.frac() * 6.28,
       }));
@@ -117,6 +124,11 @@ export function createMoonScene() {
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
       this.flash.setSize(W, H);
+      for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
+        const size = Math.max(p.r * 2.6, 48 * this.dpr);
+        this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
+        this.skyZones[id].input.hitArea.setSize(size, size);
+      }
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const pad = unit * 2;

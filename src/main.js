@@ -3,7 +3,7 @@
 // routes the rules' outbox to the HUD, the overlays and the Phaser scene.
 
 import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './rules/config.js';
-import { UPGRADES, ROOMS } from './rules/content.js';
+import { UPGRADES, ROOMS, FUN_FACTS } from './rules/content.js';
 import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow,
@@ -12,7 +12,11 @@ import { createHud } from './ui/hud.js';
 import { showCard, showRepair, showRebuild, showCall, showShop, showData, showPause, toast, floater, esc } from './ui/overlays.js';
 import { renderStart, renderEnd, renderError } from './ui/screens.js';
 import { icon } from './ui/icons.js';
-import { loadProgress, saveResult, nextLevel, isUnlocked, LEVEL_ORDER, rankFor, markHintSeen, setHints } from './progress.js';
+import {
+  loadProgress, saveResult, nextLevel, isUnlocked, LEVEL_ORDER, rankFor, markHintSeen, setHints, setPref, saveBadges,
+} from './progress.js';
+import { createSfx } from './audio/sfx.js';
+import { voice } from './audio/voice.js';
 import { createGuide } from './ui/guide.js';
 import { createMoonScene } from './scene/MoonScene.js';
 
@@ -22,6 +26,39 @@ const app = document.getElementById('app');
 const BLOCK_SHORT = ['blocks nothing', 'blocks half', 'blocks most', 'blocks almost all'];
 
 const data = { index: null, docs: {}, art: { rooms: {}, background: null } };
+
+// ------------------------------------------------------------------ sound and read-aloud
+const sfx = createSfx({ enabled: loadProgress().sound });
+let readAloud = loadProgress().readAloud && voice.available;
+const funIdx = { earth: 0, sun: 0 };
+
+// Browsers only allow audio after a tap, so the sound starts with the first one.
+document.addEventListener('pointerdown', () => sfx.unlock(), { capture: true });
+document.addEventListener('click', (e) => {
+  const soundBtn = e.target.closest('[data-sound]');
+  if (soundBtn) {
+    const on = !sfx.on;
+    sfx.set(on);
+    setPref('sound', on);
+    syncSoundButtons();
+    if (on) sfx.play('tap');
+    return;
+  }
+  if (e.target.closest('.crew .speak')) {
+    const line = run?.hud.crew.current();
+    if (line) voice.speak(line);
+    return;
+  }
+  if (e.target.closest('button:not([disabled])')) sfx.play('tap');
+});
+
+function syncSoundButtons() {
+  for (const b of document.querySelectorAll('[data-sound]')) {
+    b.setAttribute('aria-pressed', String(sfx.on));
+    b.innerHTML = icon(sfx.on ? 'sound' : 'mute');
+    b.setAttribute('aria-label', sfx.on ? 'Sound is on. Tap to mute.' : 'Sound is off. Tap to turn it on.');
+  }
+}
 // Playtest helper: ?debug=1 exposes the running mission and lets tests jump ahead in time.
 if (params.get('debug') === '1') {
   window.__moonbase = {
@@ -91,6 +128,12 @@ function startPhaser() {
   game.scene.add('moon', MoonScene, true, { art: data.art, dpr });
   game.events.once('moon-ready', (s) => { scene = s; scene.view = idleView(); syncSlot(); });
   game.events.on('room-tap', (id) => run && actions.repair(id, true));
+  game.events.on('sky-tap', (id) => {
+    if (!run || run.blockers.size || run.state.pendingCard) return;
+    const facts = FUN_FACTS[id];
+    sfx.play('fun');
+    run.hud.crew.say(facts[funIdx[id]++ % facts.length], 'happy', { tag: 'fun' });
+  });
   addEventListener('resize', onResize);
 }
 
@@ -136,6 +179,7 @@ function showStart() {
     index: data.index, progress, unlockAll: UNLOCK_ALL, next: nextLevel(progress, UNLOCK_ALL),
     onStart: (id) => startMission(id),
   });
+  syncSoundButtons();
   if (scene) { scene.view = idleView(); syncSlot(); }
 }
 
@@ -144,6 +188,7 @@ function showEnd(summary) {
   const doc = run.doc;
   const rankBefore = rankFor(loadProgress());
   const progress = saveResult(id, summary.stars);
+  const newBadges = saveBadges(summary.badges);
   const rankAfter = rankFor(progress);
   const i = LEVEL_ORDER.indexOf(id);
   const nextId = LEVEL_ORDER.slice(i + 1).find((x) => data.docs[x] && isUnlocked(x, progress, UNLOCK_ALL));
@@ -151,10 +196,12 @@ function showEnd(summary) {
   stopRun();
   clearApp();
   renderEnd(app, {
-    summary, doc, rankBefore, rankAfter, nextId, nextTitle: nextId ? data.docs[nextId].title : '',
+    summary, doc, rankBefore, rankAfter, nextId, nextTitle: nextId ? data.docs[nextId].title : '', newBadges, sound: sfx.on,
     onNext: () => startMission(nextId), onAgain: () => startMission(id), onMenu: showStart,
   });
   if (scene && finalView) { scene.view = finalView; syncSlot(); }
+  syncSoundButtons();
+  sfx.play('star');
 }
 
 // ------------------------------------------------------------------ mission run
@@ -164,8 +211,9 @@ function startMission(id) {
   clearApp();
   const doc = data.docs[id];
   const seed = Number(params.get('seed')) || (Date.now() % 1e9);
-  const hud = createHud(app, actions);
   const progress = loadProgress();
+  const hud = createHud(app, actions, { sound: sfx.on, canSpeak: voice.available });
+  hud.crew.onLine = (text) => { if (readAloud) voice.speak(text); };
   const guide = createGuide({
     root: hud.el, enabled: progress.hints, seen: progress.seen, markSeen: markHintSeen,
     say: (text, mood, opts) => hud.crew.say(text, mood, opts),
@@ -194,6 +242,7 @@ function stopRun() {
   run.ro?.disconnect();
   run.guide.stop();
   run.hud.crew.clear();
+  voice.stop();
   run = null;
 }
 
@@ -269,6 +318,7 @@ function drain() {
         if (s.pendingCard !== e.card) break; // already answered (only happens in debug skips)
         slowDown();
         block('card', true);
+        sfx.play('card');
         showCard(e.card, (optionId) => {
           chooseOption(s, optionId);
           block('card', false);
@@ -276,6 +326,7 @@ function drain() {
         break;
       case 'flare':
         scene?.flare(e.score);
+        if (e.score >= 400) sfx.play('flare');
         if (e.score >= 400) slowDown();
         break;
       case 'particles':
@@ -284,18 +335,23 @@ function drain() {
         break;
       case 'room':
         if (e.status === 'leak' || e.status === 'lost') slowDown();
-        if (e.status === 'ok') r.hud.crew.dismissAlert();
+        if (e.status === 'ok') { r.hud.crew.dismissAlert(); sfx.play('fixed'); }
+        else if (e.status === 'lost') sfx.play('setback');
+        else sfx.play('alert');
         break;
       case 'setback':
         r.hud.hitMeter(e.kind);
+        sfx.play('setback');
         slowDown();
         break;
       case 'warn':
         r.hud.hitMeter(e.key);
+        sfx.play('warn');
         slowDown();
         break;
       case 'upgrade':
         toast(`${icon('check')}<span>Built: <b>${esc(UPGRADES[e.key].name)}</b></span>`, 'word');
+        sfx.play('upgrade');
         break;
       case 'end':
         setTimeout(() => { if (run === r) showEnd(e.summary); }, 900);
@@ -324,6 +380,13 @@ const actions = {
     showPause({
       hints: loadProgress().hints,
       onHints: (on) => { setHints(on); run?.guide.setEnabled(on); },
+      readAloud: voice.available ? readAloud : null,
+      onReadAloud: (on) => {
+        readAloud = on;
+        setPref('readAloud', on);
+        if (on) voice.speak('Okay! I will read every line aloud.');
+        else voice.stop();
+      },
       onResume: () => block('pause', false),
       onRestart: () => startMission(run.id),
       onMenu: showStart,
@@ -359,6 +422,7 @@ const actions = {
       return;
     }
     const advice = callEarth(s);
+    sfx.play('radio');
     run.guide.onAction('call');
     block('call', true);
     let applied = null;
@@ -439,5 +503,6 @@ addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
+  if (document.hidden) voice.stop();
   if (document.hidden && run && !run.blockers.size && !run.state.ended) actions.pause();
 });
