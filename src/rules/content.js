@@ -23,6 +23,7 @@ export const GLOSSARY = {
   dust: { word: 'Lunar dust', text: 'Sharp, sticky Moon dust that covers everything.' },
   magneticField: { word: 'Magnetic field', text: 'Earth’s invisible shield that bends solar particles away.' },
   atmosphere: { word: 'Atmosphere', text: 'A layer of air around a planet. Mars has a thin one.' },
+  magnetShield: { word: 'Magnet shield', text: 'Test tech: strong magnets push solar particles away. No base has one yet.' },
 };
 
 /** Calm-moment lines so something is always happening. All true facts. */

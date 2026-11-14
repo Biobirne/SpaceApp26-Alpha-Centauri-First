@@ -126,6 +126,8 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 | Radiation factors per site and day | Exact power and air costs per action |
 | Earth–Moon radio round trip of 2.6 s | The cooldown on calling Mission Control |
 | Lunar night of about 14 days, launch windows every 26 months, a 7-month trip to Mars | Science points and stars |
+| Magnet shields are a real research idea (NASA NIAC studies, the EU/CERN project SR2S): superconducting magnets that push solar particles away. They need constant power for cooling. | That a base has one: no base does yet. The block values (60/85/95 %) and power costs are game numbers. The game calls it test tech ("Magnet shield" word, "How it works") |
+| Real protection: Moon soil (regolith) or water walls, a storm shelter, space weather forecasts from Earth | The shelter's 90 % and the regolith upgrade's numbers |
 
 ## Build order (cut from the bottom)
 1. **One playable Moon mission with one storm** (May 2024), using grey boxes and no art: start → 30 days → end → restart. Test it with a real kid or teammate. (See `prototype-fast`.)
@@ -198,6 +200,7 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
   - **Badges** for ways of playing (fix 3 problems, no sealed room, no emergency, block most radiation, ask Mission Control, build an upgrade, reach the science goal). The collection is on the start screen. The end screen praises the effort or strategy the kid actually used.
   - **Easter eggs:** tap Earth or the Sun for true fun facts (`FUN_FACTS` in `src/rules/content.js`).
   - **Sound:** effects synthesized live with Web Audio (`src/audio/sfx.js`, no files). Starts with the first tap; a sound button sits in the top bar and on the start and end screens.
+  - **Everything is explained:** a "How it works" sheet (start screen and pause menu) covers every bar and control, what is real and what is made up, plus a "For grown-ups" note for judges. Call Earth says what Mission Control sees, the "Do it for me" button names the exact change, and afterwards the crewmate says what is set now and what it costs.
   - **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
 
 ## Still to decide today (team)

@@ -146,6 +146,7 @@ export function setShield(state, level) {
     return false;
   }
   state.shield = lvl;
+  if (lvl > 0) learn(state, 'magnetShield');
   return true;
 }
 
@@ -268,7 +269,7 @@ export function getAdvice(state) {
       state.rooms.shelter.status !== 'lost' ? { shield: 2, sheltered: true } : { shield: 3 });
   }
   if (recentBigFlare && state.shield < 2 && rad < 20) {
-    return advice('Raise your shield to Mid or Max.',
+    return advice('Raise your shield to Max.',
       `An ${recentBigFlare.cls} flare just went off. Its particles can arrive within hours.`, { shield: 3 });
   }
   if (leak) {
@@ -312,6 +313,32 @@ export function applyAdvice(state, action) {
   if (!action) return;
   if (action.shield !== undefined) setShield(state, action.shield);
   if (action.sheltered !== undefined) setShelter(state, action.sheltered);
+}
+
+/** What Mission Control's plan would change, in a few words (the button label). */
+export function describeAdvice(state, action) {
+  if (!action) return null;
+  if (action.repair) return `Fix the ${ROOMS[action.repair].name.toLowerCase()}`;
+  const parts = [];
+  if (action.shield !== undefined && action.shield !== state.shield) parts.push(`Shield to ${SHIELD_LABELS[action.shield]}`);
+  if (action.sheltered === true && !state.sheltered) parts.push('crew to the shelter');
+  if (action.sheltered === false && state.sheltered) parts.push('crew back to work');
+  if (!parts.length) return null;
+  const text = parts.join(', ');
+  return text[0].toUpperCase() + text.slice(1);
+}
+
+/** After the plan is set: what is true now, and what it costs (said by the crewmate). */
+export function explainSetup(state) {
+  const cfg = state.cfg;
+  const lvl = state.shield;
+  const shield = lvl === 0
+    ? 'The shield is off, so it uses no power.'
+    : `The shield is on ${SHIELD_LABELS[lvl]}: it blocks ${BLOCK_WORDS[lvl]} of the radiation and uses ${cfg.power.shieldPerDay[lvl]} power a day.`;
+  const shelter = state.sheltered
+    ? ' The crew is in the shelter: very safe, but no science.'
+    : ' The crew is working, so science goes on.';
+  return shield + shelter;
 }
 
 export function fmtTimes(x) {

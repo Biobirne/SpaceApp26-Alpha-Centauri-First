@@ -185,9 +185,10 @@ export function showRebuild(job, science, onYes) {
  * The radio signal really takes about 1.3 s each way between the Moon and Earth.
  * We play that delay, then show the tip with its reason.
  */
-export function showCall(advice, roundTripSeconds, onApply, onClose) {
+export function showCall(advice, { roundTripSeconds, cooldownDays, actionLabel }, onApply, onClose) {
   const html = `
     <h2>Calling Mission Control</h2>
+    <p class="call-intro">Mission Control on Earth watches the real space weather and your base. They tell you the one most important thing to do now.</p>
     <div class="link" aria-hidden="true">
       <span class="end moon">Moon</span><span class="wire"></span><span class="pulse"></span><span class="end earth">Earth</span>
       <span class="timer">Radio signal on its way…</span>
@@ -196,6 +197,7 @@ export function showCall(advice, roundTripSeconds, onApply, onClose) {
       <p class="a-text"></p>
       <div class="a-why">${icon('info')}<span><b>Why?</b> <span class="a-reason"></span></span></div>
       <div class="row"></div>
+      <p class="source">Mission Control can take your next call in ${cooldownDays} days.</p>
     </div>`;
   const sheet = openSheet(html, { className: 'call-sheet', onClose });
   const pulse = sheet.el.querySelector('.pulse');
@@ -225,12 +227,14 @@ export function showCall(advice, roundTripSeconds, onApply, onClose) {
     box.querySelector('.a-text').textContent = advice.text;
     box.querySelector('.a-reason').textContent = advice.reason;
     const row = box.querySelector('.row');
-    if (advice.action) {
+    if (advice.action && actionLabel) {
+      // A repair is still the kid's job: the button opens it. Shield and shelter are set for them.
       const label = advice.action.repair ? 'Fix it now' : 'Do it for me';
-      row.insertAdjacentHTML('beforeend', `<button type="button" class="btn earth apply">${icon('check')}${label}</button>`);
+      const sub = advice.action.repair ? 'Opens the repair' : actionLabel;
+      row.insertAdjacentHTML('beforeend', `<button type="button" class="btn earth apply">${icon('check')}<span>${label}<small class="sub">${esc(sub)}</small></span></button>`);
       row.querySelector('.apply').addEventListener('click', () => { onApply(advice.action); sheet.close(); });
     }
-    row.insertAdjacentHTML('beforeend', `<button type="button" class="btn quiet ok">${advice.action ? 'I’ll do it myself' : 'Got it'}</button>`);
+    row.insertAdjacentHTML('beforeend', `<button type="button" class="btn quiet ok">${advice.action && actionLabel ? 'I’ll do it myself' : 'Got it'}</button>`);
     row.querySelector('.ok').addEventListener('click', () => sheet.close());
     row.querySelector('.btn').focus({ preventScroll: true });
   }
@@ -317,13 +321,14 @@ export function showData(state, doc) {
 
 // ------------------------------------------------------------------ pause
 
-export function showPause({ onResume, onRestart, onMenu, hints, onHints, readAloud = null, onReadAloud }) {
+export function showPause({ onResume, onRestart, onMenu, onHelp, hints, onHints, readAloud = null, onReadAloud }) {
   const html = `
     <h2>Paused</h2>
     <p>The Moon base waits for you.</p>
     <div class="row">
       <button type="button" class="btn primary resume">${icon('play')}Keep playing</button>
     </div>
+    <button type="button" class="btn quiet small hints howto">${icon('book')}<span>How it works</span></button>
     <button type="button" class="btn quiet small hints" aria-pressed="${hints}">${icon('info')}<span></span></button>
     ${readAloud === null ? '' : `<button type="button" class="btn quiet small hints readaloud" aria-pressed="${readAloud}">${icon('speak')}<span></span></button>`}
     <div class="row">
@@ -359,6 +364,7 @@ export function showPause({ onResume, onRestart, onMenu, hints, onHints, readAlo
       renderRead(on);
     });
   }
+  sheet.el.querySelector('.howto').addEventListener('click', () => { picked = onHelp; sheet.close(); });
   sheet.el.querySelector('.restart').addEventListener('click', () => { picked = onRestart; sheet.close(); });
   sheet.el.querySelector('.menu').addEventListener('click', () => { picked = onMenu; sheet.close(); });
   return sheet;
