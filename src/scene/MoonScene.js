@@ -89,11 +89,33 @@ export function createMoonScene() {
       this.game.events.emit('moon-ready', this);
     }
 
-    /** Stage rectangle in CSS pixels (the empty grid cell between the HUD parts). */
-    setSlot(rect, dpr) {
+    /**
+     * Stage rectangle in CSS pixels (the empty grid cell between the HUD parts). `base` is the part
+     * the base may use (clear of Sam's bubble and the repair buttons). `tight`: the sky may sit behind
+     * the bubble, so the base fills its part from top to bottom.
+     */
+    setSlot(rect, dpr, base = rect, tight = false) {
       this.dpr = dpr;
-      this.slot = { x: rect.x * dpr, y: rect.y * dpr, w: Math.max(1, rect.w * dpr), h: Math.max(1, rect.h * dpr) };
+      const px = (r) => ({ x: r.x * dpr, y: r.y * dpr, w: Math.max(1, r.w * dpr), h: Math.max(1, r.h * dpr) });
+      this.slot = px(rect);
+      this.baseSlot = px(base);
+      this.tight = tight;
       if (this.sky) this.layout();
+    }
+
+    /** Keep Earth and the Sun above the roofs, on every screen shape. */
+    fitSky(unit) {
+      const s = this.slot;
+      const roofs = Math.min(...Object.values(this.boxes).map((b) => b.y)) - unit * 4;
+      for (const p of [this.earth, this.sunPos]) {
+        p.r = Math.max(10 * this.dpr, Math.min(p.r, (roofs - s.y) * 0.3));
+        p.y = Math.max(s.y + p.r * 1.2, Math.min(p.y, roofs - p.r * 1.3));
+      }
+      for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
+        const size = Math.max(p.r * 2.6, 48 * this.dpr);
+        this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
+        this.skyZones[id].input.hitArea.setSize(size, size);
+      }
     }
 
     // ------------------------------------------------------------------ layout
@@ -102,13 +124,28 @@ export function createMoonScene() {
       const W = this.scale.width;
       const H = this.scale.height;
       const s = this.slot;
-      const tall = s.w / s.h < 1.15;
+      const bs = this.baseSlot || s;
+      let tall;
+      let unit;
+      if (this.tight) {
+        // Earth and the Sun live in the whole stage, so the base may fill its own part:
+        // pick one row or two rows, whichever draws the buildings bigger, and centre it.
+        // The bottom strip stays free for the SI watermark.
+        const bh = bs.h - 20 * this.dpr;
+        const rowU = Math.min(bs.w / 108, bh / 22);
+        const tallU = Math.min(bs.w / 66, bh / 42);
+        tall = tallU > rowU * 1.1;
+        unit = tall ? tallU : rowU;
+        this.groundY = bs.y + bh / 2 + (tall ? -6.5 : 4.5) * unit;
+      } else {
+        tall = bs.w / bs.h < 1.15;
+        // Ground line: the base stands on it. Leave room above for Earth and the Sun.
+        this.groundY = bs.y + bs.h * (tall ? 0.5 : 0.64);
+        unit = tall ? Math.min(bs.w / 66, bs.h / 56) : Math.min(bs.w / 108, bs.h / 34);
+      }
       this.tall = tall;
-      // Ground line: the base stands on it. Leave room above for Earth and the Sun.
-      this.groundY = s.y + s.h * (tall ? 0.5 : 0.58);
-      const unit = tall ? Math.min(s.w / 66, s.h / 56) : Math.min(s.w / 108, s.h / 34);
       this.u = unit;
-      const cx = s.x + s.w / 2;
+      const cx = bs.x + bs.w / 2;
       const gy = this.groundY;
       if (tall) {
         // Two rows: three rooms at the back, two bigger ones in front.
@@ -138,6 +175,7 @@ export function createMoonScene() {
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
         this.skyZones[id].input.hitArea.setSize(size, size);
       }
+      this.fitSky(unit);
       for (const id of ROOM_IDS) {
         const b = this.boxes[id];
         const pad = unit * 2;
@@ -160,6 +198,9 @@ export function createMoonScene() {
           fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${fs}px`, fontStyle: '600', color: C.label,
           stroke: '#070b18', strokeThickness: Math.round(fs * 0.3),
         }).setOrigin(0.5, 0);
+        // Small screens: shrink a long name to its building's width, so neighbours never overlap.
+        const maxW = b.w + this.u * 2.4;
+        if (t.width > maxW) t.setScale(maxW / t.width);
         this.labelLayer.add(t);
         const r = Math.max(13 * this.dpr, this.u * 2.6);
         const badge = this.add.container(b.x + b.w * 0.82, b.y + b.h * 0.12);
@@ -177,7 +218,7 @@ export function createMoonScene() {
       // Space Apps rule: SI-generated images carry a visible watermark. The placeholder visuals
       // are drawn by SI-written code, so they are marked until the team's own art replaces them.
       if (this.art.siPlaceholders !== false) {
-        const s = this.slot;
+        const s = this.baseSlot || this.slot;
         const wfs = Math.round(11 * this.dpr);
         const mark = this.add.text(s.x + 8 * this.dpr, s.y + s.h - 6 * this.dpr, 'SI-generated placeholder art', {
           fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${wfs}px`, fontStyle: '600', color: '#c9d3f2',

@@ -159,7 +159,16 @@ function syncSlot() {
   const stage = run?.hud.stage;
   if (stage) {
     const r = stage.getBoundingClientRect();
-    scene.setSlot({ x: r.left, y: r.top, w: r.width, h: r.height }, dpr);
+    // Keep the base clear of Sam's bubble and the repair buttons: layout.css reserves their space
+    // per screen shape (--reserve-top / --reserve-bottom). On a very short stage the reserves shrink.
+    const cs = getComputedStyle(stage);
+    let top = parseFloat(cs.getPropertyValue('--reserve-top')) || 0;
+    let bottom = parseFloat(cs.getPropertyValue('--reserve-bottom')) || 0;
+    const fit = Math.min(1, (r.height * 0.5) / Math.max(1, top + bottom));
+    top *= fit;
+    bottom *= fit;
+    const full = { x: r.left, y: r.top, w: r.width, h: r.height };
+    scene.setSlot(full, dpr, { x: r.left, y: r.top + top, w: r.width, h: r.height - top - bottom }, top > 0);
     document.documentElement.style.setProperty('--toast-bottom', `${Math.round(innerHeight - r.bottom + 60)}px`);
   } else {
     const h = innerHeight;
