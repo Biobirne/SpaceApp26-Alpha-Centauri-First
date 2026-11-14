@@ -29,9 +29,11 @@ Our record for the idea rule: the game concept came from team discussion. SI hel
 | Audio | `CREDITS.md`, in-game credit line | `si-manifest.json`, plus file tags (below) | Credit line |
 | Video (demo video) | Video description | Upload metadata | **Watermark** on SI-generated footage |
 
-### Placeholder pictures in the game right now
+### The graphics in the game are code, not images
 
-The Moon base, Earth, Sun, icons and crewmate are drawn by code that an SI tool wrote. We treat these pictures as SI-generated images. So the game shows the watermark **"SI-generated placeholder art"** in the corner of the Moon scene. It goes away once the team's own art replaces everything: set `"siPlaceholders": false` in `assets/art/manifest.json`. Team art itself never gets the watermark, because people drew it.
+The Moon base, Earth, Sun, icons, crewmate and the mini-game scenes are drawn by program code (shapes and colours in `src/`). The game contains **no image files and no generated pictures**. The team decided on 14 Nov 2026 that these graphics count as **code**: a button is drawn by code in the same way. So they are labelled like all other code, with a header comment in every file, `SI_USAGE.md` and `si-manifest.json`, and they carry no watermark.
+
+The watermark rule applies to image and video **files** made by an SI tool. If we ever add one, it gets a visible watermark as described below.
 
 The project rule (AGENTS.md, rule 6) stays the same: the **final** game uses no SI-generated images.
 

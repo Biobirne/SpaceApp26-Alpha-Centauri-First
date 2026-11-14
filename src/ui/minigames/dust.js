@@ -77,7 +77,6 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
         </ul>
       </div>
       <div class="dg-ground" aria-hidden="true"></div>
-      <span class="mg-mark">SI-generated placeholder art</span>
       <div class="dg-win" hidden>
         <p class="dg-gain"></p>
         <p class="dg-fact">Moon dust sticks like a balloon on your hair, so brushing is slow. In 2025, NASA tested a dust shield on the Moon that shakes dust off with electricity.</p>

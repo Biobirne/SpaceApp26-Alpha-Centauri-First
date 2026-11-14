@@ -28,7 +28,7 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Done (intro: `?intro=1`, also the first visit and the Training button). The kid places the five buildings one by one, each with its job and its power cost, then meets dust, leak, filter and a storm drill once, with problem and fix before each. |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
-| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (rub the dust off; the battery switches air, water, lab and radio back on). Storm fort done (stack heavy supplies on the shelter wall; it makes the shelter block more). Test page `minigame.html?game=dust` or `fort`. Leak and filter next. |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Done: dust (rub the dust off), storm wall (test what stops particles, then stack it), leak (fog shows the hole, tape the patch), filter (pull out, build the Apollo 13 adapter, push in). Each has numbered steps or a test first, and a real story at the end. Test page `minigame.html?game=dust`, `fort`, `leak` or `filter`. Greenhouse and lab still have no event of their own. |
 
 ## Team
 
@@ -152,6 +152,13 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - The storm fort explained nothing: "no idea what I did or learned". Now it starts with a test (pillow, then water bag, in the particle stream), states the rule (light lets radiation through, heavy stops it), and shows before and after for the crew.
 - Sam's text in the mini-games was cut off at the bottom of a small phone. Now it sits under the title in both mini-games, and both fit a 375×640 screen.
 - "Cool, we have the lab, and now?" The intro now gives 40 training points and lets the kid build one upgrade.
+
+### Florian (14 Nov, ~18:00)
+- The "SI-generated placeholder art" line is removed. Team decision: the graphics are drawn by code and count as code, so they are labelled as code (`SI_DISCLOSURE.md`). The game holds no image files.
+- On a phone, the top bar of the intro only held the sound button and cost a whole row. The button now sits on Sam's card.
+- Earth looked like a beach ball. Redrawn at the same size with oceans, continents, clouds and a night side.
+- "I still don't get the storm fort." It is now called storm wall, and says why it works: every particle bumps into the stuff in its way, so more stuff stops more particles.
+- The first version of the filter mini-game could not be finished: the pulled-out filter sat invisibly on top of a button. Fixed, and both new mini-games now lead step by step (numbered steps, a "Tap" pointer on the next thing, the instruction in bold before the reason).
 
 ## Automatic SI review
 

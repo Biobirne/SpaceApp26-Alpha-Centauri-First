@@ -208,7 +208,7 @@ const JOB_LABEL = {
   leak: (r) => `Fix leak: ${r.short}`,
   dust: () => 'Clean panels',
   filter: () => 'Swap filter',
-  fort: () => 'Build storm fort',
+  fort: () => 'Build storm wall',
   rebuild: (r) => `Rebuild ${r.short}`,
 };
 
