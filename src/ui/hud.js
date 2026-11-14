@@ -285,6 +285,18 @@ function createCrew(node) {
     timer = setTimeout(next, ms);
   }
 
+  // At most a couple of lines wait (playtest: "6 more" was too much to read). The least important
+  // goes first: small news, then alerts. Hints, fun facts the kid asked for, and lessons stay.
+  const MAX_WAITING = 2;
+  function trim() {
+    while (queue.length > MAX_WAITING) {
+      let i = queue.findIndex((q) => !q.tag && !q.keep && q.mood !== 'alert');
+      if (i < 0) i = queue.findIndex((q) => !q.tag && !q.keep);
+      if (i < 0) i = 0;
+      queue.splice(i, 1);
+    }
+  }
+
   bubble.addEventListener('click', next);
   avWrap.addEventListener('click', () => api.onAvatar?.());
 
@@ -300,15 +312,17 @@ function createCrew(node) {
      * `tag` groups lines that replace each other (the guide's hints): a new one removes older
      * queued ones and takes over the bubble. `onShow` runs when the line actually appears.
      */
-    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null, now = false } = {}) {
+    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null, now = false, keep = false } = {}) {
       if (chatter && (showing || queue.length)) return;
+      // The same sentence twice in a row is noise (playtest: a line came back the next day).
+      if (!w && (showing?.text === text || queue.some((q) => q.text === text))) return;
       // Drop stale chatter when something important comes in.
       if (!chatter) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].chatter) queue.splice(i, 1);
       if (tag) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
-      if (queue.length > 5) queue.splice(0, queue.length - 5);
-      const line = { text, mood, chatter, word: w, tag, onShow, t: api.now() };
+      const line = { text, mood, chatter, word: w, tag, onShow, keep, t: api.now() };
       // `now`: a lesson that holds the clock goes first, so the glowing button and the words match.
       if (now) { queue.unshift(line); if (!frozen) { next(); return; } } else queue.push(line);
+      trim();
       // Real news replaces small talk right away, and a new hint replaces an old one.
       if (!showing || (!frozen && ((showing.chatter && !chatter) || (tag && showing.tag === tag)))) next();
       else more.textContent = `${queue.length} more ›`;

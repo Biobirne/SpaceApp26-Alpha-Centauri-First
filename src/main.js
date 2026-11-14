@@ -323,7 +323,7 @@ function drain() {
     r.guide.onEvent(e);
     switch (e.type) {
       case 'crew':
-        r.hud.crew.say(e.text, e.mood, { chatter: e.chatter, word });
+        r.hud.crew.say(e.text, e.mood, { chatter: e.chatter, keep: e.keep, word });
         word = null;
         break;
       case 'word':

@@ -615,7 +615,7 @@ function stormReport(state) {
       + (state.shield < 3 ? ' Shield on Max in the shelter blocks even more.' : '');
   }
   state.stormReports.push({ day: Math.floor(state.t) + 1, taken: took, inShelter: shelter });
-  emit(state, 'crew', { mood: 'calm', text });
+  emit(state, 'crew', { mood: 'calm', keep: true, text });
 }
 
 /** Space weather forecasters watch the Sun: pass on a warning before the first storm. */
@@ -764,7 +764,7 @@ function particleCard(state) {
 function lesson(state, kind, ctx) {
   const l = LESSONS[kind](ctx);
   state.lessons.push({ kind, day: Math.floor(state.t) + 1, ...l });
-  emit(state, 'crew', { mood: 'calm', text: `Why did that happen? ${l.why} Next time: ${l.next}` });
+  emit(state, 'crew', { mood: 'calm', keep: true, text: `Why did that happen? ${l.why} Next time: ${l.next}` });
 }
 
 /** Where the power comes from and goes to, per day (for the power info sheet). */
