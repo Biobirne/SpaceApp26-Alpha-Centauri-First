@@ -258,7 +258,7 @@ export function completeRepair(state, roomId, kind) {
   if (kind === 'fort') {
     if (state.fort) return false;
     state.fort = true;
-    emit(state, 'crew', { mood: 'happy', text: 'The storm fort is built! Heavy supplies on the wall stop even more radiation in the shelter.' });
+    emit(state, 'crew', { mood: 'happy', text: 'The storm wall is built! More stuff in the way means less radiation in the shelter.' });
     return true;
   }
   if (kind === 'leak' && room.status === 'leak') {

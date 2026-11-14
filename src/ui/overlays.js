@@ -8,6 +8,8 @@ import { SHIELD_LABELS, CONFIG } from '../rules/config.js';
 import { currentDayIndex, fmtTimes } from '../rules/mission.js';
 import { mountDust } from './minigames/dust.js';
 import { mountFort } from './minigames/fort.js';
+import { mountLeak } from './minigames/leak.js';
+import { mountFilter } from './minigames/filter.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -80,10 +82,10 @@ function blockText(fx) {
 // ------------------------------------------------------------------ repair mini-games
 
 const TASKS = {
-  leak: { title: 'Patch the leak', goal: (n) => `Tap the ${n} cracks to seal them.`, icon: 'drop', spot: 'wrench' },
+  leak: { title: 'Find the leak', icon: 'drop', game: mountLeak },
   dust: { title: 'Clean the solar panels', icon: 'sun', game: mountDust },
-  fort: { title: 'Build the storm fort', icon: 'shelter', game: mountFort },
-  filter: { title: 'Swap the air filter', goal: () => 'Do the steps in order.', icon: 'filter', steps: ['Pull out old filter', 'Put in new filter', 'Lock it'] },
+  fort: { title: 'Build the storm wall', icon: 'shelter', game: mountFort },
+  filter: { title: 'Swap the air filter', icon: 'filter', game: mountFilter },
   rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
 };
 
@@ -115,6 +117,7 @@ export function showRepair(job, onDone, onCancel) {
     });
     t.game(sheet.el.querySelector('.mg-root'), {
       eva: job.eva,
+      room: room.name,
       dustyFactor: CONFIG.power.dustySolarFactor,
       reducedMotion: reducedMotion(),
       onFinish: () => { finished = true; sheet.close(); onDone(); },

@@ -50,6 +50,7 @@
 .fg-rule[hidden] { display: none; }
 .fg .fg-rule p { margin: 0; font-size: 20px; line-height: 1.35; }
 .fg-rule b { color: var(--sun); }
+.fg .fg-rule .fg-why { font-size: 16px; color: var(--ink-2); }
 .fg-room {
   position: absolute; top: -6px; bottom: -6px; right: 0; width: calc((100% - 112px) / 2 + 6px); max-width: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
@@ -143,12 +144,6 @@
 .fg-btn { min-height: 56px; border: 0; border-radius: 14px; cursor: pointer; font: 700 20px/1 var(--font, system-ui); background: var(--sun); color: var(--dark); }
 @keyframes fg-rise { from { transform: translateY(100%); } }
 
-/* Space Apps rule: SI-made pictures carry a visible mark (the mini-game art is drawn by SI-written code). */
-.mg-mark {
-  position: absolute; left: calc(var(--safe-l) + 6px); bottom: calc(var(--safe-b) + 2px); width: auto !important; z-index: 3;
-  padding: 1px 5px; font-size: 10px; font-weight: 600; color: #c9d3f2; background: rgb(7 11 24 / 0.55); pointer-events: none;
-}
-
 /* Wide screens: the words stand on the left, the test or the wall on the right. */
 @media (min-width: 900px) and (min-aspect-ratio: 5/4) {
   .fg {
@@ -160,7 +155,6 @@
   .fg-head h2 { font-size: 34px; padding-right: 0; }
   .fg .fg-sam { font-size: 19px; }
   .fg-win { left: auto; width: min(520px, 50%); border-radius: 26px 0 0 0; }
-  .fg > .mg-mark { grid-column: auto; }
 }
 @media (max-height: 700px) {
   .fg { gap: 8px; }

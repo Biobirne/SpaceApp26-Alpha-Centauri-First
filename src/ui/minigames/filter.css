@@ -1,0 +1,80 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Filter mini-game (filter.js): the air machine with a round hole on the left, the square spare on the right. */
+
+.ft-scene { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
+.ft-wall, .ft-bench {
+  position: relative; min-height: 190px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ft-wall { background: linear-gradient(160deg, #e9e4d8, #cfc8b8); box-shadow: inset 0 0 0 3px #8f897c; }
+.ft-bench { background: var(--dark); box-shadow: inset 0 0 0 2px var(--line); }
+.ft-label { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 14px; font-weight: 600; color: #57524a; }
+.ft-bench .ft-label { color: var(--ink-2); }
+
+/* The round hole of the air machine, with a fan that only turns when a filter is in. */
+.ft-hole {
+  width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center;
+  background: #23211d; box-shadow: inset 0 0 0 6px #6d675c, 0 0 0 4px #b9b2a2;
+}
+.ft-fan {
+  width: 70px; height: 70px; border-radius: 50%;
+  background: conic-gradient(#55504a 0 12%, transparent 12% 25%, #55504a 25% 37%, transparent 37% 50%, #55504a 50% 62%, transparent 62% 75%, #55504a 75% 87%, transparent 87%);
+}
+.ft[data-stage='done'] .ft-fan { animation: ft-spin 1.2s linear infinite; }
+@keyframes ft-spin { to { transform: rotate(360deg); } }
+
+/* The old filter: a round canister, dark with what it caught. */
+.ft-old {
+  position: absolute; left: 50%; top: 50%; width: 104px; height: 104px; margin: -52px 0 0 -52px; border: 0; border-radius: 50%; cursor: pointer;
+  background:
+    radial-gradient(#2a2622 2px, transparent 3px) 0 0 / 11px 11px,
+    radial-gradient(circle, #6b6157, #3b352f);
+  box-shadow: inset 0 0 0 6px #4a443d;
+  transition: transform 500ms ease-in, opacity 400ms 200ms;
+}
+.ft-old.out { transform: translateY(60%) rotate(-25deg); opacity: 0; box-shadow: inset 0 0 0 6px #4a443d; pointer-events: none; }
+
+/* The new filter: a clean square. The adapter parts appear on it one by one. */
+.ft-new {
+  position: relative; width: 104px; height: 104px; border: 0; border-radius: 50%; cursor: pointer; padding: 0;
+  display: grid; place-items: center; background: transparent;
+  transition: transform 600ms var(--ease-out, ease-out);
+}
+.ft-new:disabled { cursor: default; }
+.ft-square {
+  width: 62px; height: 62px; border-radius: 6px; z-index: 1;
+  background:
+    linear-gradient(90deg, transparent 46%, rgb(0 0 0 / 0.1) 46% 54%, transparent 54%),
+    linear-gradient(0deg, transparent 46%, rgb(0 0 0 / 0.1) 46% 54%, transparent 54%),
+    #f4f1ea;
+  box-shadow: inset 0 0 0 3px #b9b2a2;
+}
+.ft-new::before, .ft-new::after { content: ''; position: absolute; border-radius: 50%; opacity: 0; transition: opacity 300ms; }
+.ft-new::before { inset: 2px; background: #c9a36b; box-shadow: inset 0 0 0 4px #a17c45; } /* cardboard collar */
+.ft-new::after { inset: -4px; background: rgb(190 225 255 / 0.28); box-shadow: inset 0 0 0 2px rgb(210 235 255 / 0.7); } /* plastic bag */
+.ft-new.has-card::before { opacity: 1; }
+.ft-new.has-bag::after { opacity: 1; }
+.ft-new.has-tape .ft-square { box-shadow: inset 0 0 0 3px #b9b2a2, 0 0 0 5px #8a8f99; }
+.ft[data-stage='push'] .ft-new { animation: ft-nudge 1.2s ease-in-out infinite; }
+@keyframes ft-nudge { 50% { transform: translateX(-6px); } }
+/* Pushed in: it slides over to the hole in the air machine. */
+.ft-scene { container-type: inline-size; }
+.ft-new.in { animation: none !important; box-shadow: none !important; transform: translateX(calc(-50cqw - 6px)); }
+
+.ft-parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; } /* room for the Tap pointer */
+.ft-parts[hidden] { display: none; }
+.ft-part {
+  min-height: 72px; padding: 6px 4px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  border: 0; border-radius: 12px; background: var(--dark); box-shadow: inset 0 0 0 2px var(--line), 0 3px 0 #000;
+  font: 600 14px/1.1 var(--font, system-ui); color: var(--ink);
+}
+.ft-part:disabled { opacity: 0.3; cursor: default; }
+.ft-pic { width: 38px; height: 28px; }
+.ft-pic[data-id='bag'] { border-radius: 8px 8px 12px 12px; background: rgb(190 225 255 / 0.3); box-shadow: inset 0 0 0 2px rgb(210 235 255 / 0.8); }
+.ft-pic[data-id='card'] { border-radius: 3px; background: #c9a36b; box-shadow: inset 0 0 0 2px #a17c45; }
+.ft-pic[data-id='tape'] { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, transparent 32%, #8a8f99 34% 68%, #6d7078 70%); }
+
+@media (max-height: 700px) {
+  .ft-wall, .ft-bench { min-height: 160px; }
+}

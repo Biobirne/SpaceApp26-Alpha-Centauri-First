@@ -5,7 +5,7 @@
 // It has the same interface as the in-mission guide (guide.js), so the controller treats it the same.
 
 import { setShield, setShelter, powerInPerDay } from '../rules/mission.js';
-import { crewAvatar } from './icons.js';
+import { crewAvatar, soundButton } from './icons.js';
 import { UPGRADES } from '../rules/content.js';
 
 const CSS_URL = new URL('./intro.css', import.meta.url).href;
@@ -52,7 +52,7 @@ function buildings(cfg, solarNow) {
   ];
 }
 
-export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
+export function createIntro({ hud, startAt = '1', speak, relayout, syncSound, onDone }) {
   const root = hud.el;
   let state = null;
   let steps = [];
@@ -120,6 +120,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
       card.innerHTML = `
         <div class="coach-body">
           <p class="coach-todo">${todo}</p>
+          ${soundButton(true)}
           <button type="button" class="coach-more" aria-label="Show the explanation again">?</button>
         </div>`;
       card.querySelector('.coach-more').addEventListener('click', () => { mini = false; draw(); });
@@ -140,6 +141,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
           <div class="coach-top">
             <span class="coach-progress" role="img" aria-label="Training step ${idx + 1} of ${steps.length}"><i style="width:${Math.round(((idx + 1) / steps.length) * 100)}%"></i></span>
             <button type="button" class="coach-skip">Skip training</button>
+            ${soundButton(true)}
           </div>
           ${lines}
           ${act ? `<button type="button" class="coach-btn">${act.label}</button>` : ''}
@@ -147,6 +149,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
       card.querySelector('.coach-skip').addEventListener('click', () => onDone({ skipped: true }));
       if (act) card.querySelector('.coach-btn').addEventListener('click', () => act.go());
     }
+    syncSound?.(); // on phones the sound button lives on the card (the top bar would cost a whole row)
     card.classList.remove('pop');
     void card.offsetWidth; // restart the entrance
     card.classList.add('pop');
@@ -320,7 +323,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
         render({
           kind: 'problem', title: 'What really protects astronauts',
           problem: 'In a very strong storm, the shield alone is not enough.',
-          fix: 'Thick, heavy walls stop radiation. Build a storm fort at the shelter.',
+          fix: 'Thick, heavy walls stop radiation. Build a storm wall at the shelter.',
           todo: 'Tap the red button, or the shelter.',
         });
       },
@@ -332,7 +335,7 @@ export function createIntro({ hud, startAt = '1', speak, relayout, onDone }) {
         show('shelter');
         spotlight('.shelterbtn');
         render({
-          praise: 'The fort is built!', title: 'Now send the crew inside',
+          praise: 'The storm wall is built!', title: 'Now send the crew inside',
           text: ['Behind the thick wall, almost no radiation reaches them.'],
           todo: 'Tap Shelter at the bottom.',
         });

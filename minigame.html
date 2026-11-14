@@ -5,7 +5,9 @@
   <!-- Test page: plays one mini-game straight away, without a mission.
        minigame.html?game=dust            low radiation
        minigame.html?game=dust&risky=1    high radiation, the kid decides first
-       minigame.html?game=fort            build the storm fort -->
+       minigame.html?game=fort            build the storm wall
+       minigame.html?game=leak            find and patch a leak
+       minigame.html?game=filter          swap the air filter -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
@@ -34,6 +36,8 @@
     const jobs = {
       dust: { kind: 'dust', roomId: 'solar', taps: 5, eva },
       fort: { kind: 'fort', roomId: 'shelter', taps: 5 },
+      leak: { kind: 'leak', roomId: 'hab', taps: 4 },
+      filter: { kind: 'filter', roomId: 'hab', taps: 3 },
     };
     const again = document.querySelector('.again');
 

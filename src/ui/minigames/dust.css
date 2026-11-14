@@ -183,12 +183,6 @@
 .dg .dg-gate-big { font-size: 26px; font-weight: 700; color: var(--sun); }
 .dg-gate .dg-btn { width: 100%; max-width: 420px; }
 
-/* Space Apps rule: SI-made pictures carry a visible mark (the mini-game art is drawn by SI-written code). */
-.mg-mark {
-  position: absolute; left: calc(var(--safe-l) + 6px); bottom: calc(var(--safe-b) + 2px); z-index: 3;
-  padding: 1px 5px; font-size: 10px; font-weight: 600; color: #c9d3f2; background: rgb(7 11 24 / 0.55); pointer-events: none;
-}
-
 @keyframes dg-puff { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 @keyframes dg-pulse { to { top: 100%; opacity: 0.4; } }
 @keyframes dg-rise { from { transform: translateY(100%); } }

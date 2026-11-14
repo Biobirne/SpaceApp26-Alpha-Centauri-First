@@ -34,6 +34,15 @@
 /* While the buildings add up, the card shows the running total, so the meter's own rate waits. */
 .game.intro:not(.show-rates) .meter.power .m-rate { visibility: hidden; }
 
+/* Phones: the top bar would only hold the sound button and cost a whole row, so the button moves onto the card. */
+.game.intro .topbar { display: none; }
+.coach .soundbtn { flex: none; width: 40px; height: 40px; min-height: 0; }
+.coach .soundbtn .ic { width: 20px; height: 20px; }
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .game.intro .topbar { display: flex; }
+  .coach .soundbtn { display: none; }
+}
+
 /* ---------------------------------------------------------------- the coach card */
 .coach {
   --paper: #f5f1e8;
