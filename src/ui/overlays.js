@@ -306,48 +306,49 @@ export function showShop(state, onBuy) {
 // ------------------------------------------------------------------ pause
 
 export function showPause({ onResume, onRestart, onMenu, onHelp, hints, onHints, readAloud = null, onReadAloud }) {
+  // Settings are switches with a name, a one-line "what it does", and On/Off written on the switch
+  // (playtest: the old hint button was wired to the wrong button and the real one showed only an "i").
+  const toggle = (cls, ic, name, text, on) => `
+    <button type="button" class="pz-toggle ${cls}" role="switch" aria-checked="${on}">
+      ${icon(ic)}<span class="pz-text"><b>${name}</b><small>${text}</small></span>
+      <span class="pz-switch" aria-hidden="true"><span class="pz-knob"></span><span class="pz-state"></span></span>
+    </button>`;
   const html = `
     <h2>Paused</h2>
     <p>The Moon base waits for you.</p>
     <div class="row">
       <button type="button" class="btn primary resume">${icon('play')}Keep playing</button>
     </div>
-    <button type="button" class="btn quiet small hints howto">${icon('book')}<span>How it works</span></button>
-    <button type="button" class="btn quiet small hints" aria-pressed="${hints}">${icon('info')}<span></span></button>
-    ${readAloud === null ? '' : `<button type="button" class="btn quiet small hints readaloud" aria-pressed="${readAloud}">${icon('speak')}<span></span></button>`}
-    <div class="row">
-      <button type="button" class="btn quiet small restart">${icon('restart')}Start this storm again</button>
-      <button type="button" class="btn quiet small menu">${icon('back')}All missions</button>
-    </div>`;
+    <div class="pz-settings">
+      ${toggle('hinttoggle', 'info', 'Tips from Sam', 'Sam shows you what to try next.', hints)}
+      ${readAloud === null ? '' : toggle('readaloud', 'speak', 'Read aloud', 'Sam reads every line out loud.', readAloud)}
+    </div>
+    <button type="button" class="btn quiet howto">${icon('book')}How it works</button>
+    <div class="row pz-leave">
+      <button type="button" class="btn quiet small restart">${icon('restart')}Play this storm again</button>
+      <button type="button" class="btn quiet small menu">${icon('home')}Main menu</button>
+    </div>
+    <p class="pz-note">Both end this mission.</p>`;
   let picked = null;
   const sheet = openSheet(html, { className: 'pause-sheet', onClose: () => (picked || onResume)() });
   sheet.el.querySelector('.resume').addEventListener('click', () => { picked = onResume; sheet.close(); });
-  // Help on demand: the kid decides whether the step-by-step hints show.
-  const hintBtn = sheet.el.querySelector('.hints');
-  const renderHints = (on) => {
-    hintBtn.setAttribute('aria-pressed', String(on));
-    hintBtn.querySelector('span').textContent = on ? 'Hints are on. Tap to turn them off.' : 'Hints are off. Tap to show them again.';
-  };
-  renderHints(hints);
-  hintBtn.addEventListener('click', () => {
-    const on = hintBtn.getAttribute('aria-pressed') !== 'true';
-    onHints(on);
-    renderHints(on);
-  });
-  // Read aloud: the device's own voice reads every crew line (for kids who are still learning to read).
-  const readBtn = sheet.el.querySelector('.readaloud');
-  if (readBtn) {
-    const renderRead = (on) => {
-      readBtn.setAttribute('aria-pressed', String(on));
-      readBtn.querySelector('span').textContent = on ? 'Sam reads every line aloud. Tap to stop.' : 'Tap to let Sam read every line aloud.';
+  const wire = (btn, onChange) => {
+    if (!btn) return;
+    const render = (on) => {
+      btn.setAttribute('aria-checked', String(on));
+      btn.querySelector('.pz-state').textContent = on ? 'On' : 'Off';
     };
-    renderRead(readAloud);
-    readBtn.addEventListener('click', () => {
-      const on = readBtn.getAttribute('aria-pressed') !== 'true';
-      onReadAloud(on);
-      renderRead(on);
+    render(btn.getAttribute('aria-checked') === 'true');
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-checked') !== 'true';
+      onChange(on);
+      render(on);
     });
-  }
+  };
+  // Help on demand: the kid decides whether the step-by-step tips show.
+  wire(sheet.el.querySelector('.hinttoggle'), onHints);
+  // Read aloud: the device's own voice reads every crew line (for kids who are still learning to read).
+  wire(sheet.el.querySelector('.readaloud'), onReadAloud);
   sheet.el.querySelector('.howto').addEventListener('click', () => { picked = onHelp; sheet.close(); });
   sheet.el.querySelector('.restart').addEventListener('click', () => { picked = onRestart; sheet.close(); });
   sheet.el.querySelector('.menu').addEventListener('click', () => { picked = onMenu; sheet.close(); });

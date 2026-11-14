@@ -578,8 +578,24 @@ body.no-phaser #scene {
 
 /* pause */
 .pause-sheet { text-align: center; }
-.pause-sheet .hints { margin-top: 14px; width: 100%; }
-.pause-sheet .hints[aria-pressed='true'] { box-shadow: 0 4px 0 #0d1226, inset 0 0 0 2px var(--science-deep); }
+.pz-settings { display: grid; gap: 8px; margin-top: 16px; }
+.pz-toggle {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 12px;
+  border: 0; border-radius: var(--r-m); background: var(--panel-2); color: var(--text);
+  font: inherit; text-align: left; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.pz-toggle > .ic { width: 22px; height: 22px; flex: none; color: var(--air); }
+.pz-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.pz-text b { font-size: 16px; }
+.pz-text small { font-size: 14px; color: var(--text-2); }
+.pz-switch { position: relative; flex: none; width: 64px; height: 32px; border-radius: 99px; background: var(--panel-3); box-shadow: inset 0 0 0 1.5px var(--line); transition: background-color 160ms; }
+.pz-knob { position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--text-2); transition: transform 160ms var(--ease-out), background-color 160ms; }
+.pz-state { position: absolute; inset: 0 8px 0 34px; display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--text-2); }
+.pz-toggle[aria-checked='true'] .pz-switch { background: var(--science-deep); }
+.pz-toggle[aria-checked='true'] .pz-knob { transform: translateX(32px); background: #fff; }
+.pz-toggle[aria-checked='true'] .pz-state { inset: 0 34px 0 8px; color: #fff; }
+.pause-sheet .howto { width: 100%; margin-top: 12px; }
+.pz-note { margin: 6px 0 0 !important; font-size: 14px !important; color: var(--text-2); }
 
 /* guided first steps: the control to try next glows */
 .spot-on { position: relative; z-index: 3; animation: spot-glow 1.4s ease-in-out infinite; }

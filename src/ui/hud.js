@@ -24,7 +24,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
       <div class="clock" aria-live="off"><span class="clock-day"></span><span class="clock-date"></span></div>
       ${soundButton(sound)}
       <div class="speedbox"><div class="speed" role="group" aria-label="Game speed">
-        <button type="button" data-speed="pause" aria-label="Pause">${icon('pause')}</button>
+        <button type="button" data-speed="pause" aria-label="Pause and menu">${icon('pause')}</button>
         <button type="button" data-speed="normal" aria-label="Normal speed">${icon('play')}</button>
         <button type="button" data-speed="fast" aria-label="Fast forward">${icon('fast')}</button>
       </div><span class="speed-note"></span></div>
