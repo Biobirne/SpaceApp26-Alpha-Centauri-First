@@ -7,6 +7,7 @@ import { UPGRADES, ROOMS, CREWMATE_NAME } from '../rules/content.js';
 import { SHIELD_LABELS, CONFIG } from '../rules/config.js';
 import { currentDayIndex, fmtTimes } from '../rules/mission.js';
 import { mountDust } from './minigames/dust.js';
+import { mountFort } from './minigames/fort.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -81,6 +82,7 @@ function blockText(fx) {
 const TASKS = {
   leak: { title: 'Patch the leak', goal: (n) => `Tap the ${n} cracks to seal them.`, icon: 'drop', spot: 'wrench' },
   dust: { title: 'Clean the solar panels', icon: 'sun', game: mountDust },
+  fort: { title: 'Build the storm fort', icon: 'shelter', game: mountFort },
   filter: { title: 'Swap the air filter', goal: () => 'Do the steps in order.', icon: 'filter', steps: ['Pull out old filter', 'Put in new filter', 'Lock it'] },
   rebuild: { title: 'Rebuild the room', goal: () => 'Place the new wall panels.', icon: 'wrench', spot: 'check' },
 };

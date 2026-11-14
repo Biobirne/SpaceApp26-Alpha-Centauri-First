@@ -132,12 +132,14 @@ export function createMoonScene() {
         // Earth and the Sun live in the whole stage, so the base may fill its own part:
         // pick one row or two rows, whichever draws the buildings bigger, and centre it.
         // The bottom strip stays free for the SI watermark.
-        const bh = bs.h - 20 * this.dpr;
+        // The top strip stays free for the labels above the base (solar output, radiation).
+        const labels = 26 * this.dpr;
+        const bh = bs.h - 20 * this.dpr - labels;
         const rowU = Math.min(bs.w / 108, bh / 22);
         const tallU = Math.min(bs.w / 66, bh / 42);
         tall = tallU > rowU * 1.1;
         unit = tall ? tallU : rowU;
-        this.groundY = bs.y + bh / 2 + (tall ? -6.5 : 4.5) * unit;
+        this.groundY = bs.y + labels + bh / 2 + (tall ? -6.5 : 4.5) * unit;
       } else {
         tall = bs.w / bs.h < 1.15;
         // Ground line: the base stands on it. Leave room above for Earth and the Sun.
@@ -185,7 +187,7 @@ export function createMoonScene() {
       this.solarLabel.setStyle({
         fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${Math.round(13 * this.dpr)}px`, fontStyle: '700', color: '#1d1503',
         backgroundColor: '#ffbf3c',
-      }).setPadding(6 * this.dpr, 3 * this.dpr).setPosition(sb.x + sb.w / 2, sb.y - unit * 1.2);
+      }).setPadding(6 * this.dpr, 3 * this.dpr).setPosition(sb.x + sb.w / 2, sb.y - unit * (this.tight ? 0.4 : 1.2));
       for (const [id, p] of [['earth', this.earth], ['sun', this.sunPos]]) {
         const size = Math.max(p.r * 2.6, 48 * this.dpr);
         this.skyZones[id].setPosition(p.x, p.y).setSize(size, size);
@@ -447,7 +449,7 @@ export function createMoonScene() {
         badge.setVisible(Boolean(kind));
         if (kind) {
           const rebuild = kind === 'rebuild';
-          const build = kind === 'build';
+          const build = kind === 'build' || kind === 'fort'; // something to build, not something broken
           badge.disc.setFillStyle(build ? 0xffbf3c : rebuild ? 0x2c3863 : C.alert);
           badge.mark.setText(rebuild || build ? '+' : '!').setColor(rebuild ? '#f3f0e8' : '#2b0a00');
         }

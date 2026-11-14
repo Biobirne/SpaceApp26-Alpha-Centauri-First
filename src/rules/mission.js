@@ -110,7 +110,10 @@ export const isWorking = (state) => !state.sheltered && !state.forcedShelter && 
 export function blockFraction(state) {
   const c = state.cfg.dose;
   let through = 1 - c.shieldBlock[state.shield];
-  if ((state.sheltered || state.forcedShelter) && state.rooms.shelter.status !== 'lost') through *= 1 - c.shelterBlock;
+  if ((state.sheltered || state.forcedShelter) && state.rooms.shelter.status !== 'lost') {
+    through *= 1 - c.shelterBlock;
+    if (state.fort) through *= c.fortFactor; // heavy supplies stacked on the wall block even more
+  }
   if (state.upgrades.walls) through *= c.wallsFactor;
   return 1 - through;
 }
@@ -216,7 +219,16 @@ export function repairFor(state, roomId) {
   if (room.status === 'lost') return { roomId, kind: 'rebuild', taps: 6, cost: 30 };
   if (roomId === 'solar' && state.dust) return { roomId, kind: 'dust', taps: 5, eva: evaCost(state) };
   if (roomId === 'hab' && state.filter) return { roomId, kind: 'filter', taps: 3 };
+  if (roomId === 'shelter' && fortOpen(state)) return { roomId, kind: 'fort', taps: 5 };
   return null;
+}
+
+/**
+ * The storm fort: before or during a storm, the crew can stack heavy supplies against the shelter wall
+ * (the real plan for NASA's Orion spaceship). It is a way to prepare, not a repair, and stays for the mission.
+ */
+function fortOpen(state) {
+  return !state.fort && state.rooms.shelter.status === 'ok' && (state.stormSoon || radiationNow(state) >= 3);
 }
 
 /** A spacewalk outside: what it costs in radiation dose right now (no shield, no walls out there). */
@@ -243,6 +255,12 @@ function afterSpacewalk(state) {
 
 export function completeRepair(state, roomId, kind) {
   const room = state.rooms[roomId];
+  if (kind === 'fort') {
+    if (state.fort) return false;
+    state.fort = true;
+    emit(state, 'crew', { mood: 'happy', text: 'The storm fort is built! Heavy supplies on the wall stop even more radiation in the shelter.' });
+    return true;
+  }
   if (kind === 'leak' && room.status === 'leak') {
     room.status = 'ok';
     state.stats.leaksFixed++;

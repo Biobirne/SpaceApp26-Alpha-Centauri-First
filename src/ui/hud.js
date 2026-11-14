@@ -188,7 +188,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
     const sig = jobs.map((j) => `${j.roomId}:${j.kind}`).join(',');
     set('jobs', refs.tasks, sig, (n) => {
       n.innerHTML = jobs.map((j) => `<button type="button" class="task" data-room="${j.roomId}" data-kind="${j.kind}">
-        ${icon(j.kind === 'rebuild' ? 'wrench' : j.kind === 'dust' ? 'sun' : j.kind === 'filter' ? 'filter' : 'drop')}
+        ${icon(j.kind === 'rebuild' ? 'wrench' : j.kind === 'dust' ? 'sun' : j.kind === 'filter' ? 'filter' : j.kind === 'fort' ? 'shelter' : 'drop')}
         ${JOB_LABEL[j.kind](ROOMS[j.roomId])}</button>`).join('');
     });
   }
@@ -208,6 +208,7 @@ const JOB_LABEL = {
   leak: (r) => `Fix leak: ${r.short}`,
   dust: () => 'Clean panels',
   filter: () => 'Swap filter',
+  fort: () => 'Build storm fort',
   rebuild: (r) => `Rebuild ${r.short}`,
 };
 

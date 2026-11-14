@@ -51,6 +51,7 @@ export const CONFIG = {
     perNormalDay: 0.25,       // dose units per day at 1x normal radiation, unshielded
     shieldBlock: [0, 0.6, 0.85, 0.95],
     shelterBlock: 0.9,
+    fortFactor: 0.3,          // storm fort: supplies stacked on the shelter wall multiply what still gets through
     wallsFactor: 0.6,         // upgrade: regolith walls multiply what gets through
     warnAbove: 70,
   },

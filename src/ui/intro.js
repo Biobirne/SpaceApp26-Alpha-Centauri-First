@@ -168,10 +168,13 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
         room: b.id, place,
         enter: () => {
           buildNext = b.id;
+          // The kid has to place it on the Moon: no shortcut button on the card.
+          // Only when the scene could not load (no canvas) does the card offer a button, so nobody gets stuck.
+          const noScene = document.body.classList.contains('no-phaser');
           render({
-            kind: 'build', title: b.name, text: [b.what],
-            tap: 'Tap the glowing spot on the Moon.',
-            button: { label: `Build the ${b.name.toLowerCase()}`, go: place },
+            kind: 'build', title: `Build: ${b.name}`, text: [b.what],
+            tap: noScene ? '' : 'Tap the glowing <b>+</b> on the Moon to build it.',
+            button: noScene ? { label: `Build the ${b.name.toLowerCase()}`, go: place } : null,
           });
         },
       });
@@ -241,8 +244,25 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
         spotlight('.meter.power');
         render({
           title: `The shield uses ${num(cost)} power a day`,
-          text: ['It blocks radiation, but it eats power. A stronger shield eats more.', 'That is the trade: safety costs power.'],
+          text: [
+            'It blocks radiation, but it eats power. A stronger shield eats more.',
+            'A magnet shield is test tech: scientists are working on it, but no base has one yet.',
+          ],
           button: { label: 'Next', go: next },
+        });
+      },
+    });
+
+    add('fort', {
+      doneOn: 'repairDone',
+      enter: () => {
+        state.fort = false; // the rules now offer the fort at the shelter
+        spotlight('.task[data-room="shelter"]');
+        render({
+          kind: 'problem', title: 'What really protects astronauts',
+          problem: 'In a very strong storm, the shield alone is not enough.',
+          fix: 'Thick, heavy walls stop radiation. Build a storm fort at the shelter.',
+          button: { label: 'Build the storm fort', go: () => repair('shelter') },
         });
       },
     });
@@ -253,9 +273,9 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
         show('shelter');
         spotlight('.shelterbtn');
         render({
-          kind: 'problem', title: 'Big storm? Use the shelter',
-          problem: 'In a very strong storm, the shield alone is not enough.',
-          fix: 'Thick walls stop radiation. Tap Shelter to send the crew in.',
+          praise: 'The fort is built!', title: 'Now send the crew inside',
+          text: ['Behind the thick wall, almost no radiation reaches them.'],
+          tap: 'Tap Shelter at the bottom.',
         });
       },
     });
@@ -311,6 +331,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
   /** Jump straight to one lesson (for testing): everything before it counts as done. */
   function jumpTo(name) {
     const alias = { storm: 'storm-shield', drill: 'storm-shield', shelter: 'storm-shelter', build: 'build-solar' };
+    if (name === 'fort') show('rates', 'tasks');
     const target = steps.findIndex((s) => s.id === (alias[name] ?? name));
     if (target <= 0) return 0;
     for (const b of buildings(state.cfg, powerInPerDay(state))) {
@@ -342,6 +363,7 @@ export function createIntro({ hud, startAt = '1', repair, speak, relayout, onDon
     begin(missionState) {
       state = missionState;
       state.outbox.length = 0;
+      state.fort = true; // not offered until its own lesson
       steps = makeSteps();
       go(jumpTo(startAt));
     },
