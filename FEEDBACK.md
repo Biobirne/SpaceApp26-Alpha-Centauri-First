@@ -175,6 +175,10 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - Cause (very likely, not seen on a real phone here): a touch on a building opens the mini-game, and the browser then sends a late click for the same spot, which pressed whatever lay there. Home is on the left and the shelter on the right, which matches what was pressed.
 - Fix: every sheet ignores clicks for 0.45 s after it opens.
 
+### Florian (14 Nov, ~18:40)
+- On a phone held sideways the game looks bad: in the intro, Sam's card becomes a tall narrow column and its button is off the screen; the mini-games need scrolling.
+- Decision: no landscape layout for phones. A phone on its side gets a note to hold it upright, with "Play sideways anyway" in case a device reports its shape wrongly. Tablets and computers keep the wide layout.
+
 ## Automatic SI review
 
 Claude Code (SI) playing the game and reviewing it.

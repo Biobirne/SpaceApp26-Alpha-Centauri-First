@@ -22,6 +22,7 @@
     { "path": "minigame.html", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "comment in head", "notes": "Test page that opens one mini-game without a mission." },
     { "path": "src/ui/minigames/*.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
     { "path": "src/ui/intro.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
+    { "path": "src/ui/portrait.css", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment" },
     { "path": "package.json", "kind": "code", "si": "assisted", "tool": "claude-code" },
     { "path": "data/donki/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Unchanged NASA DONKI responses, downloaded by an SI tool. The values are NASA's, not SI-made." },
     { "path": "data/storms/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Built from NASA DONKI and NASA OSDR RadLab data by tools/build_storm_library.py (SI-assisted script). Kid-facing summaries written with SI help." },
