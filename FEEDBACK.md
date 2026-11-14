@@ -28,7 +28,7 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 | M7 | The player places each building to learn its purpose | A short build phase before the first mission: tap a free spot, the module appears with one sentence about its job; tunnels connect them automatically | Round 3 |
 | M8 | Make players aware why they made a mistake | When something runs out, Sam says why it happened and what to do next time; the end screen lists these lessons | Done (round 1) |
 | M9 | Let curious players learn more | Tap any building for an info sheet (what it does, real life, built from, fact); tap the power, air and dose bars for a live breakdown | Done (round 1) |
-| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (brush the panels, power meter climbs, sticky dust lands again, real 2025 dust shield fact); leak, filter and storm fort next |
+| M10 | Mini-games should make sense: show what is broken and what each tap does | Rework repairs: find and patch the hole, wipe the panels and watch power come back, swap the CO₂ filter step by step, connect a cable or a water pipe | Dust done (#19: rub the dust off, the battery switches air, water, lab and radio back on, real 2025 dust shield fact; test page `minigame.html`); leak, filter and storm fort next |
 
 ## Team
 
