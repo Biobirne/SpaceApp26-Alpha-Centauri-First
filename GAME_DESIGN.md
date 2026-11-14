@@ -183,7 +183,7 @@ Architecture rule (from the `phaser-core` skill):
 - This keeps the rules testable without a browser and makes a restart just a fresh state.
 
 ## Build status (14 Nov, evening)
-Everything below runs on placeholder art, marked in the game as "SI-generated placeholder art". The real art replaces it via `assets/art/manifest.json` (see `assets/art/README.md`).
+Everything below is drawn by code (shapes, not image files). Team art can replace it via `assets/art/manifest.json` (see `assets/art/README.md`).
 - **Real sky.** Lunar day and night are computed for the real storm dates at a base in the Sea of Tranquility, near the Apollo 11 site (mean synodic month, so about ±1 day). Earth's phase is computed too.
 - **Decision cards** (game pauses until the player picks):
   - The first X-class flare, then only new record flares. Smaller big flares are a flash plus a crew line.

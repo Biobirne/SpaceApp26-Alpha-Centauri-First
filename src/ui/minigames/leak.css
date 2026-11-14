@@ -1,0 +1,54 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Leak mini-game (leak.js): a wall of panels, fog that drifts to the hole, then a patch with four taped corners. */
+
+.lk-wall {
+  position: relative; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px;
+  aspect-ratio: 4 / 3; max-height: 40vh; padding: 6px; border-radius: 12px;
+  background: #8f897c; box-shadow: inset 0 0 0 3px #55504a;
+}
+.lk-wall[hidden] { display: none; }
+.lk-cell {
+  min-width: 44px; min-height: 44px; border: 0; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(160deg, #e9e4d8, #cfc8b8); box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.12);
+}
+.lk-cell::before { content: ''; display: block; width: 6px; height: 6px; margin: 6px; border-radius: 50%; background: rgb(0 0 0 / 0.25); }
+.lk-cell.miss { animation: lk-shake 320ms; box-shadow: inset 0 0 0 3px var(--bad); }
+@keyframes lk-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* The fog: soft grey puffs. They sit above the panels and never catch a tap. */
+.lk-fog { position: absolute; inset: 0; pointer-events: none; }
+.lk-fog i {
+  position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.95), rgb(190 200 215 / 0.5) 60%, transparent 72%);
+  opacity: 0; transition: left 1.6s ease-in, top 1.6s ease-in, opacity 400ms;
+}
+
+/* Close-up of the hole, with the patch to tape down. */
+.lk-patch {
+  position: relative; align-self: center; width: min(260px, 70vw) !important; aspect-ratio: 1; border-radius: 14px;
+  background: linear-gradient(160deg, #e9e4d8, #cfc8b8); box-shadow: inset 0 0 0 3px #8f897c;
+}
+.lk-patch[hidden] { display: none; }
+.lk-hole {
+  position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%;
+  background: radial-gradient(circle, #000 45%, #3b3832 70%, transparent 72%);
+  box-shadow: 0 0 0 6px rgb(0 0 0 / 0.12);
+}
+/* The patch itself: a silver square that gets more solid with every taped corner. */
+.lk-patch::after {
+  content: ''; position: absolute; inset: 22%; border-radius: 8px; pointer-events: none;
+  background: repeating-linear-gradient(45deg, #c8ccd4 0 8px, #b4b9c2 8px 16px); opacity: 0.55;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+}
+.lk.won .lk-patch::after { opacity: 1; }
+.lk-corner {
+  position: absolute; z-index: 1; width: 64px; height: 64px; border: 3px dashed #8a5a00; border-radius: 12px; cursor: pointer;
+  background: rgb(255 201 74 / 0.25);
+}
+.lk-corner[data-c='0'] { left: 10%; top: 10%; }
+.lk-corner[data-c='1'] { right: 10%; top: 10%; }
+.lk-corner[data-c='2'] { left: 10%; bottom: 10%; }
+.lk-corner[data-c='3'] { right: 10%; bottom: 10%; }
+.lk-corner.on { border-style: solid; border-color: #6d7078; background: repeating-linear-gradient(135deg, #9aa0ab 0 6px, #868c98 6px 12px); cursor: default; }
+
+.lk-puff { align-self: center; }

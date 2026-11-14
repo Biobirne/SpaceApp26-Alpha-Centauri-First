@@ -269,6 +269,7 @@ function startMission(id, { training = null } = {}) {
       hud, startAt: training,
       speak: (text) => { if (readAloud) voice.speak(text); },
       relayout: () => syncSlot(),
+      syncSound: () => syncSoundButtons(),
       onDone: endTraining,
     })
     : createGuide({

@@ -1,5 +1,5 @@
 // SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
-// Mini-game: build a storm fort. It teaches what really protects astronauts: mass.
+// Mini-game: build a storm wall (called "fort" in the code). It teaches what really protects astronauts: mass.
 // Two parts, so a 7-year-old knows what they are doing and why:
 // 1. Test: hold a pillow, then a water bag into the particle stream. Light lets it through, heavy stops it.
 // 2. Build: use that rule to stack the right things on the thin shelter wall, and watch how much
@@ -41,7 +41,6 @@ const lane = (cls, n) => `<span class="fg-lane ${cls}" aria-hidden="true">${'<i>
 export function mountFort(root, { reducedMotion = false, onFinish }) {
   root.innerHTML = `<div class="fg ${reducedMotion ? 'still' : ''}"></div>`;
   const game = root.querySelector('.fg');
-  const mark = '<span class="mg-mark">SI-generated placeholder art</span>';
   const buzz = (ms) => { if (navigator.vibrate) try { navigator.vibrate(ms); } catch { /* not allowed */ } };
 
   // ------------------------------------------------------------------ part 1: the test
@@ -70,9 +69,10 @@ export function mountFort(root, { reducedMotion = false, onFinish }) {
       </div>
       <div class="fg-rule" hidden>
         <p><b>Light</b> things let radiation through.<br><b>Heavy</b> things stop it.</p>
+        <p class="fg-why">Why? Every particle bumps into the stuff in its way. The more stuff, the more particles get stuck.</p>
         <button type="button" class="fg-btn fg-next">Build the wall</button>
       </div>
-      ${mark}`;
+`;
     const row = game.querySelector('.fg-row');
     const probe = game.querySelector('.fg-probe');
     const sam = game.querySelector('.fg-sam span');
@@ -111,8 +111,8 @@ export function mountFort(root, { reducedMotion = false, onFinish }) {
     game.style.setProperty('--through', 100);
     game.innerHTML = `
       <header class="fg-head">
-        <h2>Build the storm fort</h2>
-        <p class="fg-sam" aria-live="polite"><b>Sam</b><span>The shelter wall is thin. Stack heavy things on it until the purple bar is below the yellow line.</span></p>
+        <h2>Build the storm wall</h2>
+        <p class="fg-sam" aria-live="polite"><b>Sam</b><span>The shelter wall is thin. Stack heavy things against it, so more stuff is in the way. Get the purple bar below the yellow line!</span></p>
       </header>
       <div class="fg-scene">
         <div class="fg-room" aria-hidden="true">${crewAvatar('alert')}<span>Crew</span></div>
@@ -131,12 +131,11 @@ export function mountFort(root, { reducedMotion = false, onFinish }) {
       <div class="fg-shelf" role="group" aria-label="Supplies">
         ${SHELF.map((kind, n) => `<button type="button" class="fg-item" data-n="${n}">${thing(kind)}<span>${KINDS[kind].name}</span></button>`).join('')}
       </div>
-      ${mark}
       <div class="fg-win" hidden>
         <p class="fg-gain">The crew is safe!</p>
         <p class="fg-before"></p>
         <p class="fg-fact">Real astronauts do this too: on NASA’s Orion spaceship, the crew plans to build a storm shelter from its supply bags.</p>
-        <button type="button" class="fg-btn fg-done">Fort is ready</button>
+        <button type="button" class="fg-btn fg-done">Wall is ready</button>
       </div>`;
 
     const rows = [...game.querySelectorAll('.fg-row')];

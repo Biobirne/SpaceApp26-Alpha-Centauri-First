@@ -32,5 +32,4 @@ The Moon base in `src/scene/MoonScene.js` is drawn from simple shapes as a place
 
 ## Rules (from AGENTS.md)
 - No SI-generated images (Space Apps term for AI), no NASA logos or insignia.
-- When all placeholder visuals are replaced by team art, set `"siPlaceholders": false` in `manifest.json`. That removes the in-game "SI-generated placeholder art" watermark.
 - Record every file and its license in `CREDITS.md`.

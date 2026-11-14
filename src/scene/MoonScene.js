@@ -20,6 +20,16 @@ const C = {
   alert: 0xff7b5c, label: '#f3f0e8',
 };
 
+// Earth as seen from the Moon, in units of its radius (x to the right, y down). Shapes stay inside the disc.
+const EARTH = {
+  northAmerica: [[-0.82, -0.3], [-0.7, -0.52], [-0.5, -0.66], [-0.3, -0.6], [-0.28, -0.42], [-0.42, -0.3], [-0.5, -0.12], [-0.66, -0.14]],
+  southAmerica: [[-0.74, 0.02], [-0.52, -0.04], [-0.36, 0.14], [-0.38, 0.36], [-0.5, 0.6], [-0.58, 0.74], [-0.64, 0.5], [-0.7, 0.26]],
+  europe: [[0.0, -0.5], [0.06, -0.68], [0.2, -0.78], [0.4, -0.74], [0.52, -0.58], [0.4, -0.46], [0.2, -0.44]],
+  africa: [[-0.08, -0.32], [0.08, -0.38], [0.3, -0.38], [0.46, -0.2], [0.54, 0.0], [0.4, 0.1], [0.36, 0.36], [0.24, 0.6], [0.12, 0.58], [0.08, 0.28], [-0.1, 0.12], [-0.2, -0.1]],
+  sahara: [[-0.04, -0.28], [0.1, -0.33], [0.28, -0.32], [0.4, -0.18], [0.3, -0.08], [0.08, -0.06], [-0.1, -0.12]],
+  clouds: [[-0.3, -0.3, 0.62, 0.14], [-0.12, 0.34, 0.5, 0.12], [0.3, -0.56, 0.4, 0.1], [0.42, 0.26, 0.36, 0.1], [-0.52, 0.12, 0.3, 0.09]],
+};
+
 export function createMoonScene() {
   return class MoonScene extends Phaser.Scene {
     constructor() {
@@ -131,7 +141,7 @@ export function createMoonScene() {
       if (this.tight) {
         // Earth and the Sun live in the whole stage, so the base may fill its own part:
         // pick one row or two rows, whichever draws the buildings bigger, and centre it.
-        // The bottom strip stays free for the SI watermark.
+        // A thin strip at the bottom stays free, so the base never touches the edge.
         // The top strip stays free for the labels above the base (solar output, radiation).
         const labels = 26 * this.dpr;
         const bh = bs.h - 20 * this.dpr - labels;
@@ -255,17 +265,6 @@ export function createMoonScene() {
           this.tweens.add({ targets: badge, scale: 1.15, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
         }
       }
-      // Space Apps rule: SI-generated images carry a visible watermark. The placeholder visuals
-      // are drawn by SI-written code, so they are marked until the team's own art replaces them.
-      if (this.art.siPlaceholders !== false) {
-        const s = this.baseSlot || this.slot;
-        const wfs = Math.round(11 * this.dpr);
-        const mark = this.add.text(s.x + 8 * this.dpr, s.y + s.h - 6 * this.dpr, 'SI-generated placeholder art', {
-          fontFamily: 'Lexend, system-ui, sans-serif', fontSize: `${wfs}px`, fontStyle: '600', color: '#c9d3f2',
-          backgroundColor: 'rgba(7,11,24,0.55)', padding: { x: 5 * this.dpr, y: 2 * this.dpr },
-        }).setOrigin(0, 1).setAlpha(0.85);
-        this.labelLayer.add(mark);
-      }
     }
 
     // ------------------------------------------------------------------ static drawing
@@ -361,29 +360,56 @@ export function createMoonScene() {
     drawEarth(lit) {
       const { x, y, r } = this.earth;
       const g = this.earthG.clear();
-      g.fillStyle(C.earthLit, 0.12);
-      g.fillCircle(x, y, r * 1.18);
-      g.fillStyle(C.earthDark, 1);
-      g.fillCircle(x, y, r);
-      // Lit part faces the Sun (drawn on the left). lit = fraction of Earth's disc in sunlight.
-      const f = Phaser.Math.Clamp(lit, 0, 1);
-      if (f > 0.02) {
-        g.fillStyle(C.earthLit, 1);
-        g.slice(x, y, r, Math.PI / 2, (Math.PI * 3) / 2, false);
-        g.fillPath();
-        if (f >= 0.5) {
-          g.fillEllipse(x, y, 2 * r * (2 * f - 1), 2 * r);
-        } else {
-          g.fillStyle(C.earthDark, 1);
-          g.fillEllipse(x, y, 2 * r * (1 - 2 * f) + 1, 2 * r + 1);
-        }
-        // a few clouds on the lit side
-        g.fillStyle(C.earthCloud, 0.55);
-        g.fillEllipse(x - r * 0.35, y - r * 0.35, r * 0.7, r * 0.18);
-        g.fillEllipse(x - r * 0.5, y + r * 0.25, r * 0.5, r * 0.14);
+      const poly = (pts, color, alpha = 1) => {
+        g.fillStyle(color, alpha);
+        g.fillPoints(pts.map(([px, py]) => ({ x: x + px * r, y: y + py * r })), true);
+      };
+      // thin blue air glow around the planet
+      for (let i = 3; i >= 1; i--) {
+        g.fillStyle(0x6fb6ff, 0.06 * (4 - i));
+        g.fillCircle(x, y, r * (1 + i * 0.07));
       }
-      g.lineStyle(Math.max(1, r * 0.06), C.earthLit, 0.5);
-      g.strokeCircle(x, y, r);
+      // oceans, lighter towards the sunlit side
+      g.fillStyle(0x1f5fc0, 1);
+      g.fillCircle(x, y, r);
+      g.fillStyle(0x3d8df0, 0.9);
+      g.fillCircle(x - r * 0.18, y - r * 0.12, r * 0.78);
+      g.fillStyle(0x62aaff, 0.5);
+      g.fillCircle(x - r * 0.36, y - r * 0.26, r * 0.42);
+      // continents (a simple view of the Atlantic side: the Americas, Europe and Africa)
+      poly(EARTH.northAmerica, 0x4aa565);
+      poly(EARTH.southAmerica, 0x3f9a5a);
+      poly(EARTH.europe, 0x5bab6a);
+      poly(EARTH.africa, 0x4aa565);
+      poly(EARTH.sahara, 0xd8c382);
+      // ice at the poles
+      g.fillStyle(0xf4f9ff, 0.95);
+      g.fillEllipse(x, y - r * 0.9, r * 0.56, r * 0.16);
+      g.fillEllipse(x + r * 0.05, y + r * 0.92, r * 0.42, r * 0.12);
+      // clouds
+      g.fillStyle(C.earthCloud, 0.8);
+      for (const [cx, cy, w, h] of EARTH.clouds) g.fillEllipse(x + cx * r, y + cy * r, w * r, h * r);
+      // Night side. The lit part faces the Sun (on the left); lit = fraction of the disc in sunlight.
+      const f = Phaser.Math.Clamp(lit, 0, 1);
+      if (f < 0.98) {
+        const a = 2 * f - 1; // where the day-night line crosses the middle: 1 = right edge, -1 = left edge
+        const pts = [];
+        const n = 24;
+        for (let i = 0; i <= n; i++) {
+          const th = -Math.PI / 2 + (Math.PI * i) / n;
+          pts.push([Math.cos(th) * 1.01, Math.sin(th) * 1.01]);
+        }
+        for (let i = n; i >= 0; i--) {
+          const th = -Math.PI / 2 + (Math.PI * i) / n;
+          pts.push([Math.cos(th) * a, Math.sin(th) * 1.01]);
+        }
+        poly(pts, 0x060a1c, 0.86);
+      }
+      // rim light on the sunlit edge
+      g.lineStyle(Math.max(1, r * 0.05), 0x9fd0ff, 0.55);
+      g.beginPath();
+      g.arc(x, y, r, Math.PI * 0.55, Math.PI * 1.45, false);
+      g.strokePath();
     }
 
     drawBase(v) {

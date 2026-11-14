@@ -1,0 +1,109 @@
+/* SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. */
+/* Shared frame for the newer mini-games (leak, filter): full screen, title, Sam's line under the
+   title, one meter, the scene, and a result sheet. Same world as the dust and wall games. */
+
+.mg {
+  --sun: #ffc94a;
+  --ink: #f5f1e8;
+  --ink-2: #c9c2b4;
+  --dark: #1d1b18;
+  --line: #55504a;
+  --good: #8fe36b;
+  --bad: #ff7b5c;
+  position: relative; height: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(var(--safe-t) + 14px) calc(var(--safe-r) + 16px) calc(var(--safe-b) + 22px) calc(var(--safe-l) + 16px);
+  color: var(--ink); overflow: hidden auto; /* a very small phone can scroll, so nothing is ever cut off */
+  background: linear-gradient(to bottom, #23211d, #33302a 60%, #23211d);
+}
+.mg > * { width: 100%; max-width: 460px; }
+
+.mg-head { display: flex; flex-direction: column; gap: 8px; }
+.mg-head h2 { margin: 0; padding-right: 60px; min-height: 48px; display: flex; align-items: center; font-size: 26px; line-height: 1.15; font-weight: 700; }
+.mg .mg-sam {
+  margin: 0; display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 14px; border-radius: 4px 18px 18px 18px;
+  background: var(--ink); color: var(--dark); font-size: 17px; line-height: 1.3;
+}
+.mg-sam b { font-size: 13px; color: #8a5a00; }
+.mg-sam strong { font-weight: 700; }
+
+/* The numbered steps: a real sequence, so the numbers mean something. */
+.mg-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; }
+.mg-steps li {
+  flex: 1; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; line-height: 1.15; color: var(--ink-2); background: rgb(0 0 0 / 0.3);
+}
+.mg-steps b { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; background: var(--line); color: var(--ink); }
+.mg-steps li[data-state='now'] { color: var(--dark); background: var(--sun); }
+.mg-steps li[data-state='now'] b { background: var(--dark); color: var(--sun); }
+.mg-steps li[data-state='done'] { color: var(--good); }
+.mg-steps li[data-state='done'] b { background: var(--good); color: var(--dark); }
+
+/* Everything below the words: meter, scene, buttons. */
+.mg-body { display: flex; flex-direction: column; gap: 10px; }
+
+/* The pointer: sits on top of the thing to tap, and that thing glows. */
+.mg-point {
+  position: absolute; z-index: 4; width: auto !important; transform: translate(-50%, -115%); pointer-events: none;
+  padding: 5px 12px; border-radius: 99px; font-size: 15px; font-weight: 700; background: var(--sun); color: var(--dark);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.5); animation: mg-bob 1s ease-in-out infinite;
+}
+.mg-point::after { content: ''; position: absolute; left: 50%; top: 100%; margin-left: -7px; border: 7px solid transparent; border-top-color: var(--sun); }
+.mg-point[hidden] { display: none; }
+@keyframes mg-bob { 50% { transform: translate(-50%, -135%); } }
+.mg .mg-target { box-shadow: 0 0 0 4px var(--sun), 0 0 18px 4px rgb(255 201 74 / 0.55) !important; }
+
+.mg-meter { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; font-size: 15px; color: var(--ink-2); }
+.mg-meter-label { grid-column: 1 / -1; }
+.mg-track { position: relative; height: 16px; border-radius: 99px; background: var(--dark); box-shadow: inset 0 0 0 2px var(--line); overflow: hidden; }
+.mg-fill { position: absolute; inset: 0 auto 0 0; width: calc(var(--level, 50) * 1%); border-radius: inherit; background: var(--meter, var(--sun)); transition: width 500ms, background-color 300ms; }
+.mg-pct { min-width: 3em; text-align: right; font-size: 20px; color: var(--meter, var(--sun)); }
+
+.mg-btn {
+  min-height: 56px; padding: 0 18px; border: 0; border-radius: 14px; cursor: pointer;
+  font: 700 19px/1.1 var(--font, system-ui); background: var(--sun); color: var(--dark); box-shadow: 0 3px 0 #8a5a00;
+}
+.mg-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a5a00; }
+.mg-btn:disabled { opacity: 0.4; cursor: default; }
+.mg button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+.mg-win {
+  position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; max-width: none;
+  padding: 22px calc(var(--safe-r) + 20px) calc(var(--safe-b) + 20px) calc(var(--safe-l) + 20px);
+  background: var(--dark); border-radius: 26px 26px 0 0; box-shadow: 0 -10px 30px rgb(0 0 0 / 0.5);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: mg-rise 420ms var(--ease-pop, ease-out) both;
+}
+.mg-win[hidden] { display: none; }
+.mg .mg-gain { margin: 0; font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--good); }
+.mg .mg-fact { margin: 0; font-size: 17px; line-height: 1.35; color: var(--ink-2); max-width: 46ch; }
+.mg .mg-fact b { color: var(--sun); }
+@keyframes mg-rise { from { transform: translateY(100%); } }
+
+/* Wide screens: the words stand on the left, the game on the right. */
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .mg {
+    display: grid; justify-content: center; align-content: center; column-gap: 56px; row-gap: 14px;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 480px);
+  }
+  .mg { align-items: center; }
+  .mg > * { max-width: none; }
+  .mg-head { grid-column: 1; gap: 16px; }
+  .mg-body { grid-column: 2; }
+  .mg-steps { flex-direction: column; }
+  .mg-steps li { font-size: 16px; padding: 8px 12px; }
+  .mg-head h2 { font-size: 34px; padding-right: 0; }
+  .mg .mg-sam { font-size: 19px; }
+  .mg-win { left: auto; width: min(520px, 50%); border-radius: 26px 0 0 0; }
+}
+@media (max-height: 700px) {
+  .mg { gap: 8px; }
+  .mg-steps li { padding: 4px 6px; font-size: 12px; }
+  .mg-steps b { width: 18px; height: 18px; font-size: 12px; }
+  .mg-head h2 { font-size: 22px; }
+  .mg .mg-sam { font-size: 16px; padding: 8px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg *, .mg *::before, .mg *::after { animation: none !important; transition: none !important; }
+}
