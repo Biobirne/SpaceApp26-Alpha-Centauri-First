@@ -34,6 +34,16 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~18:00)
+- The layout must work on every format (tablet, laptop, phone) and not look odd. Nothing should glitch or sit in the wrong place.
+
+**Status: done** (branch `fix/layout-all-sizes`). Checked at 11 sizes, from 360×740 phones to 1920×1080, including phones held sideways and tablets both ways. Fixed:
+- **Base hidden:** Sam's bubble and the repair buttons covered the base on phones and landscape tablets. The base now gets its own space between them, and Earth and the Sun stay above the roofs.
+- **Repair buttons:** on phones they sit in one row above the bars. On landscape tablets, laptops and sideways phones they use the empty column on the right, so they never cover Earth.
+- **Small phones (360 px):** the four bars stay in one row, and the building names shrink instead of overlapping.
+- **Sideways phones:** smaller title and end-screen headings, so the buttons are in view.
+- **Info sheets:** the first line no longer runs under the close button.
+
 ### Florian (14 Nov, ~17:00)
 - The shield needs a lot of explaining. Tapping the shield icon should open an explanation, with sources and everything.
 
@@ -168,6 +178,7 @@ Left open: three lines inside `overlays.js` next to the mini-game code (shield w
 - **Status: "neither" fixed** ("no thick air and no magnetic field"). The leak count and the tip are still open.
 
 **P3: Laptop layout.** At 1440×900 the lower half of the screen is empty ground and the base sits small in the middle.
+- **Status: done** with the layout round (Florian, ~18:00): the base stands lower, Sam has his own strip at the bottom, and the repairs use the right column.
 
 **P3: Look.** The placeholder art is clean, but the palette drifts to the common navy/purple look. The art direction is still open; see the research notes from 14 Nov:
 - Real NASA images (SDO Sun, LRO Moon, Earth) for the sky and ground.
