@@ -53,3 +53,10 @@
 .lamp-toggle:disabled { cursor: default; opacity: 0.7; }
 
 @media (prefers-reduced-motion: reduce) { .ls-node { transition: none; } }
+
+/* Fix buttons in the bar sheets and in the loop: the repair is one tap away from the explanation */
+.fixes { display: grid; gap: 8px; margin: 8px 0 14px; }
+.fixes .fix { width: 100%; justify-content: flex-start; gap: 10px; min-height: 56px; padding: 8px 14px; text-align: left; font-size: 17px; font-weight: 700; }
+.fixes .fix .sub { display: block; font-size: 13px; font-weight: 500; opacity: 0.85; }
+.ls-fix { display: flex; width: 100%; margin-top: 10px; gap: 8px; }
+button.ls-leak { width: 100%; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
