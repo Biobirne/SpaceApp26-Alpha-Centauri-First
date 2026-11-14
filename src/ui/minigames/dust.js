@@ -58,7 +58,8 @@ export function mountDust(root, { eva = null, dustyFactor = 0.4, reducedMotion =
       <div class="dg-rays" aria-hidden="true"><i></i><i></i><i></i></div>
       <header class="dg-head">
         <h2>Brush off the Moon dust</h2>
-        <p>Dust blocks the sunlight.</p>
+        <p class="dg-why"><b>Problem:</b> dust blocks the sunlight, so the panels make less power.</p>
+        <p class="dg-why"><b>Fix:</b> rub the dust off.</p>
         ${evaLine ? `<p class="dg-eva">${evaLine}</p>` : ''}
       </header>
       <div class="dg-rig">
