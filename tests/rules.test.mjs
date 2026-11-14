@@ -8,6 +8,7 @@ import {
   repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize,
 } from '../src/rules/mission.js';
 import { isDaylight } from '../src/rules/sky.js';
+import { configFor } from '../src/rules/config.js';
 import { buildTimeline, flareScore } from '../src/rules/storm.js';
 
 const load = (id) => JSON.parse(readFileSync(new URL(`../data/storms/${id}.json`, import.meta.url)));
@@ -172,4 +173,43 @@ test('badges and praise reward how the kid played', () => {
   assert.ok(typeof sum.praise === 'string' && sum.praise.length > 10);
   const lazy = play('may2024', passive);
   assert.ok(!summarize(lazy).badges.includes('steady'));
+});
+
+test('difficulty levels: Easy throws fewer random problems than Hard, the storm data is the same', () => {
+  const count = (level, seed) => {
+    const s = createMission(load('mar2024'), { seed, config: configFor(level) });
+    let n = 0;
+    while (!s.ended) {
+      for (const e of s.outbox) if (e.type === 'room' && ['leak', 'dust', 'filter'].includes(e.status)) n++;
+      s.outbox.length = 0;
+      if (s.pendingCard) { chooseOption(s, s.pendingCard.options[0].id); continue; }
+      sensible.each(s);
+      tick(s, 0.05);
+    }
+    return { n, s };
+  };
+  let easy = 0;
+  let hard = 0;
+  for (const seed of [1, 2, 3, 4]) {
+    const e = count('easy', seed);
+    const h = count('hard', seed);
+    easy += e.n;
+    hard += h.n;
+    assert.deepEqual(e.s.timeline.days.map((d) => d.radiation), h.s.timeline.days.map((d) => d.radiation));
+    assert.equal(summarize(h.s).difficulty, 'hard');
+  }
+  assert.ok(easy < hard, `easy ${easy} vs hard ${hard}`);
+  assert.equal(configFor('nonsense').difficulty, 'normal');
+});
+
+test('every setback comes with a reason and a tip for next time', () => {
+  const s = play('may2024', passive);
+  const sum = summarize(s);
+  assert.ok(sum.lessons.length > 0);
+  for (const l of sum.lessons) {
+    assert.ok(l.title && l.why && l.next, JSON.stringify(l));
+    assert.ok(l.day >= 1 && l.day <= 30);
+  }
+  // one per kind on the end screen
+  assert.equal(new Set(sum.lessons.map((l) => l.kind)).size, sum.lessons.length);
 });

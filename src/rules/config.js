@@ -95,3 +95,31 @@ export const CONFIG = {
 
 export const SHIELD_LABELS = ['Off', 'Low', 'Mid', 'Max'];
 export const ROOM_IDS = ['solar', 'lab', 'hab', 'greenhouse', 'shelter'];
+
+/** Difficulty levels (mentor feedback). Each one changes a copy of CONFIG. Kid-facing text: content.js. */
+export const DIFFICULTY_TUNING = {
+  easy: (c) => {
+    c.events.randomGapDays = [4.5, 7];
+    c.events.leakToLostDays = 4;
+    c.power.capacity = 130;
+    c.power.start = 130;
+    c.callEarth.cooldownDays = 2;
+    c.dose.perNormalDay = 0.2;
+  },
+  normal: () => {},
+  hard: (c) => {
+    c.events.randomGapDays = [2.2, 3.6];
+    c.events.leakToLostDays = 1.6;
+    c.power.solarPerDay = 21;
+    c.callEarth.cooldownDays = 4;
+    c.dda.max = 0.5; // the adaptive help stays small on Hard
+  },
+};
+
+export function configFor(level = 'normal') {
+  const key = DIFFICULTY_TUNING[level] ? level : 'normal';
+  const c = structuredClone(CONFIG);
+  DIFFICULTY_TUNING[key](c);
+  c.difficulty = key;
+  return c;
+}

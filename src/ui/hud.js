@@ -80,6 +80,7 @@ export function createHud(root, actions, { sound = true, canSpeak = false } = {}
   refs.shelter.addEventListener('click', () => actions.shelter());
   refs.call.addEventListener('click', () => actions.call());
   refs.science.addEventListener('click', () => actions.shop());
+  for (const m of el.querySelectorAll('[data-info]')) m.addEventListener('click', () => actions.info(m.dataset.info));
   refs.rad.addEventListener('click', () => actions.data());
   refs.tasks.addEventListener('click', (e) => {
     const b = e.target.closest('[data-room]');
@@ -205,10 +206,11 @@ const JOB_LABEL = {
 };
 
 function meter(kind, ic, label) {
-  return `<div class="meter ${kind}" role="group" aria-label="${label}">
+  return `<button type="button" class="meter ${kind}" data-info="${kind}" aria-label="${label}. Tap to see where it comes from and goes to.">
     ${icon(ic)}<span class="m-value"></span><span class="m-label">${label}</span>
     <span class="m-bar"><span class="m-fill"></span></span><span class="m-rate"></span><span class="m-warn"></span>
-  </div>`;
+    <span class="m-info" aria-hidden="true">i</span>
+  </button>`;
 }
 
 function rate(perDay, unit) {

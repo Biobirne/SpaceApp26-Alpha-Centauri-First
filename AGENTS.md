@@ -36,6 +36,7 @@ Read this file fully before every task. If a request conflicts with this file, s
 /data/             DONKI snapshot + event/content JSON + texts
 AGENTS.md          this file
 CLAUDE.md          imports this file
+FEEDBACK.md        all feedback (mentors, SI review, team) and what we did with it
 SI_USAGE.md        log of SI tool usage (required for submission)
 SI_DISCLOSURE.md   how SI use is labelled (watermarks, text, metadata)
 si-manifest.json   machine-readable SI metadata for files
