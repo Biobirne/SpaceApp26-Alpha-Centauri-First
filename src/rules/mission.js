@@ -559,7 +559,7 @@ function particleCard(state) {
   if (shelterOk) {
     options.push({ id: 'shelter', label: 'Crew to shelter', cost: `${shieldCost(state, 1)}, no science`,
       effects: { sheltered: true, shield: 1 }, mood: 'happy',
-      reply: 'Everyone is in the shelter. Its thick walls block almost everything, and it costs no extra power. Smart!' });
+      reply: 'Everyone is in the shelter. Its thick walls block almost everything, and it costs no extra power. Good plan!' });
   }
   options.push({ id: 'max', label: 'Shield to Max', cost: shieldCost(state, 3), effects: { shield: 3, sheltered: false }, mood: 'calm',
     reply: 'Shield at Max, and the crew keeps working. That costs a lot of power.' });
