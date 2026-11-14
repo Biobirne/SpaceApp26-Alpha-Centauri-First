@@ -1,24 +1,61 @@
-# Alpha Centauri First – Junior Astronaut Mission Trainer
+# Alpha Centauri First – Moon Base Commander
 
-NASA Space Apps Challenge 2026, Vienna. A browser game for kids aged 7–12: run a lunar/Martian outpost and make trade-offs between power, life support, radiation shielding, food and communication delay, driven by real NASA space weather data (DONKI).
+NASA Space Apps Challenge 2026, Vienna. Challenge: "Build a Junior Astronaut Mission Trainer".
 
-Play: _GitHub Pages URL goes here_
+A browser game for kids aged 7–12. You run a small base on the Moon for 30 days while a real solar storm from the past hits it. Every choice costs something: power against protection, safety against science. The storms, flares and radiation levels are archived NASA measurements (DONKI and OSDR RadLab), replayed day by day.
+
+"Moon Base Commander" is a working title, and so is the crewmate's name, Sam.
+
+**Play:** not online yet. GitHub Pages is not switched on (the repo is private). Run it locally, see below.
+
+## What's in the game
+- **Six real storms (2017–2025)** as levels, unlocked one after the other. Easy, Normal or Hard, each explained on the start screen.
+- **Three bars:** power, air and the crew's radiation dose. Science points are the score.
+- **Choices with a cost:** the shield (a magnet shield, labelled as test tech), the storm shelter, repairs, upgrades, fast-forward.
+- **Call Earth:** Mission Control gives one tip with the reason behind it, after a real 2.6 s radio round trip.
+- **Sam, the crewmate:** guided first steps, the story, lessons after mistakes, and read-aloud with the device's voice.
+- **Learn more on tap:** every building, every bar, a "How it works" sheet, and a panel with the real NASA numbers.
+- **Rewards:** stars, ranks and badges. Sound effects are synthesized in the browser.
+
+Design, decisions and build status: [GAME_DESIGN.md](GAME_DESIGN.md). Feedback and what we did with it: [FEEDBACK.md](FEEDBACK.md).
 
 ## Run locally
-No build step. ES modules need an HTTP server (not `file://`):
+No build step and no dependencies. ES modules need an HTTP server, not `file://`:
 
 ```sh
-python -m http.server 8000
+python tools/serve.py 8000
 # open http://localhost:8000
 ```
 
-Test on a phone in the same Wi-Fi: `python -m http.server 8000 --bind 0.0.0.0`, then open `http://<your-laptop-ip>:8000`.
+`tools/serve.py` works like `python -m http.server`, but it turns off caching, so a reload always loads the latest code. It listens on all network interfaces, so a phone in the same Wi-Fi can open `http://<your-laptop-ip>:8000`.
 
-## Data
-`/data/donki/` holds snapshot JSON from NASA CCMC DONKI (see `manifest.json`). The game works offline from these snapshots.
+Useful URL options:
 
-## Rules for contributors
-See [AGENTS.md](AGENTS.md). Game design: [GAME_DESIGN.md](GAME_DESIGN.md). Data: [data/README.md](data/README.md). Log SI tool usage in [SI_USAGE.md](SI_USAGE.md) (see [SI_DISCLOSURE.md](SI_DISCLOSURE.md)), asset licenses in [CREDITS.md](CREDITS.md).
+| Option | What it does |
+|--------|--------------|
+| `?all=1` | Unlocks every storm (for judges) |
+| `?storm=may2024` | Starts a storm directly |
+| `?seed=5` | Makes the random problems repeatable |
+| `?debug=1` | Adds `window.__moonbase.skip(days)` to jump ahead in playtests |
+
+## Tests
+The game rules are plain JavaScript with no Phaser and no DOM, so Node can test them (Node 18 or newer):
+
+```sh
+npm test
+```
+
+## Project files
+| File | What it is |
+|------|------------|
+| [AGENTS.md](AGENTS.md) | Rules for everyone who works on the code, people and coding agents |
+| [GAME_DESIGN.md](GAME_DESIGN.md) | The game design, what is real and what is made up, and the build status |
+| [FEEDBACK.md](FEEDBACK.md) | Feedback from mentors, playtests and SI review, with our decisions |
+| [data/README.md](data/README.md) | The NASA data, how the storm library was built, and the wording rules (archived, not live) |
+| [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
+| [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |
+| [SI_USAGE.md](SI_USAGE.md), [SI_DISCLOSURE.md](SI_DISCLOSURE.md), [si-manifest.json](si-manifest.json) | Where SI tools (Super Intelligence, the Space Apps term) were used, and how it is labelled |
+| `Guide_Gamedesign_Attention.md` | Background research on game design for kids (German, gathered with Gemini) |
 
 ## License
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). The NASA data stays NASA's; see [CREDITS.md](CREDITS.md).

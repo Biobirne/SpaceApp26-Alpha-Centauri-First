@@ -16,7 +16,7 @@ python tools/serve.py 8000
 
 It works like `python -m http.server` but turns off caching, so a reload always loads the latest modules. If port 8000 is busy, use 8001. Reuse a server that is already running.
 
-Useful URLs: `?storm=may2024` starts a storm directly, `?all=1` unlocks every storm, `?seed=5` makes random events repeatable, and `?debug=1` exposes `window.__moonbase.skip(days)` to jump ahead (cards are answered with the first option).
+Useful URLs: `?storm=may2024` starts a storm directly, `?all=1` unlocks every storm, `?seed=5` makes random events repeatable, and `?debug=1` exposes `window.__moonbase.skip(days, pick)` to jump ahead (cards are answered with `pick(card)`, by default the first option). Progress lives in `localStorage` (`moonbase.progress.v1`): a fresh browser profile shows the guided first steps again.
 
 ## 2. Look at it (Playwright MCP)
 Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailable, fall back to Claude in Chrome.
@@ -31,8 +31,8 @@ Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailab
 ## 3. Check against the hard rules
 - No horizontal scrolling at 390px. Tap targets are at least 44px.
 - Text is English and readable for a 7-year-old: short sentences, no jargon without explanation.
-- The NASA data attribution is visible on screen. Snapshot data is labelled "snapshot", never "live".
-- Nothing fails offline. Live DONKI fetch is optional, and the snapshot in `/data/donki/` must work alone.
+- The NASA data attribution is visible on screen. Archived data is labelled "archived" (see `data/README.md`), never "live".
+- Nothing fails offline. Once loaded, the game plays from `/data/storms/` alone and makes no data requests.
 - Total download stays small. Check the sizes of new files in `assets/`.
 
 ## 4. Report

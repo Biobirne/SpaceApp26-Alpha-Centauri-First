@@ -44,7 +44,7 @@ Our players are children on a phone, often a parent's or teacher's, in a noisy r
 - No external links inside gameplay. The credits or about screen may link to NASA sources.
 
 ## Real data, calm framing
-- Space weather is real and the data is from NASA DONKI. Say so plainly and label snapshots: "Real solar flares from May 2024 (snapshot)".
+- Space weather is real and the data is from NASA DONKI. Say so plainly and label archived data as archived: "Real solar flares from May 2024 (archived NASA data)". Wording rules: `data/README.md`.
 - Frame events as challenges the crew can handle, not disasters. Example: "A big flare is coming! Time to check your shields." Don't write "DANGER: lethal radiation".
 
 ## Review checklist (run before merge, together with `playtest`)

@@ -1,6 +1,6 @@
 # Game design
 
-Status: agreed direction, Saturday 14 Nov 2026. Details marked **(open)** are decided during the build, depending on time.
+Status: agreed direction, Saturday 14 Nov 2026, updated to what is built. Details marked **(open)** or **(not built yet)** are still to come. What is built: "Build status" at the end.
 
 ## One sentence
 **You run a Moon base for one month during a real solar storm, and you split your power between keeping the crew safe and doing science.**
@@ -22,8 +22,8 @@ Status: agreed direction, Saturday 14 Nov 2026. Details marked **(open)** are de
    - Text is short: at most two short lines per speech bubble.
 3. **Not too shallow for the jury.** The depth is there, one tap away.
    - The kid sees "278× normal radiation".
-   - A **"Show real data"** button opens the real numbers: µGy/h, instrument, spacecraft, date, the flare class, and a mini chart of the 30 days.
-   - The end screen links every number to its NASA source (see `data/README.md`).
+   - The radiation chip in the HUD opens the real numbers: a chart of the 30 days, today's µGy/h, the instrument and spacecraft, the normal level, and the biggest flares so far.
+   - The end screen names the NASA sources for every number (see `data/README.md`).
 
 ## Your crewmate (the guide)
 An astronaut character **pops in from the side** with a speech bubble. They are the voice of the game:
@@ -31,7 +31,7 @@ An astronaut character **pops in from the side** with a speech bubble. They are 
 - They react to the player's choices: "Good call, Commander!"
 - They deliver the answers from Mission Control.
 - They are friendly, a little funny, and never scary. They are always okay, even when the base struggles.
-- They are drawn by the team or taken from a CC0 asset pack (no SI art). Their name is **(open)**.
+- They are drawn by the team or taken from a CC0 asset pack (no SI art). Their name is **Sam** for now (placeholder, `CREWMATE_NAME`).
 
 ## Setting: the Moon (decided)
 Why the Moon:
@@ -86,7 +86,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 - The answer is a **concrete tip and the reason for it**, using the real numbers. The child learns the *why*, not just the *what*. For example:
   - "Raise your shield to 3, because particles from yesterday's X8 flare are arriving. Radiation near the Moon is 278× normal right now."
   - "Pause the science for 2 days, because night is coming and your batteries are only half full. Solar panels can't charge in the dark."
-- **(open)** A **"Do it for me"** button under the tip, which applies the setting automatically. It helps younger players. Alternatively the tip only highlights the right control. Decide after the first playtest with a kid.
+- A **"Do it for me"** button under the tip names the exact change ("Shield to Mid, crew to the shelter") and applies it. Afterwards the crewmate says what is set now and what it costs. For a repair the button says "Fix it now" and opens the repair, because the repair stays the kid's job.
 - **Cooldown:** after a call, the button recharges over a few in-game days. The game shows this as a filling ring. The text "Mission Control is working out the next plan" makes clear that this is a game rule, not a physics limit.
 - If the player is in trouble (a resource in the warning zone, or several bad choices in a row), the button gently pulses. No forced pop-ups.
 
@@ -94,20 +94,22 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 - Each resource warns at about 25 %, using colour, icon and text.
 - At 0 the player gets a setback, not a game over. Examples: "The crew moved to the shelter. You lost 2 days of science." "Life support switched to emergency mode."
 - The astronauts are always okay. The base and the science suffer.
-- The end screen celebrates any result and gives one tip for next time.
+- After every setback the crewmate says why it happened and what to try next time (for example: "It was lunar night, so the panels made no power, but the shield kept using it.").
+- The end screen celebrates any result, lists these lessons, and praises the effort or strategy the kid used.
 
 ## End screen (the lesson)
 - What happened, with the real numbers. For example: "On 14 May 2024 the radiation near the Moon was 278× normal. Your shield blocked most of it."
 - **The real comparison, same day, from the same storm file:**
   - "On Mars it was only 15×. Mars has a thin atmosphere."
   - "On the space station it was about 1×. Earth's magnetic field protects it."
-- A science score and 1–3 stars.
+- A science score and 1–3 stars, badges earned, new rank, and the science words learned.
+- "What went wrong, and why" with one lesson per kind of setback (or one tip, if nothing went wrong).
 - Data attribution, with the label "Archived NASA measurements, <month year>".
 
 ## Progression and unlocks
-1. **The storm library as levels.** The suggested order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme). Each finished mission unlocks the next. Feb 2022 and Nov 2025 are for the Mars and rocket content.
-2. **Live mission.** Unlocked after the first mission: "The real Sun this month", using DONKI fetched live. The radiation factor is then estimated from similar past storms, and the game labels it as an estimate.
-3. **Rocket to Mars, the end goal.** Unlocked after a few missions. Grounded in real facts:
+1. **The storm library as levels** (built). The order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme) → Feb 2022 → Nov 2025. Each finished mission unlocks the next. Ranks grow with stars: Cadet → Flight Engineer → Base Commander.
+2. **Live mission (not built yet).** Unlocked after the first mission: "The real Sun this month", using DONKI fetched live. The radiation factor is then estimated from similar past storms, and the game labels it as an estimate.
+3. **Rocket to Mars, the end goal (not built yet).** Unlocked after a few missions. Grounded in real facts:
    - Earth and Mars line up for a launch about **every 26 months**. The trip takes **about 7 months**.
    - In deep space there is no air and no magnetic field. Our BioSentinel data shows what storms do out there (up to about 300× normal).
    - Once at Mars, a radio message to Earth takes **between about 3 and 22 minutes one way**.
@@ -130,15 +132,16 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 | Real protection: Moon soil (regolith) or water walls, a storm shelter, space weather forecasts from Earth | The shelter's 90 % and the regolith upgrade's numbers |
 
 ## Build order (cut from the bottom)
-1. **One playable Moon mission with one storm** (May 2024), using grey boxes and no art: start → 30 days → end → restart. Test it with a real kid or teammate. (See `prototype-fast`.)
-2. Event cards with costs, the 3 bars, shield and dose.
-3. The end screen with the real comparison and attribution.
-4. Call Earth (2.6 s round trip, tips, cooldown).
-5. Speed controls (normal, fast-forward, pause on event).
-6. Art and sound pass. Juice only after the loop is fun (see `game-feel`).
-7. The storm library as levels, and unlocks.
-8. The live DONKI mission.
-9. The rocket to Mars (option 1 first).
+1. ✓ One playable Moon mission with one storm: start → 30 days → end → restart.
+2. ✓ Event cards with costs, the 3 bars, shield and dose.
+3. ✓ The end screen with the real comparison and attribution.
+4. ✓ Call Earth (2.6 s round trip, tips, cooldown).
+5. ✓ Speed controls (normal, fast-forward, pause on event).
+6. Art and sound pass. Sound is done (synthesized). The team's art replaces the placeholders (see `assets/art/README.md`).
+7. ✓ The storm library as levels, and unlocks.
+8. Mentor feedback rounds 2 and 3 (`FEEDBACK.md`): life support loop, meaningful repair mini-games, placing the buildings.
+9. The live DONKI mission.
+10. The rocket to Mars (option 1 first).
 
 ## Tech (decided)
 **Phaser 3.90.0** (the final Phaser 3 release) via cdnjs, as a plain `<script>` tag. It exposes the global `Phaser`. There is no npm and no build step, so it stays a static site for GitHub Pages. The download is about 320 KB gzipped.
@@ -153,8 +156,8 @@ Architecture rule (from the `phaser-core` skill):
 - Phaser scenes only draw the state and send player actions back.
 - This keeps the rules testable without a browser and makes a restart just a fresh state.
 
-## What the foundation build has (14 Nov)
-Everything below runs on placeholder art. The real art replaces it via `assets/art/manifest.json` (see `assets/art/README.md`).
+## Build status (14 Nov, evening)
+Everything below runs on placeholder art, marked in the game as "SI-generated placeholder art". The real art replaces it via `assets/art/manifest.json` (see `assets/art/README.md`).
 - **Real sky.** Lunar day and night are computed for the real storm dates at a base in the Sea of Tranquility, near the Apollo 11 site (mean synodic month, so about ±1 day). Earth's phase is computed too.
 - **Decision cards** (game pauses until the player picks):
   - The first X-class flare, then only new record flares. Smaller big flares are a flash plus a crew line.
@@ -194,18 +197,21 @@ Everything below runs on placeholder art. The real art replaces it via `assets/a
   - 2 for a safe crew with at least half the science goal.
   - 3 for the full goal (120) with no room lost.
   - Hiding in the shelter all month is safe but earns one star.
-- **Progress** is saved in `localStorage` only. Levels unlock in order. `?all=1` unlocks everything for judges. `?storm=<id>` starts a storm directly. `?debug=1` exposes a skip helper for playtests.
-- **From the team's kids game design guide (second round):**
+- **Progress** is saved in `localStorage` only: stars, badges, hints on/off, sound, read-aloud and difficulty. Levels unlock in order. `?all=1` unlocks everything for judges. `?storm=<id>` starts a storm directly. `?debug=1` exposes a skip helper for playtests.
+- **From the team's kids game design guide:**
   - **Invisible difficulty adjustment.** Only the random problems (leaks, dust, filters) adapt; the NASA storm data never changes. Each setback or sealed room raises a level (max 2): problems come later, and only one at a time. Four calm days lower it again, down to −1 (problems come about 15 % sooner). Tuning: `dda` in `src/rules/config.js`.
   - **Badges** for ways of playing (fix 3 problems, no sealed room, no emergency, block most radiation, ask Mission Control, build an upgrade, reach the science goal). The collection is on the start screen. The end screen praises the effort or strategy the kid actually used.
   - **Easter eggs:** tap Earth or the Sun for true fun facts (`FUN_FACTS` in `src/rules/content.js`).
   - **Sound:** effects synthesized live with Web Audio (`src/audio/sfx.js`, no files). Starts with the first tap; a sound button sits in the top bar and on the start and end screens.
+- **Making the game explain itself:**
   - **Everything is explained:** a "How it works" sheet (start screen and pause menu) covers every bar and control, what is real and what is made up, plus a "For grown-ups" note for judges. Call Earth says what Mission Control sees, the "Do it for me" button names the exact change, and afterwards the crewmate says what is set now and what it costs.
-  - **Mentor feedback, round 1** (`FEEDBACK.md`): Easy/Normal/Hard (`DIFFICULTY_TUNING` in `config.js`, texts in `content.js`), a mission briefing, Sam's story and materials lines, an info sheet for every building (`ROOM_INFO`), live breakdowns behind the power, air and dose bars, and lessons: every setback says why it happened and what to try next time, and the end screen lists them.
-  - **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
+- **Mentor feedback, round 1** (`FEEDBACK.md`): Easy/Normal/Hard (`DIFFICULTY_TUNING` in `config.js`, texts in `content.js`), a mission briefing, Sam's story and materials lines, an info sheet for every building (`ROOM_INFO`), live breakdowns behind the power, air and dose bars, and lessons: every setback says why it happened and what to try next time, and the end screen lists them.
+- **Read aloud:** a speech button next to the crewmate's bubble reads the line with the device's own voice; the pause menu can turn on reading every line (`src/audio/voice.js`).
 
-## Still to decide today (team)
-- Interfaces: a first version is in `AGENTS.md` (from the foundation build). Change it there if the team wants something else.
+## Still to decide (team)
+- Interfaces: a first version is in `AGENTS.md`. Change it there if the team wants something else.
+- Mentor rounds 2 and 3, and the playtest feedback in PR #12: what comes first (`FEEDBACK.md`).
+- `Guide_Gamedesign_Attention.md` is German: translate it, or keep only English key findings here and delete it.
 - Game title: "Moon Base Commander" is a placeholder (`GAME_TITLE` in `src/ui/screens.js`). The crewmate's name "Sam" is a placeholder too (`CREWMATE_NAME`).
 - Art style and who draws (no SI images; `CREDITS.md` for everything).
 - Exact numbers: costs, cooldown length, shield levels. Tune them by playtesting, not on paper.
