@@ -14,6 +14,16 @@ function pickVoice() {
 
 export const voice = {
   available: Boolean(synth && typeof window.SpeechSynthesisUtterance === 'function'),
+  /** True while a line is being read. */
+  busy: false,
+  /** Called with true when reading starts and false when it ends, so the button can show it. */
+  onState: null,
+
+  setBusy(on) {
+    if (this.busy === on) return;
+    this.busy = on;
+    this.onState?.(on);
+  },
 
   speak(text) {
     if (!this.available || !text) return;
@@ -24,12 +34,20 @@ export const voice = {
       if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-GB';
       u.rate = 0.95;
       u.pitch = 1.1;
+      // Only the newest line may switch the state off: cancel() ends the previous one first.
+      const done = () => { if (this.current === u) { this.current = null; this.setBusy(false); } };
+      u.onend = done;
+      u.onerror = done;
+      this.current = u;
+      this.setBusy(true);
       synth.speak(u);
-    } catch { /* reading aloud is a bonus */ }
+    } catch { this.setBusy(false); /* reading aloud is a bonus */ }
   },
 
   stop() {
+    this.current = null;
     try { synth?.cancel(); } catch { /* ignore */ }
+    this.setBusy(false);
   },
 };
 
