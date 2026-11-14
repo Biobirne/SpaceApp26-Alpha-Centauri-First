@@ -51,3 +51,66 @@ test('the shield sheet: every level with the real radiation of today, the curren
   assert.ok(SHIELD_INFO.sources.length >= 2, 'the sheet names its sources');
   assert.match(SHIELD_INFO.real, /No base/);
 });
+
+// Playtest 14 Nov (~22:00): storm cards must fit the shield the kid already has, and Call Earth must
+// help when things went wrong, not say "Everything looks great".
+import { tick, setShield as setShieldLevel, chooseOption, getAdvice as adviceNow } from '../src/rules/mission.js';
+
+function nextCard(s, kind, maxDays = 30) {
+  while (s.t < maxDays) {
+    tick(s, 0.05);
+    if (s.pendingCard) {
+      if (s.pendingCard.kind === kind) return s.pendingCard;
+      chooseOption(s, s.pendingCard.options.at(-1).id);
+    }
+  }
+  return null;
+}
+
+test('a flare card with the shield already on Max offers no "up to Max" and no twin choices', () => {
+  const s = createMission(load('may2024'), { seed: 1 });
+  s.script = [];
+  setShieldLevel(s, 3);
+  s.power = s.capacity; s.cfg.power.shieldPerDay = [0, 0, 0, 0]; // keep the shield running
+  const card = nextCard(s, 'flare');
+  assert.ok(card, 'a flare card came');
+  const labels = card.options.map((o) => o.label);
+  assert.ok(labels.includes('Keep shield on Max'), labels.join(' / '));
+  assert.ok(labels.includes('Shield down to Mid'), labels.join(' / '));
+  assert.ok(!labels.some((l) => /up to Max/.test(l)));
+  assert.equal(card.options.length, 2);
+});
+
+test('a particle card says "down to Low" for the shelter when the shield is higher, and "Stay" when inside', () => {
+  const s = createMission(load('may2024'), { seed: 1 });
+  s.script = [];
+  s.power = s.capacity; s.cfg.power.shieldPerDay = [0, 0, 0, 0];
+  setShieldLevel(s, 3);
+  setShelter(s, true);
+  const card = nextCard(s, 'particles');
+  assert.ok(card, 'a particle card came');
+  const shelter = card.options.find((o) => o.id === 'shelter');
+  assert.equal(shelter.label, 'Stay in the shelter, shield down to Low');
+  assert.ok(card.options.some((o) => o.label === 'Back to work'));
+});
+
+test('Call Earth notices a sealed building, an empty battery and the forced shelter', () => {
+  const s = createMission(load('oct2021'), { seed: 1 });
+  s.rooms.lab.status = 'lost';
+  s.science = 5;
+  let a = adviceNow(s);
+  assert.doesNotMatch(a.text, /Everything looks great/);
+  assert.match(a.text, /rebuild the science lab/i);
+  s.science = 40;
+  a = adviceNow(s);
+  assert.match(a.text, /Rebuild the science lab/);
+  assert.equal(a.action.repair, 'lab');
+
+  const p = createMission(load('oct2021'), { seed: 1 });
+  p.powerEmergency = true; p.power = 0;
+  assert.match(adviceNow(p).text, /Wait for sunrise|Let the battery charge|Clean the solar panels/);
+
+  const f = createMission(load('oct2021'), { seed: 1 });
+  f.forcedShelter = true;
+  assert.match(adviceNow(f).text, /Stay in the shelter and wait/);
+});

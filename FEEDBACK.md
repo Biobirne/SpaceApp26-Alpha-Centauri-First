@@ -34,6 +34,15 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (14 Nov, ~22:00)
+- When radiation comes, the card offers options as if the shield were off. With the shield already high, "Shield to Mid" or the shelter's "Low" really turn it *down*. The wording should fit.
+- Call Earth doesn't help with everything. With a building completely lost, Earth said everything is fine. It must really support confused kids who lost control, and maybe lost a building.
+
+**Status: done** (branch `fix/storm-options-advice`):
+- **Storm cards** are built when they appear, from the shield the kid has then: "Shield up to Max", "Keep shield on Max", "Shield down to Mid", "Crew to shelter, shield down to Low", "Stay in the shelter", "Back to work". Two choices that would end the same way become one.
+- **Call Earth** now covers: a sealed building (rebuild it, or how many science points are missing and what the base lacks until then), an empty battery (wait for sunrise, clean the panels, or let it charge, with the %), the forced stay in the shelter ("wait, you are doing it right", and when it ends), the storm fort before a storm, and a low battery in daylight. During a storm with an empty battery it sends the crew to the shelter, because the shield can't run. The repair button names the job ("Start now: Rebuild the science lab").
+- Tests in `tests/text.test.mjs`.
+
 ### Florian (14 Nov, ~21:00)
 - Next to Sam's bubble there is a small button at the bottom right that seems to do nothing.
 - When more lines wait, "1 more" / "2 more" at the bottom right of the bubble overlaps the text.
