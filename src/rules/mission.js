@@ -64,8 +64,11 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     // Difficulty level: 0 normal, above 0 the kid is struggling, below 0 it's too easy.
     dda: { level: 0, lastTroubleT: 0, lastEaseT: 0 },
     lessons: [],
+    stormReports: [],
   };
   updateSky(state, true);
+  const storm = firstStormDay(state);
+  state.forecastT = storm != null && storm - state.cfg.forecastDaysAhead >= 1 ? storm - state.cfg.forecastDaysAhead : null;
   emit(state, 'crew', {
     mood: 'happy',
     text: `Hi Commander, I'm ${CREWMATE_NAME}! Real NASA data decides our space weather.`,
@@ -432,6 +435,7 @@ function step(state, h) {
   const dayIdx = currentDayIndex(state);
   if (dayIdx !== state.dayIndex) onNewDay(state, dayIdx);
   updateSky(state, false);
+  checkForecast(state);
   processDataEvents(state);
   if (state.pendingCard) return;
   while (state.script.length && state.script[0].t <= state.t) {
@@ -497,6 +501,14 @@ function step(state, h) {
   state.dose += got;
   state.stats.totalDose += got;
   state.stats.blockedDose += unshielded - got;
+  if (state.stormDose) {
+    // what would have got through in the shelter, with the same shield and walls
+    const c = cfg.dose;
+    const shelterOk = state.rooms.shelter.status !== 'lost';
+    const through = (1 - c.shieldBlock[state.shield]) * (shelterOk ? 1 - c.shelterBlock : 1) * (state.upgrades.walls ? c.wallsFactor : 1);
+    state.stormDose.taken += got;
+    state.stormDose.inShelter += Math.min(got, unshielded * through);
+  }
   if (state.dose >= cfg.dose.limit && rad > 3 && !state.forcedShelter && state.rooms.shelter.status !== 'lost') {
     state.forcedShelter = true;
     if (!state.doseLimitHit) state.stats.setbacks++;
@@ -561,6 +573,63 @@ function updateSky(state, initial) {
   state.earthLit = earthLitFraction(ms);
 }
 
+/** The first day the storm gets announced (same rule as onNewDay), or null. */
+function firstStormDay(state) {
+  const cfg = state.cfg.radiation;
+  let prev = moonTimesNormal(state.timeline, 0);
+  for (let d = 1; d < state.cfg.missionDays; d++) {
+    const rad = moonTimesNormal(state.timeline, d);
+    if (rad >= cfg.announceAtLeast && rad >= prev * 1.5) return d;
+    prev = rad;
+  }
+  return null;
+}
+
+/** Nothing needs the player right now, so the clock may run faster (see calmSecondsPerDay). */
+export function isCalm(state) {
+  if (state.pendingCard || state.stormActive || state.stormSoon || state.powerEmergency) return false;
+  if (radiationNow(state) >= 3 || state.dust || state.filter) return false;
+  if (ROOM_IDS.some((id) => state.rooms[id].status === 'leak')) return false;
+  if (state.power / state.capacity * 100 < state.cfg.power.warnBelow || state.air < state.cfg.air.warnBelow) return false;
+  return true;
+}
+
+/**
+ * After a storm: what the crew got, next to what the shelter would have let through.
+ * The risky choice gets a visible, explained result (playtest: "Keep working" had no felt consequence).
+ */
+function stormReport(state) {
+  const r = state.stormDose;
+  state.stormDose = null;
+  if (!r) return;
+  const took = Math.round(r.taken);
+  const shelter = Math.max(1, Math.round(r.inShelter));
+  let text;
+  if (r.taken >= 3 && r.taken > r.inShelter * 2) {
+    text = `Storm report: the crew got +${took} dose. In the shelter it would have been about +${shelter}. Working costs safety.`;
+  } else if (r.taken < 3) {
+    text = `Storm report: only +${Math.max(0, took)} dose for the crew. The shelter and shield did their job!`;
+  } else {
+    // most of it came in the shelter: a really strong storm (or the dose limit sent everyone inside)
+    text = `Storm report: the crew got +${took} dose, even with the shelter. That was a really strong storm!`
+      + (state.shield < 3 ? ' Shield on Max in the shelter blocks even more.' : '');
+  }
+  state.stormReports.push({ day: Math.floor(state.t) + 1, taken: took, inShelter: shelter });
+  emit(state, 'crew', { mood: 'calm', keep: true, text });
+}
+
+/** Space weather forecasters watch the Sun: pass on a warning before the first storm. */
+function checkForecast(state) {
+  if (state.forecastT == null || state.forecastGiven || state.t < state.forecastT) return;
+  state.forecastGiven = true;
+  state.stormSoon = true;
+  emit(state, 'forecast', {});
+  emit(state, 'crew', {
+    mood: 'alert',
+    text: 'Forecast from Earth: the Sun has a big, busy sunspot. A storm may come soon. Charge the battery!',
+  });
+}
+
 function onNewDay(state, dayIdx) {
   state.dayIndex = dayIdx;
   const rad = moonTimesNormal(state.timeline, dayIdx);
@@ -571,6 +640,8 @@ function onNewDay(state, dayIdx) {
   if (rad >= cfg.announceAtLeast && rad >= yesterday * 1.5) {
     learn(state, 'radiation');
     state.stormActive = true;
+    state.stormSoon = false;
+    state.stormDose = { taken: 0, inShelter: 0 };
     emit(state, 'crew', {
       mood: 'alert',
       text: `Real NASA data: radiation near the Moon is ${fmtTimes(rad)} normal today!`,
@@ -583,6 +654,7 @@ function onNewDay(state, dayIdx) {
         ? `The storm is fading: radiation is back to ${fmtTimes(rad)} normal. Tap Shelter to get back to work!`
         : `The storm is fading. Radiation is back to ${fmtTimes(rad)} normal.`,
     });
+    stormReport(state);
   }
   state.lastAnnounced = rad;
 }
@@ -674,10 +746,15 @@ function particleCard(state) {
     reply: 'Shield at Max, and the crew keeps working. That costs a lot of power.' });
   options.push({ id: 'work', label: 'Keep working', cost: 'Risky', effects: { sheltered: false }, mood: 'calm',
     reply: 'We keep working. Our radiation dose will go up.' });
+  state.particleWaves = (state.particleWaves || 0) + 1;
+  const wave = state.particleWaves;
+  const rad = radiationNow(state);
   return {
     kind: 'particles',
-    title: 'Particle storm!',
-    text: 'Fast particles from the Sun are hitting the Moon right now.',
+    title: wave === 1 ? 'Particle storm!' : wave === 2 ? 'Second wave of particles!' : `Particle wave number ${wave}!`,
+    text: rad >= 3
+      ? `Fast particles from the Sun are hitting the Moon. Radiation today: ${fmtTimes(rad)} normal (real NASA data).`
+      : `NASA measured fast particles from the Sun. Near the Moon it is still ${fmtTimes(rad)} normal today, but it can rise fast.`,
     fact: 'The Moon has no air and no magnetic field to stop them.',
     options,
   };
@@ -687,7 +764,7 @@ function particleCard(state) {
 function lesson(state, kind, ctx) {
   const l = LESSONS[kind](ctx);
   state.lessons.push({ kind, day: Math.floor(state.t) + 1, ...l });
-  emit(state, 'crew', { mood: 'calm', text: `Why did that happen? ${l.why} Next time: ${l.next}` });
+  emit(state, 'crew', { mood: 'calm', keep: true, text: `Why did that happen? ${l.why} Next time: ${l.next}` });
 }
 
 /** Where the power comes from and goes to, per day (for the power info sheet). */

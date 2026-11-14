@@ -41,6 +41,7 @@ Team members playing themselves: name, device, build, what you noticed. Priority
 - The intro at the start is great, but after it the game stops explaining. I did not know what I was doing wrong.
 - The end screen told me I should have sent the crew to the shelter. I did not even know that was possible.
 - When my oxygen dropped, I did not know why.
+- **Status (feat/feedback-clarity):** the first steps now teach the shelter: Sam asks the kid to send the crew in and back out once, and the clock waits. After each storm, Sam gives a storm report (see the SI review below).
 - I did not find it intuitive where science points come from, or what they do.
 - The cards that kept popping up said an event was coming that needs power. I did not understand what they changed or what had happened afterwards.
 - I am not sure how realistic the shield is. It may be fine, but we should check.
@@ -86,6 +87,7 @@ Claude Code (SI) playing the game and reviewing it.
 - A semi-random strategy got a perfect score, including choosing "Keep working (Risky)" during a particle storm.
 - The risky choice had no visible consequence. If nothing can go wrong, no choice really costs anything, and that is the heart of the challenge.
 - Idea: storm 1 can stay gentle, but the risky option should cause one clear, explained setback at least once.
+- **Status: done.** After each storm Sam gives a storm report: the dose the crew got, next to what the shelter would have let through ("+20 dose. In the shelter it would have been about +2. Working costs safety."). The setback itself stays gentle.
 
 **P1: All mini-games are the same game.**
 - All four repair types (`src/ui/overlays.js`, `showRepair`) are "tap N buttons":
@@ -107,17 +109,20 @@ Claude Code (SI) playing the game and reviewing it.
 - The first decision card came on day 14, about 2–3 minutes in. Days 1–13 had only leaks and fun-fact bubbles.
 - A judge or a kid may stop before the storm arrives.
 - Idea: start the mission a few days before the first big event, or compress calm days automatically.
+- **Status: done.** Calm days pass 3× faster once the first steps are over (nothing broken, low radiation, no storm on the way); the speed note says "Calm days". First event: October 2021 storm after about 80 s instead of 205 s.
 
 **P2: Repetitive event cards.**
 - The same "Particle storm!" card with identical text came on days 14, 18 and 20.
 - Its options ("Shield to Max", "Crew to shelter") repeat the HUD controls, so the card adds little.
 - Idea: use the real numbers of that day ("Second wave! 42× normal today"), give each wave its own line, and offer different verbs than the HUD.
+- **Status: partly done.** Each wave has its own title ("Second wave of particles!") and the real radiation of that day. Different verbs than the HUD: still open.
 
 **P2: Speech bubble backlog.**
 - Sam's queue grew to "6 more ›". The same line was shown again on the next day.
 - Some tips arrived days late, for example "Not sure what to do? Call Earth" on days 15–16, after the decision.
 - Too much text for a 7-year-old, especially in fast-forward.
 - Idea: drop stale lines, and keep at most 1 queued line.
+- **Status: done.** At most 2 lines wait; small news goes first, hints and lessons stay. A line that is already waiting is not added again. Urgent hints (like the shelter step) jump to the front.
 
 **P2: Fast-forward resets after every event.**
 - I had to re-tap ⏩ about 9 times in one mission.
@@ -126,11 +131,13 @@ Claude Code (SI) playing the game and reviewing it.
 **P2: No warning before radiation rises.**
 - On day 14 the radiation chip already showed 9.1× when the flare card appeared.
 - Real physics gives a head start: flare light arrives in about 8 minutes, a CME takes 1–3 days, and particle storms take minutes to hours. That warning time is a planning moment the game does not use yet.
+- **Status: done.** A day and a half before the first storm, Sam passes on a forecast from Earth ("the Sun has a big, busy sunspot ... Charge the battery!"), and calm days stop speeding up.
 
 **P3: End screen text.**
 - `src/ui/screens.js:88`: "The Moon has neither" is shown even when only the Mars line is visible, so "neither" refers to one thing.
 - "6 leaks fixed" also counts filter swaps.
 - The tip "keep an eye on the battery and the air" appears on a perfect run with nothing low.
+- **Status: "neither" fixed** ("no thick air and no magnetic field"). The leak count and the tip are still open.
 
 **P3: Laptop layout.** At 1440×900 the lower half of the screen is empty ground and the base sits small in the middle.
 
