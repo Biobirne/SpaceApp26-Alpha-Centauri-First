@@ -134,7 +134,7 @@ function startPhaser() {
   game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: 'scene',
-    backgroundColor: '#070b18',
+    backgroundColor: '#03070d',
     banner: false,
     audio: { noAudio: true },
     scale: { mode: Phaser.Scale.NONE, width: innerWidth * dpr, height: innerHeight * dpr, zoom: 1 / dpr },
