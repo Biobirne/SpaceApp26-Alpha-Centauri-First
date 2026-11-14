@@ -591,6 +591,8 @@ const actions = {
 // The learn-more sheets can switch the plant lamps and teach the loop words.
 setInfoActions({
   growLights: (on) => actions.growLights(on, { quiet: true }),
+  // A fix button in a learn-more sheet: that sheet is closing, so it no longer blocks the repair.
+  repair: (roomId) => { block('info', false); actions.repair(roomId); },
   loopSeen: () => run && noteLoopSeen(run.state),
 });
 
