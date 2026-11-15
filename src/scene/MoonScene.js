@@ -195,14 +195,18 @@ export function createMoonScene() {
       // The shield dome must cover every corner of every module (with a margin for ports and dishes).
       const dcx = (minX + maxX) / 2;
       const rx = (maxX - minX) / 2 + unit * (tall ? 16 : 9); // wider dome = lower, rounder dome
-      let ry = this.baseBottom - minY + unit * 4;
+      // The dome stands on a ring on the ground, just below the lowest foot of any module, so every
+      // building with its feet is inside. Seen at an angle, the front half of that ring is a flat arc.
+      const cy = Math.max(...all.map((b) => b.y + b.h)) + unit * 1.2;
+      const depth = unit * 2.2;
+      let ry = cy - minY + unit * 4;
       for (const b of all) {
         for (const x of [b.x - unit * 2, b.x + b.w + unit * 2]) {
           const f = 1 - ((x - dcx) / rx) ** 2;
-          if (f > 0) ry = Math.max(ry, (this.baseBottom - (b.y - unit * 2)) / Math.sqrt(f));
+          if (f > 0) ry = Math.max(ry, (cy - (b.y - unit * 2)) / Math.sqrt(f));
         }
       }
-      this.dome = { cx: dcx, cy: this.baseBottom, rx, ry };
+      this.dome = { cx: dcx, cy, rx, ry, depth };
       this.earth = { x: s.x + s.w * (tall ? 0.78 : 0.83), y: s.y + Math.max(unit * 10, s.h * 0.17), r: Math.max(14 * this.dpr, unit * (tall ? 6.5 : 5.2)) };
       this.sunPos = { x: s.x + s.w * 0.14, y: s.y + Math.max(unit * 8, s.h * 0.12), r: Math.max(10 * this.dpr, unit * 3.4) };
 
@@ -469,8 +473,10 @@ export function createMoonScene() {
           continue;
         }
         const ctx = { g, b, u, lw, night, status, v };
+        if (id === 'shelter' && v?.upgrades?.fission) reactor(ctx); // stands behind the shelter
         DRAW[id](ctx);
         for (const k of shown) if (ports[k].room === id) dock(g, ports[k], used.has(k), u, lw, night);
+        UPGRADE_ART[id]?.(ctx, v?.upgrades || {});
         if (status === 'lost') {
           g.fillStyle(0x070b18, 0.55);
           g.fillRoundedRect(b.x - u * 0.5, b.y - u * 0.5, b.w + u, b.h + u, u * 1.5);
@@ -495,7 +501,7 @@ export function createMoonScene() {
       const v = this.view;
       if (!v || !this.boxes) return;
       const dt = Math.min(0.05, deltaMs / 1000);
-      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}|${JSON.stringify(v.built || 0)}|${v.buildNext || ''}`;
+      const sig = `${v.daylight}|${JSON.stringify(v.rooms)}|${v.dust}|${v.filter}|${v.sheltered}|${v.powerEmergency}|${JSON.stringify(v.built || 0)}|${v.buildNext || ''}|${JSON.stringify(v.upgrades || 0)}`;
       if (sig !== this.last.sig) {
         if (this.last.daylight !== v.daylight) { this.drawSky(); this.drawGround(!v.daylight); this.drawSun(v.daylight); }
         this.drawBase(v);
@@ -549,15 +555,23 @@ export function createMoonScene() {
       const a = this.shieldAlpha;
       if (a < 0.01) return;
       const d = this.dome;
-      const pts = [];
-      for (let i = 0; i <= 40; i++) {
-        const ang = Math.PI + (Math.PI * i) / 40;
-        pts.push({ x: d.cx + Math.cos(ang) * d.rx, y: d.cy + Math.sin(ang) * d.ry });
+      // The dome from its ground ring up: the arc on top, and the front half of the ring below,
+      // so the bottom edge runs in front of every foot and meets the arc at both ends.
+      const top = [];
+      const ring = [];
+      const n = 80;
+      for (let i = 0; i <= n; i++) {
+        const x = d.cx - d.rx + (2 * d.rx * i) / n;
+        const f = Math.sqrt(Math.max(0, 1 - ((x - d.cx) / d.rx) ** 2));
+        top.push({ x, y: d.cy - d.ry * f });
+        ring.unshift({ x, y: d.cy + d.depth * f });
       }
       g.fillStyle(C.shield, a * 0.55);
-      g.fillPoints(pts, true);
+      g.fillPoints(top.concat(ring), true);
       g.lineStyle(Math.max(2, this.u * 0.45), C.shield, Math.min(1, a * 3));
-      g.strokePoints(pts, false);
+      g.strokePoints(top, false);
+      g.lineStyle(Math.max(1.5, this.u * 0.3), C.shield, Math.min(1, a * 2));
+      g.strokePoints(ring, false);
     }
 
     updateParticles(dt, v) {
@@ -755,6 +769,114 @@ function viewport(g, x, y, s, color, lw) {
   g.fillRoundedRect(x - s / 2, y - s / 2, s, s, s * 0.3);
   g.lineStyle(Math.max(1, lw * 0.5), 0xffffff, 0.5);
   g.lineBetween(x - s * 0.25, y - s * 0.05, x - s * 0.05, y - s * 0.25);
+}
+
+// ------------------------------------------------------------------ upgrades you can see
+// Every upgrade changes the base, so a kid can point at what they built (AGENTS.md: a visible cause).
+
+/** Fission power unit: a reactor mast with radiator fins, standing behind the shelter. */
+function reactor({ g, b, u, lw, night }) {
+  const base = b.y + b.h;
+  const x = b.x + b.w * 0.8;
+  const top = b.y - u * 4;
+  g.fillStyle(tone(P.metalDark, night), 1);
+  g.fillRect(x - u * 0.6, top, u * 1.2, base - top);
+  // radiator fins fold out like an umbrella near the top
+  for (let k = 0; k < 3; k++) {
+    const y = top + u * (0.8 + k * 1.6);
+    for (const dir of [-1, 1]) {
+      const pts = [{ x, y }, { x: x + dir * u * 3.2, y: y + u * 0.9 }, { x: x + dir * u * 3.2, y: y + u * 1.6 }, { x, y: y + u * 0.8 }];
+      g.fillStyle(tone(P.radiator, night), 1);
+      g.fillPoints(pts, true);
+      g.lineStyle(Math.max(1, lw * 0.4), C.outline, 1);
+      g.strokePoints(pts, true);
+    }
+  }
+  g.fillStyle(P.lightOk, 1);
+  g.fillCircle(x, top - u * 0.3, u * 0.35);
+}
+
+const UPGRADE_ART = {
+  // Bigger battery: a second battery pack next to the power unit.
+  solar({ g, b, u, lw, night }, up) {
+    if (!up.battery) return;
+    const base = b.y + b.h;
+    const x = b.x + b.w * 0.5 - u * 4.6;
+    g.fillStyle(tone(P.metalLight, night), 1);
+    g.fillRoundedRect(x, base - u * 2.8, u * 2.6, u * 2.6, u * 0.3);
+    g.lineStyle(Math.max(1, lw * 0.6), C.outline, 1);
+    g.strokeRoundedRect(x, base - u * 2.8, u * 2.6, u * 2.6, u * 0.3);
+    g.fillStyle(P.lightOk, 1);
+    for (let k = 0; k < 3; k++) g.fillRect(x + u * 0.5, base - u * (0.8 + k * 0.6), u * 1.6, u * 0.4);
+  },
+  // Algae bioreactor: green glass tubes along the greenhouse ring.
+  greenhouse({ g, b, u, lw, night }, up) {
+    if (!up.algae) return;
+    const base = b.y + b.h;
+    const x = b.x + u * 1.6;
+    const w = b.w - u * 3.2;
+    for (let k = 0; k < 2; k++) {
+      const y = base - u * (2.1 + k * 1.05);
+      g.fillStyle(tone(0x2f9e48, night, 0.3), 1);
+      g.fillRoundedRect(x, y, w, u * 0.85, u * 0.42);
+      g.fillStyle(0xb8f5a0, night ? 0.25 : 0.55);
+      g.fillRect(x + u * 0.4, y + u * 0.15, w - u * 0.8, u * 0.18);
+      g.lineStyle(Math.max(1, lw * 0.45), C.outline, 1);
+      g.strokeRoundedRect(x, y, w, u * 0.85, u * 0.42);
+    }
+  },
+  hab(ctx, up) {
+    const { g, b, u, lw, night } = ctx;
+    const base = b.y + b.h;
+    const top = b.y + b.h * 0.26;
+    const h = b.h * 0.56;
+    // Suitports: two spacesuits docked on the airlock, back first.
+    if (up.suitport) {
+      const airW = b.w * 0.15;
+      const lx = b.x + b.w - airW - u * 0.6;
+      const cx = lx + (airW + u * 0.6) / 2;
+      const cy = top + h * 0.14 + h * 0.8 * 0.42;
+      for (const dx of [-0.32, 0.32]) {
+        const sx = cx + dx * (airW + u * 0.6) - u * 0.55;
+        g.fillStyle(tone(0xf4f3ef, night), 1);
+        g.fillRoundedRect(sx, cy - u * 1.6, u * 1.1, u * 2.8, u * 0.4);
+        g.fillStyle(tone(P.metal, night), 1);
+        g.fillRoundedRect(sx + u * 0.15, cy - u * 1.1, u * 0.8, u * 1.3, u * 0.2);
+        g.fillStyle(tone(P.foil, night), 1);
+        g.fillCircle(sx + u * 0.55, cy - u * 1.5, u * 0.32);
+        g.lineStyle(Math.max(1, lw * 0.45), C.outline, 1);
+        g.strokeRoundedRect(sx, cy - u * 1.6, u * 1.1, u * 2.8, u * 0.4);
+      }
+    }
+    // Regolith walls: Moon soil piled against the living quarters.
+    if (up.walls) berm(g, b.x - u * 0.6, b.x + b.w * 0.85, base, top + h * 0.82, u, lw, night); // below the ports
+  },
+  lab({ g, b, u, lw, night }, up) {
+    if (!up.walls) return;
+    const x = b.x + b.w * 0.02;
+    const top = b.y + b.h * 0.4;
+    const h = b.h * 0.44;
+    berm(g, x - u * 0.6, x + b.w * 0.64 + u * 0.6, b.y + b.h, top + h * 0.8, u, lw, night);
+  },
+};
+
+/** A heap of Moon soil from x0 to x1, standing on `base` and reaching up to `top`. */
+function berm(g, x0, x1, base, top, u, lw, night) {
+  const slope = Math.min((x1 - x0) * 0.18, (base - top) * 1.2);
+  const pts = [{ x: x0, y: base }, { x: x0 + slope, y: top + u * 0.4 }, { x: x0 + slope * 1.4, y: top },
+    { x: x1 - slope * 1.4, y: top }, { x: x1 - slope, y: top + u * 0.4 }, { x: x1, y: base }];
+  g.fillStyle(tone(P.printed, night), 1);
+  g.fillPoints(pts, true);
+  g.lineStyle(Math.max(1, lw * 0.4), tone(P.printedLine, night), 0.8);
+  for (let k = 1; k < 3; k++) {
+    const y = top + ((base - top) * k) / 3;
+    const inset = slope * (1 - k / 3);
+    g.lineBetween(x0 + inset + u * 0.3, y, x1 - inset - u * 0.3, y);
+  }
+  g.fillStyle(tone(P.printedLine, night), 1);
+  for (let x = x0 + slope + u, k = 0; x < x1 - slope - u; x += u * 2.3, k++) g.fillCircle(x, top + (base - top) * (0.3 + (k % 3) * 0.2), u * 0.22);
+  g.lineStyle(lw, C.outline, 1);
+  g.strokePoints(pts, false);
 }
 
 const DRAW = {

@@ -212,6 +212,34 @@ export function buyUpgrade(state, key) {
   return true;
 }
 
+/** What an upgrade does, in one sentence with real numbers from the tuning and today's state. */
+export function upgradeEffect(state, key) {
+  const c = state.cfg;
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const nightUse = r1(c.power.lifeSupportPerDay + c.power.sciencePerDay + c.power.nightHeatingPerDay
+    + (state.growLights ? c.power.growLightsPerDay : 0));
+  let n;
+  if (key === 'battery') {
+    const bonus = c.upgrades.battery.capacityBonus;
+    n = { bonus, nightUse, days: Math.round(bonus / nightUse) };
+  } else if (key === 'walls') {
+    const f = c.dose.wallsFactor;
+    const now = doseNow(state).perDay;
+    const before = state.upgrades.walls ? now / f : now;
+    n = { less: Math.round((1 - f) * 100), before: r1(before), after: r1(before * f) };
+  } else if (key === 'algae') {
+    n = {
+      air: c.air.algaePerDay, clogged: c.air.cloggedFilterPerDay,
+      cloggedAlgae: Math.round(c.air.cloggedFilterPerDay * c.air.algaeFilterFactor), power: c.power.algaePerDay,
+    };
+  } else if (key === 'suitport') {
+    n = { chance: Math.round(c.eva.dustToFilterChance * 10) };
+  } else if (key === 'fission') {
+    n = { power: c.power.fissionPerDay, nightUse };
+  }
+  return n && UPGRADES[key]?.effect ? UPGRADES[key].effect(n) : '';
+}
+
 /** Problems the player can fix by tapping a room. */
 export function repairFor(state, roomId) {
   const room = state.rooms[roomId];

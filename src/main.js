@@ -8,7 +8,7 @@ import {
   createMission, tick, setShield, setShelter, buyUpgrade, repairFor, completeRepair, chooseOption,
   callEarthReady, callEarth, applyAdvice, radiationNow, describeAdvice, explainSetup,
 } from './rules/mission.js';
-import { setGrowLights, noteLoopSeen, isCalm, powerBreakdown } from './rules/mission.js';
+import { setGrowLights, noteLoopSeen, isCalm, powerBreakdown, upgradeEffect } from './rules/mission.js';
 import { showHelp } from './ui/help.js';
 import { showRoomInfo, showMeterInfo, showBriefing, setInfoActions } from './ui/info.js';
 import { showData, scienceMeaning } from './ui/numbers.js';
@@ -351,6 +351,7 @@ function viewOf(s) {
     powerEmergency: s.powerEmergency,
     radiation: radiationNow(s),
     blockShield: s.cfg.dose.shieldBlock[s.shield],
+    upgrades: { ...s.upgrades },
     repairs,
     ...solarView(s),
     ...run?.guide.view?.(s),
@@ -435,6 +436,8 @@ function drain() {
       case 'upgrade':
         toast(`${icon('check')}<span>Built: <b>${esc(UPGRADES[e.key].name)}</b></span>`, 'word');
         sfx.play('upgrade');
+        // Say what changes now, with the real numbers (every number change needs a visible cause).
+        if (!r.guide.quiet) r.hud.crew.say(`${UPGRADES[e.key].name} built! ${upgradeEffect(r.state, e.key)}`, 'happy', { keep: true, now: true });
         break;
       case 'end':
         setTimeout(() => { if (run === r) showEnd(e.summary); }, 900);

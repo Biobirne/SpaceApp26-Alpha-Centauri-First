@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import {
   createMission, tick, chooseOption, setShield, setShelter, getAdvice, callEarth, callEarthReady,
-  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize, evaCost,
+  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize, evaCost, upgradeEffect,
 } from '../src/rules/mission.js';
 import { isDaylight } from '../src/rules/sky.js';
 import { configFor } from '../src/rules/config.js';
@@ -275,4 +275,21 @@ test('suitports can be bought like the other upgrades', () => {
   assert.equal(s.upgrades.suitport, false);
   buyUpgrade(s, 'suitport');
   assert.equal(s.upgrades.suitport, true);
+});
+
+test('every upgrade says what it does, with real numbers', () => {
+  const s = createMission(load('may2024'), { seed: 3 });
+  for (const key of Object.keys(s.cfg.upgrades)) {
+    const text = upgradeEffect(s, key);
+    assert.ok(text.length > 20, `${key} has an effect line`);
+    assert.match(text, /\d/, `${key} names a number`);
+    assert.doesNotMatch(text, /undefined|NaN/, `${key} has no missing number`);
+  }
+  assert.match(upgradeEffect(s, 'battery'), /40 more power/);
+  assert.match(upgradeEffect(s, 'walls'), /40% less radiation/);
+  // After building the walls, "before" is still the dose without walls.
+  const before = upgradeEffect(s, 'walls');
+  s.science = 1000;
+  buyUpgrade(s, 'walls');
+  assert.equal(upgradeEffect(s, 'walls'), before);
 });
