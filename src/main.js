@@ -380,6 +380,8 @@ function block(key, on) {
   if (on) run.blockers.add(key);
   else run.blockers.delete(key);
   run.hud.crew.freeze(run.blockers.size > 0);
+  // The shop held the bubble still: now say what the new upgrade does, before older news.
+  if (!on && key === 'shop' && run.builtInShop && !run.blockers.size) { run.builtInShop = false; run.hud.crew.advance(); }
 }
 
 function drain() {
@@ -439,7 +441,10 @@ function drain() {
         toast(`${icon('check')}<span>Built: <b>${esc(UPGRADES[e.key].name)}</b></span>`, 'word');
         sfx.play('upgrade');
         // Say what changes now, with the real numbers (every number change needs a visible cause).
-        if (!r.guide.quiet) r.hud.crew.say(`${UPGRADES[e.key].name} built! ${upgradeEffect(r.state, e.key)}`, 'happy', { keep: true, now: true });
+        if (!r.guide.quiet) {
+          r.hud.crew.say(`${UPGRADES[e.key].name} built! ${upgradeEffect(r.state, e.key)}`, 'happy', { keep: true, now: true });
+          r.builtInShop = true;
+        }
         break;
       case 'end':
         setTimeout(() => { if (run === r) showEnd(e.summary); }, 900);

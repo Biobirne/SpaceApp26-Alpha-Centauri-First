@@ -75,7 +75,7 @@ export const UPGRADES = {
     name: 'Regolith walls',
     text: 'Pile Moon soil on the base. Less radiation gets in.',
     fact: 'NASA studies covering Moon habitats with lunar soil for protection.',
-    effect: (n) => `${n.less}% less radiation reaches the crew, all the time, even with the shield off. Right now: +${n.before} dose a day becomes +${n.after}.`,
+    effect: (n) => `${n.less}% less radiation reaches the crew, all the time, even with the shield off.${n.before >= 1 ? ` Right now: +${n.before} dose a day becomes +${n.after}.` : ' You will see it most in a storm.'}`,
   },
   algae: {
     name: 'Algae bioreactor',

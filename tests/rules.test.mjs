@@ -337,4 +337,9 @@ test('every upgrade says what it does, with real numbers', () => {
   s.science = 1000;
   buyUpgrade(s, 'walls');
   assert.equal(upgradeEffect(s, 'walls'), before);
+  // On a calm day the dose is too small to compare ("+0 becomes +0"); in a storm it is shown.
+  assert.doesNotMatch(before, /Right now/);
+  const storm = createMission(load('may2024'), { seed: 3 });
+  while (storm.t < 13.6) { if (storm.pendingCard) chooseOption(storm, storm.pendingCard.options.at(-1).id); tick(storm, 0.05); }
+  assert.match(upgradeEffect(storm, 'walls'), /Right now: \+7 dose a day becomes \+4\.2/);
 });
