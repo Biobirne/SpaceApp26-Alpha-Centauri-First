@@ -36,7 +36,7 @@
 
 /* Phones: the top bar would only hold the sound button and cost a whole row, so the button moves onto the card. */
 .game.intro .topbar { display: none; }
-.coach .soundbtn { flex: none; width: 40px; height: 40px; min-height: 0; }
+.coach .soundbtn { flex: none; width: 44px; height: 44px; min-height: 0; }
 .coach .soundbtn .ic { width: 20px; height: 20px; }
 @media (min-width: 900px) and (min-aspect-ratio: 5/4) {
   .game.intro .topbar { display: flex; }
@@ -67,7 +67,7 @@
 .coach .coach-progress { flex: 1; height: 6px; border-radius: 99px; background: #dcd6c8; overflow: hidden; }
 .coach .coach-progress i { display: block; height: 100%; border-radius: inherit; background: #8a5a00; transition: width 300ms; }
 .coach .coach-skip {
-  flex: none; min-height: 32px; padding: 0 4px; border: 0; background: none; cursor: pointer;
+  flex: none; min-height: 44px; padding: 0 6px; border: 0; background: none; cursor: pointer;
   font: 500 14px/1 var(--font, system-ui); color: var(--ink-2); text-decoration: underline;
 }
 

@@ -138,6 +138,7 @@ export function createGuide({ root, enabled, seen, markSeen, say, unsay }) {
       say(next.say, 'happy', {
         tag: 'guide',
         now: Boolean(next.now),
+        sticky: Boolean(next.hold), // the clock waits, so the sentence waits too
         onShow: () => {
           if (active !== next || next.hold) return;
           shown = true;

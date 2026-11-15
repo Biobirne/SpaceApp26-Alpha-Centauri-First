@@ -407,7 +407,7 @@ export function getAdvice(state) {
     const night = nextNightChange(state);
     if (!state.daylight) {
       return advice('Wait for sunrise. Leave the shield off.',
-        `The battery is empty and it's night, so the panels make no power.${night?.becomesDay ? ` The Sun rises in about ${dayWord(Math.max(1, Math.round(night.inDays)))}.` : ''} The air machines keep running.`, null);
+        `The battery is empty and it's night, so the panels make no power.${night?.becomesDay ? ` The Sun rises in about ${dayWord(Math.max(1, Math.round(night.inDays)))}.` : ''} Without power the oxygen machine stops too, so keep an eye on the air.`, null);
     }
     if (state.dust) {
       return advice('Clean the solar panels.', 'The battery is empty, and Moon dust blocks most of the sunlight. Clean panels charge it much faster.', { repair: 'solar' });
@@ -425,7 +425,7 @@ export function getAdvice(state) {
   }
   // A storm is coming and the shelter can be made stronger: a good thing to do while waiting.
   if (state.stormSoon && fortOpen(state)) {
-    return advice('Build the storm fort: tap the shelter.',
+    return advice('Build the storm wall: tap the shelter.',
       'A storm is coming. Heavy supplies on the shelter wall stop even more radiation.', { repair: 'shelter' });
   }
   if (state.dust && state.daylight) {
@@ -494,7 +494,7 @@ export function applyAdvice(state, action) {
 /** What Mission Control's plan would change, in a few words (the button label). */
 export function describeAdvice(state, action) {
   if (!action) return null;
-  if (action.repair === 'shelter' && fortOpen(state)) return 'Build the storm fort';
+  if (action.repair === 'shelter' && fortOpen(state)) return 'Build the storm wall';
   if (action.repair && state.rooms[action.repair].status === 'lost') return `Reopen the ${ROOMS[action.repair].name.toLowerCase()}`;
   if (action.repair) return `Fix the ${ROOMS[action.repair].name.toLowerCase()}`;
   const parts = [];
@@ -574,7 +574,7 @@ function step(state, h) {
     state.stats.setbacks++;
     trouble(state);
     emit(state, 'setback', { kind: 'power' });
-    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! I switched off the shield, the lab and the plant lamps. Only the air machines and the heating run now.' });
+    emit(state, 'crew', { mood: 'alert', text: 'Battery empty! The shield, the lab and the plant lamps are off. The oxygen machine has no power either, so watch the air!' });
     lesson(state, 'power', { night: !state.daylight, shield: shieldWas > 0, dust: state.dust });
   } else if (state.powerEmergency && state.power > cfg.power.recoverAbove) {
     state.powerEmergency = false;

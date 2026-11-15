@@ -304,7 +304,7 @@ export function showShop(state, onBuy) {
       ${owned
         ? `<button type="button" class="btn quiet small" disabled>${icon('check')}Built</button>`
         : `<button type="button" class="btn go small" data-key="${key}" ${short > 0 ? 'disabled' : ''}>${icon('science')}${cost}</button>`}
-      ${!owned && short > 0 ? `<p style="grid-column:1/-1;font-size:13px">Need ${short} more science points.</p>` : ''}
+      ${!owned && short > 0 ? `<p style="grid-column:1/-1;font-size:13px">Need ${short} more science ${short === 1 ? 'point' : 'points'}.</p>` : ''}
     </div>`;
   }).join('');
   const html = `

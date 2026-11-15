@@ -150,6 +150,7 @@ export function showData(state, doc) {
   }
   rows.push(['µGy/h', 'Microgray per hour: how much radiation energy something soaks up in one hour. A microgray is one millionth of a gray.']);
   rows.push(['Gy or Sv?', `${GRAY_OR_SIEVERT} NASA’s limits for astronauts are in sieverts, because they are about the body.`]);
+  if (state.drillRadiation != null) rows.push([`${fmtTimes(d.rad)}`, 'The practice alarm in your training. It is not real data: the chart shows what NASA really measured.']);
   rows.push([`+${round1(d.perDay)}/day`, `What gets to your crew: shield, shelter and walls block ${Math.round(d.block * 100)}%, the rest adds to the Crew dose.`]);
   const html = `
     <h2>Real NASA data</h2>

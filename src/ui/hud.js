@@ -283,10 +283,16 @@ function createCrew(node) {
 
   function schedule() {
     clearTimeout(timer);
-    if (frozen || !showing) return;
+    if (frozen || !showing || showing.sticky) return;
     const words = showing.text.split(/\s+/).length + (showing.word ? showing.word.text.split(/\s+/).length + 3 : 0);
     const ms = Math.max(3200, Math.min(9000, 1200 + words * 420)) * (queue.length > 2 ? 0.7 : 1);
-    timer = setTimeout(next, ms);
+    const shownAt = Date.now();
+    const move = () => {
+      // Read aloud: never cut the voice off mid-sentence (but do not wait forever either).
+      if (api.speaking?.() && Date.now() - shownAt < 30000) { timer = setTimeout(move, 500); return; }
+      next();
+    };
+    timer = setTimeout(move, ms);
   }
 
   // At most a couple of lines wait (playtest: "6 more" was too much to read). The least important
@@ -310,20 +316,22 @@ function createCrew(node) {
     onAvatar: null,
     /** Called with the text of every line that appears (read-aloud). */
     onLine: null,
+    /** True while the device voice is still reading the line on screen. */
+    speaking: null,
     /** The line on screen right now. */
     current: () => showing?.text ?? null,
     /**
      * `tag` groups lines that replace each other (the guide's hints): a new one removes older
      * queued ones and takes over the bubble. `onShow` runs when the line actually appears.
      */
-    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null, now = false, keep = false } = {}) {
+    say(text, mood = 'calm', { chatter = false, word: w = null, tag = null, onShow = null, now = false, keep = false, sticky = false } = {}) {
       if (chatter && (showing || queue.length)) return;
       // The same sentence twice in a row is noise (playtest: a line came back the next day).
       if (!w && (showing?.text === text || queue.some((q) => q.text === text))) return;
       // Drop stale chatter when something important comes in.
       if (!chatter) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].chatter) queue.splice(i, 1);
       if (tag) for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
-      const line = { text, mood, chatter, word: w, tag, onShow, keep, t: api.now() };
+      const line = { text, mood, chatter, word: w, tag, onShow, keep, sticky, t: api.now() };
       // `now`: a lesson that holds the clock goes first, so the glowing button and the words match.
       if (now) { queue.unshift(line); if (!frozen) { next(); return; } } else queue.push(line);
       trim();
@@ -346,7 +354,7 @@ function createCrew(node) {
     /** Remove lines with this tag (a hint that is no longer needed). */
     drop(tag) {
       for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
-      if (showing?.tag === tag && !frozen) next();
+      if (showing?.tag === tag) { if (frozen) showing.sticky = false; else next(); } // while paused: let it time out afterwards
     },
     clear() { queue.length = 0; showing = null; clearTimeout(timer); node.classList.remove('show'); },
   };

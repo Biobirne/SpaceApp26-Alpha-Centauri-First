@@ -343,3 +343,22 @@ test('every upgrade says what it does, with real numbers', () => {
   while (storm.t < 13.6) { if (storm.pendingCard) chooseOption(storm, storm.pendingCard.options.at(-1).id); tick(storm, 0.05); }
   assert.match(upgradeEffect(storm, 'walls'), /Right now: \+7 dose a day becomes \+4\.2/);
 });
+
+test('with an empty battery at night the air drops, and the crew says so', () => {
+  const s = createMission(load('may2024'), { seed: 1 }); // starts in lunar night
+  setShield(s, 3);
+  let said = null;
+  while (!said && s.t < 12) {
+    if (s.pendingCard) { chooseOption(s, s.pendingCard.options.find((o) => !o.disabled).id); continue; }
+    for (const e of s.outbox) if (e.type === 'crew' && /Battery empty/.test(e.text)) said = e.text;
+    s.outbox.length = 0;
+    tick(s, 0.05);
+  }
+  assert.ok(said, 'the battery ran empty');
+  assert.doesNotMatch(said, /air machines.*run/i, 'no promise that the air machines keep running');
+  assert.match(said, /oxygen machine/i);
+  const air = s.air;
+  tick(s, 0.2);
+  assert.ok(s.air < air, 'air really drops without power');
+  assert.doesNotMatch(getAdvice(s).reason, /keep running/);
+});

@@ -32,7 +32,7 @@
   }
   .crew { max-width: 100%; }
   .bubble { margin-top: 6px; }
-  .shieldctl > .sc-label { min-height: 36px; }
+  .shieldctl > .sc-label { min-height: 44px; }
 }
 
 /* Small phones: the four bars stay in one row (two rows left almost no room for the base),
