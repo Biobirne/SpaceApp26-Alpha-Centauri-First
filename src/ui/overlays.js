@@ -5,7 +5,7 @@
 import { icon } from './icons.js';
 import { UPGRADES, ROOMS, CREWMATE_NAME } from '../rules/content.js';
 import { SHIELD_LABELS, CONFIG } from '../rules/config.js';
-import { currentDayIndex, fmtTimes } from '../rules/mission.js';
+import { currentDayIndex, fmtTimes, upgradeEffect } from '../rules/mission.js';
 import { mountDust } from './minigames/dust.js';
 import { mountFort } from './minigames/fort.js';
 import { mountLeak } from './minigames/leak.js';
@@ -298,7 +298,9 @@ export function showShop(state, onBuy) {
     const short = Math.ceil(cost - state.science);
     return `<div class="item ${owned ? 'owned' : ''}">
       <h3>${esc(u.name)}</h3>
-      <p>${esc(u.text)} <br><span style="color:var(--air)">${esc(u.fact)}</span></p>
+      <p>${esc(u.text)}</p>
+      <p class="effect">${icon(owned ? 'check' : 'bolt')}<span><b>${owned ? 'Working now:' : 'What it does:'}</b> ${esc(upgradeEffect(state, key))}</span></p>
+      <p class="fact-line">${esc(u.fact)}</p>
       ${owned
         ? `<button type="button" class="btn quiet small" disabled>${icon('check')}Built</button>`
         : `<button type="button" class="btn go small" data-key="${key}" ${short > 0 ? 'disabled' : ''}>${icon('science')}${cost}</button>`}

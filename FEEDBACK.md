@@ -34,6 +34,12 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Enpirus (15 Nov)
+- The shield dome floated above the hills or cut into them; module feet stuck out.
+- Upgrades worked in the rules, but nothing on screen showed what they do.
+
+**Status: done** (branch `fix/shield-and-upgrades`): the dome stands on a ground ring below every module's feet. Each upgrade has a "What it does" line in the shop with the real numbers from `config.js`, Sam says the line when the shop closes, and every upgrade is drawn on the base (battery pack, algae tubes, docked suits, regolith berms, reactor). Review fixes: the regolith walls only compare today's dose when it is 1 a day or more (a calm day read "+0 becomes +0").
+
 ### Florian (15 Nov, ~09:30)
 - Call Earth: the 2.6 s radio delay is real and shown, which is nice. But "Then they need 3 days before the next call" pretends the wait has a real reason. It has none.
 - We stay on the Moon. No Mars mission in the game; Mars only appears in the end-screen comparison.

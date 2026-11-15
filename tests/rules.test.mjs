@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import {
   createMission, tick, chooseOption, setShield, setShelter, getAdvice, callEarth, callEarthReady,
-  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize, evaCost,
+  repairFor, completeRepair, radiationNow, buyUpgrade, randomGapScale, summarize, evaCost, upgradeEffect,
 } from '../src/rules/mission.js';
 import { isDaylight } from '../src/rules/sky.js';
 import { configFor } from '../src/rules/config.js';
@@ -320,4 +320,26 @@ test('createMission works on a private config copy', () => {
   const b = createMission(load('oct2021'), { seed: 1 });
   assert.equal(b.cfg.power.solarPerDay, before, 'mutating one mission must not change the next');
   assert.equal(configFor('normal').power.solarPerDay, before);
+});
+
+test('every upgrade says what it does, with real numbers', () => {
+  const s = createMission(load('may2024'), { seed: 3 });
+  for (const key of Object.keys(s.cfg.upgrades)) {
+    const text = upgradeEffect(s, key);
+    assert.ok(text.length > 20, `${key} has an effect line`);
+    assert.match(text, /\d/, `${key} names a number`);
+    assert.doesNotMatch(text, /undefined|NaN/, `${key} has no missing number`);
+  }
+  assert.match(upgradeEffect(s, 'battery'), /40 more power/);
+  assert.match(upgradeEffect(s, 'walls'), /40% less radiation/);
+  // After building the walls, "before" is still the dose without walls.
+  const before = upgradeEffect(s, 'walls');
+  s.science = 1000;
+  buyUpgrade(s, 'walls');
+  assert.equal(upgradeEffect(s, 'walls'), before);
+  // On a calm day the dose is too small to compare ("+0 becomes +0"); in a storm it is shown.
+  assert.doesNotMatch(before, /Right now/);
+  const storm = createMission(load('may2024'), { seed: 3 });
+  while (storm.t < 13.6) { if (storm.pendingCard) chooseOption(storm, storm.pendingCard.options.at(-1).id); tick(storm, 0.05); }
+  assert.match(upgradeEffect(storm, 'walls'), /Right now: \+7 dose a day becomes \+4\.2/);
 });

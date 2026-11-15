@@ -69,26 +69,31 @@ export const UPGRADES = {
     name: 'Bigger battery',
     text: 'Store more power for the long lunar night. The new cells arrive fully charged.',
     fact: 'Real Moon bases must survive about 14 days of darkness.',
+    effect: (n) => `Holds ${n.bonus} more power. At night the base uses about ${n.nightUse} a day, so that is about ${n.days} more days without sun.`,
   },
   walls: {
     name: 'Regolith walls',
     text: 'Pile Moon soil on the base. Less radiation gets in.',
     fact: 'NASA studies covering Moon habitats with lunar soil for protection.',
+    effect: (n) => `${n.less}% less radiation reaches the crew, all the time, even with the shield off.${n.before >= 1 ? ` Right now: +${n.before} dose a day becomes +${n.after}.` : ' You will see it most in a storm.'}`,
   },
   algae: {
     name: 'Algae bioreactor',
     text: 'Tanks of tiny green algae eat CO₂ and make oxygen. A clogged filter hurts less. Uses a little power.',
     fact: 'ESA’s MELiSSA project grows spirulina algae for this. On the space station they made oxygen as fast as on Earth.',
+    effect: (n) => `+${n.air}% air a day. A clogged filter loses ${n.clogged}% air a day, with algae only ${n.cloggedAlgae}%. Uses ${n.power} power a day.`,
   },
   suitport: {
     name: 'Suitports',
     text: 'Spacesuits stay docked outside. The crew climbs in through the back, so no Moon dust comes in.',
     fact: 'NASA has tested suitports on a prototype Moon rover.',
+    effect: (n) => `After a spacewalk, Moon dust clogs the air filter ${n.chance} times out of 10. With suitports: never.`,
   },
   fission: {
     name: 'Fission power unit',
     text: 'A small reactor that makes power day and night.',
     fact: 'NASA’s Fission Surface Power project is designing one for the Moon.',
+    effect: (n) => `+${n.power} power a day, by day and by night. At night the base uses about ${n.nightUse} a day, so the battery almost stops running down.`,
   },
 };
 

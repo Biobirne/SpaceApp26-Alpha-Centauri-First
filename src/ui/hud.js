@@ -341,6 +341,8 @@ function createCrew(node) {
     dismissAlert() {
       if (showing?.mood === 'alert' && !frozen) next();
     },
+    /** Show the next waiting line now instead of letting the current one run out. */
+    advance() { if (!frozen && queue.length) next(); },
     /** Remove lines with this tag (a hint that is no longer needed). */
     drop(tag) {
       for (let i = queue.length - 1; i >= 0; i--) if (queue[i].tag === tag) queue.splice(i, 1);
