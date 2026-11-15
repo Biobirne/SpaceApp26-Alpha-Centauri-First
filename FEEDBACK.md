@@ -34,6 +34,27 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (15 Nov, ~10:30): bug hunt
+Searched the game on purpose for bugs and things that do not fit together: 600 random missions through the rules (all storms, all difficulties), every text the rules can say, and a read-through of the controller and the sheets.
+
+- **P1** With an empty battery Sam said "Only the air machines and the heating run now", and Mission Control said "The air machines keep running". In the rules the oxygen machine stops and the air drops by 18 a day.
+- **P1** During the training drill, the made-up 12× radiation was labelled "real NASA data" in the Shield and Crew dose sheets.
+- **P1** On phones up to 370 px wide the "Shield" button was hidden, so the shield sheet with its sources could not be opened.
+- **P1** Read aloud: a line left the screen after 9 s at most, and the next line cut the voice off mid-sentence.
+- **P2** Tips off and on again restarted the whole training on the next visit.
+- **P2** In the training, the keyboard key C used up the call (the clock stands still there, so the lesson could not be finished), and switching apps opened the mission pause menu.
+- **P2** "Skip training" marked every lesson as taught, so the first mission had no guided leak, shield or shelter hint.
+- **P2** A lesson that holds the clock ("Tap Shelter") vanished after a few seconds while the clock kept waiting.
+- **P3** Two names for one thing ("storm fort" in Call Earth, "storm wall" everywhere else); "Need 1 more science points"; `?storm=` stayed in the address after going back to the menu; stars of the removed Nov 2025 storm counted for the rank; three tap targets under 44 px.
+
+**Status: done** (branch `fix/bug-hunt`), all of the above, with tests for the battery text, the rank and the tips toggle.
+
+**Found, not changed (team decision or bigger work):**
+- The dose can pass its limit: the bar and the end screen then show for example "134/100".
+- The power bar shows % of the battery a day, the shield buttons show ⚡ a day. With a bigger battery (Easy, or the upgrade) the two numbers differ.
+- A forced-shelter particle card has only one option ("Stay in the shelter").
+- Balance: with the shield on Max and enough battery, a careful player gets 3 stars in every storm without ever using the shelter (Sep 2017: dose 48 of 100).
+
 ### Enpirus (15 Nov)
 - The shield dome floated above the hills or cut into them; module feet stuck out.
 - Upgrades worked in the rules, but nothing on screen showed what they do.

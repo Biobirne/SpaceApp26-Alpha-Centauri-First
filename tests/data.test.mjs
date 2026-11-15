@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { LEVEL_ORDER, isUnlocked } from '../src/progress.js';
+import { LEVEL_ORDER, isUnlocked, rankFor, setHints, markHintSeen } from '../src/progress.js';
 import { buildTimeline, peakDay } from '../src/rules/storm.js';
 
 const load = (id) => JSON.parse(readFileSync(new URL(`../data/storms/${id}.json`, import.meta.url)));
@@ -42,4 +42,18 @@ test('the deep-space Nov 2025 storm is not startable as a Moon mission', () => {
   assert.equal(isUnlocked('nov2025', { stars: {} }, false), false);
   assert.equal(isUnlocked('nov2025', { stars: {} }, true), false, 'judge unlock must not start it either');
   assert.equal(load('nov2025').radiation.moonOrbit, undefined);
+});
+
+test('only real levels count for the rank', () => {
+  assert.equal(rankFor({ stars: { nov2025: 3 } }), 'Cadet', 'stars of a removed storm do not count');
+  assert.equal(rankFor({ stars: { oct2021: 3, nov2025: 3 } }), 'Flight Engineer');
+});
+
+test('turning the tips back on shows the hints again, but not the whole training', () => {
+  markHintSeen('intro');
+  markHintSeen('shield');
+  setHints(false);
+  const p = setHints(true);
+  assert.equal(p.seen.intro, true);
+  assert.equal(p.seen.shield, undefined);
 });
