@@ -34,6 +34,27 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (15 Nov, ~09:30)
+- Call Earth: the 2.6 s radio delay is real and shown, which is nice. But "Then they need 3 days before the next call" pretends the wait has a real reason. It has none.
+- We stay on the Moon. No Mars mission in the game; Mars only appears in the end-screen comparison.
+- Review of the storm data fixes (PR #40), checked in the browser:
+  - `npm test` failed on Node 24 (`node --test tests/` reads the folder as a file there).
+  - The end screen said "Mars was mostly outside the storm's path" for Sep 2017 and Oct 2021. Both storms hit Mars: Curiosity measured double the radiation in Sep 2017 (NASA/LASP MAVEN news, 29 Sep 2017), and Oct 2021 was the first event measured on Earth, the Moon and Mars at once (ESA, 2 Aug 2023).
+  - Feb 2022 said "the Moon stayed calm" and then "the Moon gets the full storm".
+  - Places without a storm showed a peak date that was only noise (space station "1 May").
+  - The autopilot table in `PITCH.md` could not be reproduced.
+
+**Status: done** (branch `fix/storm-data-integrity`):
+- The wait between calls is now called what it is: a game rule that makes every call count (call sheet, "How it works", the toast). "How it works" lists it under "Made up for the game".
+- `npm test` runs `node --test`, which works on Node 20 and 24.
+- The end-screen notes only say what the numbers show. A date appears only for a clear peak (2× or more). The "full storm" sentence appears only when the Moon was hit.
+- New `tools/autopilot_sim.mjs` makes the pitch table reproducible; the table now shows its numbers.
+- New badge "Solo commander" (3 stars without calling Earth); the end screen says how often Mission Control helped.
+- Small fixes: the start button says "Play again" when every storm is done, `?seed` and `?debug` stay in the URL, the debug skip no longer hangs on a disabled card option.
+- Docs: the Mars mission is marked as dropped in `GAME_DESIGN.md`, `README.md` and `PITCH.md`.
+
+**Still open:** CME speeds and geomagnetic storms are loaded but not shown; the unused `showRepair` fallback in `overlays.js`; turning hints off and on mid-mission can make the guide wait for a leak; "Module ownership" in `AGENTS.md` is still TBD.
+
 ### Florian (14 Nov, ~23:00)
 - With an air problem the Air bar lights up and says "Clogged" in red. Tapping it (what you'd do by instinct) only opens the explanation. Tapping the broken part there only explains it too. There is no way to repair it from there.
 

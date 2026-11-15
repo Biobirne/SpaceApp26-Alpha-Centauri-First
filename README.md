@@ -9,7 +9,7 @@ A browser game for kids aged 7–12. You run a small base on the Moon for 30 day
 **Play:** https://biobirne.github.io/SpaceApp26-Alpha-Centauri-First/ (works on phones; no install, no login). Judges can add `?all=1` to unlock every storm.
 
 ## What's in the game
-- **Six real storms (2017–2025)** as levels, unlocked one after the other. Easy, Normal or Hard, each explained on the start screen.
+- **Five real Moon storms (2017–2024)** as levels, unlocked one after the other. Easy, Normal or Hard, each explained on the start screen. A sixth storm (Nov 2025) is in `data/storms/` but not in the game: it has no Moon radiation measurement.
 - **Three bars:** power, air and the crew's radiation dose. Science points are the score.
 - **Choices with a cost:** the shield (a magnet shield, labelled as test tech), the storm shelter, repairs, spacewalks (no shield outside, and Moon dust comes back in), upgrades, fast-forward.
 - **Call Earth:** Mission Control gives one tip with the reason behind it, after a real 2.6 s radio round trip.

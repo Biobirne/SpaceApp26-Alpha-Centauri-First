@@ -61,7 +61,7 @@ Why the Moon:
 - The lunar night gives a second simple, real trade-off for power.
 - Kids can see the Moon in the sky, and Artemis is in the news.
 
-Mars appears as the **end goal** (see "Rocket to Mars") and in the end-screen comparison.
+Mars appears only in the end-screen comparison (the same storm, measured on Mars). On 15 Nov the team decided to keep the whole game on the Moon; the "Rocket to Mars" idea below is dropped.
 
 **Honesty notes:**
 - Our Moon radiation numbers come from the LRO spacecraft in **lunar orbit**. On the surface the dose is roughly half, because the Moon itself blocks half the sky. In-game text says "near the Moon" or "measured in orbit around the Moon".
@@ -97,7 +97,7 @@ Each mission plays one storm from `data/storms/` (archived NASA measurements) or
 | DONKI flare (class M or X) | A warning card. The bigger the class, the stronger the warning. Choices cost power or science. |
 | DONKI particle event (SEP) | Radiation is coming. Raise the shield or send the crew to the shelter. |
 | RadLab `timesNormal` for `moonOrbit` on that day | **How strong the radiation really was** ("278× normal"). Combined with the player's shield level, it gives the crew's dose. |
-| DONKI CME speed | Flavour text: "A cloud of solar material is racing out at 1500 km per second." |
+| DONKI CME speed | Flavour text: "A cloud of solar material is racing out at 1500 km per second." (not built: the data is loaded but not shown) |
 
 Every decision offers 2–3 options. Each option shows its cost before the tap and its result after (see `kids-ux`). No option is free, and none is always best.
 
@@ -122,7 +122,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 
 ## End screen (the lesson)
 - What happened, with the real numbers. For example: "On 14 May 2024 the radiation near the Moon was 278× normal. Your shield blocked most of it."
-- **The real comparison, same day, from the same storm file:**
+- **The real comparison, at each place's peak within the same storm file:**
   - "On Mars it was only 15×. Mars has a thin atmosphere."
   - "On the space station it was about 1×. Earth's magnetic field protects it."
 - A science score and 1–3 stars, badges earned, new rank, and the science words learned.
@@ -130,9 +130,9 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 - Data attribution, with the label "Archived NASA measurements, <month year>".
 
 ## Progression and unlocks
-1. **The storm library as levels** (built). The order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme) → Feb 2022 → Nov 2025. Each finished mission unlocks the next. Ranks grow with stars: Cadet → Flight Engineer → Base Commander.
+1. **The storm library as levels** (built). The order is: Oct 2021 (gentle) → May 2024 → Mar 2024 → Sep 2017 (extreme) → Feb 2022 (the storm misses the Moon). Each finished mission unlocks the next. Ranks grow with stars: Cadet → Flight Engineer → Base Commander. Nov 2025 is in the data but not a Moon level: it has deep-space measurements only, so the game does not use it.
 2. **Live mission (not built yet).** Unlocked after the first mission: "The real Sun this month", using DONKI fetched live. The radiation factor is then estimated from similar past storms, and the game labels it as an estimate.
-3. **Rocket to Mars, the end goal (not built yet).** Unlocked after a few missions. Grounded in real facts:
+3. **Rocket to Mars (dropped on 15 Nov: the game stays on the Moon).** The idea, kept here for later. Unlocked after a few missions. Grounded in real facts:
    - Earth and Mars line up for a launch about **every 26 months**. The trip takes **about 7 months**.
    - In deep space there is no air and no magnetic field. Our BioSentinel data shows what storms do out there (up to about 300× normal).
    - Once at Mars, a radio message to Earth takes **between about 3 and 22 minutes one way**.
@@ -167,7 +167,7 @@ Mission Control on Earth is the player's **help button**, not a punishment.
 7. ✓ The storm library as levels, and unlocks.
 8. Mentor feedback rounds 2 and 3 (`FEEDBACK.md`): life support loop, meaningful repair mini-games, placing the buildings.
 9. The live DONKI mission.
-10. The rocket to Mars (option 1 first).
+10. Dropped (15 Nov): the rocket to Mars. The game stays on the Moon.
 
 ## Tech (decided)
 **Phaser 3.90.0** (the final Phaser 3 release) via cdnjs, as a plain `<script>` tag. It exposes the global `Phaser`. There is no npm and no build step, so it stays a static site for GitHub Pages. The download is about 320 KB gzipped.
@@ -193,7 +193,7 @@ Everything below is drawn by code (shapes, not image files). Team art can replac
   - A micrometeoroid leak (tap 4 cracks).
   - Dust on the panels (wipe 5 panels).
   - A clogged CO₂ filter (3 steps in order).
-  - A leaking lab or greenhouse is sealed after 2.5 days and can be rebuilt for 30 science.
+  - A leaking lab or greenhouse is sealed after 2.5 days and can be reopened for free; the price is that it earns almost no science until it is open again.
   - A to-do list shows open repairs; rooms can also be tapped in the scene.
 - **Safe failure.**
   - Battery at 0: the shield and lab switch off until it recharges.
@@ -204,7 +204,7 @@ Everything below is drawn by code (shapes, not image files). Team art can replac
   - The real 1.3 s each way is animated.
   - The tip always comes with a "Why?" and real numbers.
   - "Do it for me" or "Start now" applies the tip.
-  - 3-day cooldown.
+  - 3-day cooldown. It is a game rule (it makes every call count), and the game says so in the call sheet and in "How it works".
 - **Time.**
   - 1 day = 15 s, or 5 s when fast.
   - The scale is shown under the speed buttons.

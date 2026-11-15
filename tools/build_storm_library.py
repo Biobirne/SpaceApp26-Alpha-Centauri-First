@@ -136,12 +136,19 @@ def main() -> None:
             site, url = radlab_site(inst, start, end_excl)
             if site:
                 sites[key] = {"label": label, "where": where, "instrumentId": inst, "queryUrl": url, **site}
+        # Label by the month of the peak, not the start of the 30-day window. sep2017 starts in
+        # August but peaks in September; nov2025 starts in October but peaks in November.
+        primary = sites.get("moonOrbit") or sites.get("deepSpace")
+        if primary is None and sites:
+            primary = max(sites.values(), key=lambda s: s["peakTimesNormal"])
+        label_month = (date.fromisoformat(primary["peakDay"]).strftime("%B %Y")
+                       if primary else date.fromisoformat(start).strftime("%B %Y"))
         doc = {
             "id": storm["id"],
             "title": storm["title"],
             "summary": storm["summary"],
             "dataKind": "archived",
-            "displayLabel": f"Archived NASA measurements, {date.fromisoformat(start).strftime('%B %Y')}",
+            "displayLabel": f"Archived NASA measurements, {label_month}",
             "period": {"start": start, "end": end},
             "builtAt": date.today().isoformat(),
             "sources": {
