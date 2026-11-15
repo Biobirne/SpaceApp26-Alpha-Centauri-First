@@ -80,7 +80,7 @@ function shieldHTML(state) {
     </tr>`).join('');
   return `<h2>${icon('shield')} Shield</h2>
     <p>${esc(SHIELD_INFO.intro)}</p>
-    <h3>Every level, with today’s radiation (${fmtTimes(rad)} normal)</h3>
+    <h3>Every level, with ${state.drillRadiation != null ? 'the practice alarm' : 'today’s radiation'} (${fmtTimes(rad)} normal)</h3>
     <table class="sh-table">
       <thead><tr><th scope="col">Shield</th><th scope="col">Blocks</th><th scope="col">Power a day</th><th scope="col">Dose a day</th></tr></thead>
       <tbody>${rows}</tbody>
@@ -93,7 +93,7 @@ function shieldHTML(state) {
     ${part('rocket', 'In real life', SHIELD_INFO.real)}
     ${part('science', 'Why it needs power', SHIELD_INFO.cold)}
     <div class="fact">${icon('info')}<span>${esc(SHIELD_INFO.today)}</span></div>
-    <p class="sh-game">${icon('check')}<span><b>Game numbers:</b> how much each level blocks and the power it uses are made up for the game. The radiation is real NASA data.</span></p>
+    <p class="sh-game">${icon('check')}<span><b>Game numbers:</b> how much each level blocks and the power it uses are made up for the game. ${state.drillRadiation != null ? 'Right now this is a practice alarm, not real data. In a mission, the radiation is real NASA data.' : 'The radiation is real NASA data.'}</span></p>
     <div class="sh-sources"><b>Sources</b><ul>${SHIELD_INFO.sources.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
 }
 
@@ -166,7 +166,7 @@ export function showMeterInfo(kind, state) {
       ${doseMeaning(state)}
       <h3>Right now</h3>
       <ul class="flow">
-        <li><span>Radiation outside (real NASA data)</span><b>${fmtTimes(d.rad)} normal</b></li>
+        <li><span>Radiation outside (${state.drillRadiation != null ? 'practice alarm, not real data' : 'real NASA data'})</span><b>${fmtTimes(d.rad)} normal</b></li>
         <li class="in"><span>Shield, shelter and walls block</span><b>${Math.round(d.block * 100)}%</b></li>
         <li class="total"><span>Gets to the crew every day</span><b>+${(Math.round(d.perDay * 10) / 10)}</b></li>
       </ul>

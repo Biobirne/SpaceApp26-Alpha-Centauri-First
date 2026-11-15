@@ -50,7 +50,7 @@ export function markHintSeen(id) {
 export function setHints(on) {
   const p = loadProgress();
   p.hints = on;
-  if (on) p.seen = {};
+  if (on) p.seen = p.seen?.intro ? { intro: true } : {}; // show the hints again, not the whole training
   return save(p);
 }
 
@@ -86,7 +86,8 @@ export function nextLevel(progress, unlockAll = false) {
 
 /** Titles grow with play: Cadet → Flight Engineer → Base Commander. */
 export function rankFor(progress) {
-  const total = Object.values(progress.stars).reduce((a, b) => a + b, 0);
+  // Only storms that are levels count (an old save may hold stars for a storm that was removed).
+  const total = LEVEL_ORDER.reduce((a, id) => a + (progress.stars[id] || 0), 0);
   if (total >= 8) return 'Base Commander';
   if (total >= 3) return 'Flight Engineer';
   return 'Cadet';

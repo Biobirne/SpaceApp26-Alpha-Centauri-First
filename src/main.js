@@ -207,6 +207,7 @@ function clearApp() {
 function showStart() {
   stopRun();
   clearApp();
+  history.replaceState(null, '', location.pathname + (UNLOCK_ALL ? '?all=1' : ''));
   const progress = loadProgress();
   renderStart(app, {
     index: data.index, progress, unlockAll: UNLOCK_ALL, next: nextLevel(progress, UNLOCK_ALL),
@@ -249,9 +250,10 @@ function startTraining(startAt) {
   startMission(id, { training: startAt || '1' });
 }
 
-function endTraining() {
-  // What the intro taught does not need the in-mission hints again.
-  for (const key of ['intro', 'bars', 'leak', 'shield', 'shelter', 'shelterOut']) markHintSeen(key);
+function endTraining({ skipped = false } = {}) {
+  // What the intro taught does not need the in-mission hints again. A skipped intro taught nothing,
+  // so the first mission still shows them.
+  for (const key of skipped ? ['intro'] : ['intro', 'bars', 'leak', 'shield', 'shelter', 'shelterOut']) markHintSeen(key);
   history.replaceState(null, '', location.pathname);
   showStart();
 }
@@ -264,6 +266,7 @@ function startMission(id, { training = null } = {}) {
   const progress = loadProgress();
   const hud = createHud(app, actions, { sound: sfx.on, canSpeak: voice.available });
   hud.crew.onLine = (text) => { if (readAloud) voice.speak(text); };
+  hud.crew.speaking = () => readAloud && voice.busy;
   hud.crew.onAvatar = () => funFact('suit');
   const guide = training
     ? createIntro({
@@ -629,7 +632,7 @@ function watchClose(sheet, key) {
 // ------------------------------------------------------------------ keyboard (laptops) and tab switching
 
 addEventListener('keydown', (e) => {
-  if (!run || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!run || run.guide.quiet || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return; // quiet = the training
   if (document.querySelector('.modal')) return;
   const k = e.key.toLowerCase();
   if (k === ' ' || k === 'p') { e.preventDefault(); actions.pause(); }
@@ -640,9 +643,9 @@ addEventListener('keydown', (e) => {
 });
 
 // A phone on its side gets a note to hold it upright; a running mission pauses meanwhile.
-watchPortrait({ onShow: () => { if (run && !run.blockers.size && !run.state.ended) actions.pause(); } });
+watchPortrait({ onShow: () => { if (run && !run.guide.quiet && !run.blockers.size && !run.state.ended) actions.pause(); } });
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) voice.stop();
-  if (document.hidden && run && !run.blockers.size && !run.state.ended) actions.pause();
+  if (document.hidden && run && !run.guide.quiet && !run.blockers.size && !run.state.ended) actions.pause();
 });
