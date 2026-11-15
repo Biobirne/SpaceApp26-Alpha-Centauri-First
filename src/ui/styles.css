@@ -726,7 +726,7 @@ body.no-phaser #scene {
 .cmp .track { height: 12px; background: rgb(204 149 255 / 0.12); overflow: hidden; }
 .cmp .track i { display: block; height: 100%; background: var(--dose); transform-origin: left; animation: grow 900ms var(--ease-out) both; }
 .cmp b { font-variant-numeric: tabular-nums; }
-.cmp .cmp-date { display: block; font-size: 11px; line-height: 1.2; opacity: 0.75; }
+.cmp .cmp-date { display: block; font-size: 13px; line-height: 1.2; opacity: 0.75; }
 .cmp-note { font-size: 15px; color: var(--text-2); margin: 4px 0 0; }
 @keyframes grow { from { transform: scaleX(0); } }
 .words { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }

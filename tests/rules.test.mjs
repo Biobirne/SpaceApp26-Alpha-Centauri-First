@@ -1,5 +1,5 @@
 // SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json.
-// Run with: node --test tests/
+// Run with: npm test (node --test)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -295,6 +295,22 @@ test('a storm that misses the Moon says so (the aim lesson)', () => {
     'feb2022 explains that the storm went elsewhere');
   const may = createMission(load('may2024'), { seed: 1 });
   assert.ok(!may.outbox.some((e) => e.type === 'crew' && /misses the Moon/.test(e.text)));
+  // Mars was hit in Sep 2017 and Oct 2021 as well: both files must keep a Mars peak the end screen can show.
+  for (const id of ['sep2017', 'oct2021']) {
+    const mars = summarize(play(id, passive)).comparisons.find((c) => c.site === 'marsSurface');
+    assert.ok(mars && mars.times >= 1.5, `${id}: Mars felt the storm (${mars?.times})`);
+  }
+});
+
+test('the solo badge needs 3 stars and no call to Earth', () => {
+  const s = play('oct2021', sensible);
+  const sum = summarize(s);
+  assert.equal(sum.calls, 0);
+  assert.equal(sum.badges.includes('solo'), sum.stars === 3);
+  const helped = createMission(load('oct2021'), { seed: 7 });
+  callEarth(helped);
+  assert.ok(!summarize(helped).badges.includes('solo'), 'one call is not solo');
+  assert.equal(summarize(helped).calls, 1);
 });
 
 test('createMission works on a private config copy', () => {

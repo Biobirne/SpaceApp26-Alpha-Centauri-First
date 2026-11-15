@@ -97,7 +97,7 @@ function aimLesson(state, firstStorm) {
   if (!other || other.peak.times < 2) return null;
   if (moon && other.peak.times < moon.times * 1.5) return null;
   const name = { marsSurface: 'Mars', iss: 'the space station', deepSpace: 'deep space' }[other.site];
-  return `This storm misses the Moon. NASA measured it at ${name} instead (${fmtTimes(other.peak.times)} normal). Storms are aimed!`;
+  return `This storm misses the Moon. NASA measured it at ${name} instead (${fmtTimes(other.peak.times)} normal). A storm does not hit every place!`;
 }
 
 function shuffle(arr, rng) {
@@ -1127,6 +1127,7 @@ export function summarize(state) {
     builder: upgrades >= 1,
     science: state.science >= target,
     hardHero: cfg.difficulty === 'hard' && stars >= 2,
+    solo: calls === 0 && stars === 3,
   };
   const badges = Object.keys(BADGES).filter((k) => earned[k]);
   // Praise the effort or the strategy the kid actually used.
@@ -1145,6 +1146,7 @@ export function summarize(state) {
     praise,
     lessons,
     difficulty: cfg.difficulty || 'normal',
+    calls,
     stormTitle: tl.title,
     displayLabel: tl.displayLabel,
     stars,

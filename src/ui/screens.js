@@ -44,6 +44,7 @@ function difficultyPicker(current) {
 export function renderStart(root, { index, progress, unlockAll, next, onStart, onHelp, onDifficulty, onTraining }) {
   const byId = Object.fromEntries(index.storms.map((s) => [s.id, s]));
   const nextStorm = byId[next];
+  const allDone = LEVEL_ORDER.every((id) => progress.stars[id]);
   const el = document.createElement('div');
   el.className = 'screen start';
   el.innerHTML = `<div class="screen-tools">${soundButton(progress.sound)}</div><div class="screen-inner">
@@ -51,10 +52,10 @@ export function renderStart(root, { index, progress, unlockAll, next, onStart, o
     <p class="pitch">Run a base on the Moon for 30 days. A real solar storm is on its way. Keep your crew safe, and keep the science going.</p>
     <p class="real-note">${icon('check')}<span>The storms really happened. The radiation numbers were measured by NASA spacecraft.</span></p>
     ${difficultyPicker(DIFFICULTY[progress.difficulty] ? progress.difficulty : 'normal')}
-    <button type="button" class="btn primary big-start" data-id="${esc(next)}">${icon('rocket')}Start: ${esc(nextStorm?.title ?? next)}</button>
+    <button type="button" class="btn primary big-start" data-id="${esc(next)}">${icon('rocket')}${allDone ? 'Play again' : 'Start'}: ${esc(nextStorm?.title ?? next)}</button>
     <button type="button" class="btn quiet howto">${icon('book')}How it works</button>
     <button type="button" class="btn quiet training">${icon('wrench')}Training: build the base</button>
-    <p class="credit">Your rank: <b>${rankFor(progress)}</b>. Each finished storm unlocks the next one.</p>
+    <p class="credit">Your rank: <b>${rankFor(progress)}</b>. ${allDone ? 'You finished every storm! Play any of them again for more stars and badges.' : 'Each finished storm unlocks the next one.'}</p>
     <ul class="levels">
       ${LEVEL_ORDER.filter((id) => byId[id]).map((id, i) => {
         const s = byId[id];
@@ -102,14 +103,22 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
   const mars = (s.comparisons || []).find((c) => c.site === 'marsSurface');
   const iss = (s.comparisons || []).find((c) => c.site === 'iss');
   const moonTimes = s.moonPeak?.times ?? 1;
-  const marsNote = !mars ? '' : moonTimes < 10 && mars.times > moonTimes * 1.5
-    ? 'This storm was aimed at Mars; the Moon stayed calm.'
-    : mars.times >= 3 && moonTimes >= 20
+  // Only say what the numbers show. Mars was hit in Sep 2017 and Oct 2021 too (its thin air and
+  // its distance made it weaker), so "outside the storm's path" would be wrong there.
+  const moonHit = moonTimes >= 20;
+  const marsNote = !mars ? '' : !moonHit && mars.times > moonTimes * 1.5
+    ? 'This time Mars got more of the storm than the Moon.'
+    : mars.times >= 1.5
       ? 'Mars has a thin atmosphere that helps a little.'
-      : 'Mars was mostly outside the storm’s path this time.';
-  const issNote = !iss ? '' : moonTimes >= 20 && iss.times < 3
+      : 'Mars hardly felt this storm.';
+  const issNote = !iss ? '' : moonHit && iss.times < 3
     ? 'The space station is inside Earth’s magnetic field, which bends the particles away.'
     : 'The space station stayed close to its normal level.';
+  const moonNote = moonHit
+    ? 'The Moon has no thick air and no magnetic field, so it gets the full storm.'
+    : 'The Moon stayed calm this time.';
+  // A date only where there was a clear peak: the highest day of a calm month is just noise.
+  const CLEAR_PEAK = 2;
   const maxLog = Math.log10(Math.max(10, ...rows.map((r) => r[1])));
   const peakDate = s.moonPeak ? new Date(`${s.moonPeak.iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
   const fmtDay = (iso) => iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '';
@@ -126,13 +135,14 @@ export function renderEnd(root, { summary: s, doc, rankBefore, rankAfter, nextId
     </div>
     ${rows.length ? `<section class="compare">
       <h2>The same storm, everywhere NASA measured</h2>
-      ${rows.map(([label, v, iso]) => `<div class="cmp"><span>${label}<small class="cmp-date">${iso ? fmtDay(iso) : ''}</small></span><span class="track"><i style="width:${Math.max(3, (Math.log10(Math.max(1, v)) / maxLog) * 100)}%"></i></span><b>${fmtTimes(v)}</b></div>`).join('')}
-      <p class="cmp-note">Each bar is that place’s peak during the same storm, measured by NASA spacecraft. The peaks can fall on different days${s.moonPeak ? ` (the Moon’s was ${esc(peakDate)})` : ''}.
+      ${rows.map(([label, v, iso]) => `<div class="cmp"><span>${label}<small class="cmp-date">${iso && v >= CLEAR_PEAK ? fmtDay(iso) : ''}</small></span><span class="track"><i style="width:${Math.max(3, (Math.log10(Math.max(1, v)) / maxLog) * 100)}%"></i></span><b>${fmtTimes(v)}</b></div>`).join('')}
+      <p class="cmp-note">Each bar is the highest day at that place in the same 30 days, measured by NASA spacecraft. The peaks can fall on different days${s.moonPeak && moonHit ? ` (the Moon’s was ${esc(peakDate)})` : ''}.
         ${marsNote}
         ${issNote}
-        The Moon has no thick air and no magnetic field, so it gets the full storm.</p>
+        ${moonNote}</p>
     </section>` : ''}
     ${s.difficulty !== 'normal' ? `<p class="diff-done">Played on ${esc(DIFFICULTY[s.difficulty].label)}.</p>` : ''}
+    ${s.calls > 0 ? `<p class="diff-done">Mission Control helped you ${s.calls} ${s.calls === 1 ? 'time' : 'times'}.${s.stars === 3 ? ' Next challenge: 3 stars without a call!' : ''}</p>` : ''}
     ${s.lessons?.length ? `<section class="lessons"><h2>What went wrong, and why</h2>
       <ul>${s.lessons.map((l) => `<li><b>Day ${l.day}: ${esc(l.title)}</b><span>${esc(l.why)}</span><span class="next">${icon('star')}Next time: ${esc(l.next)}</span></li>`).join('')}</ul>
       <p class="lessons-note">Mistakes are how real mission teams learn. Try again and see what changes!</p></section>`
