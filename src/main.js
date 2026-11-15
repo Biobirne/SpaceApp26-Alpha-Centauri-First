@@ -83,12 +83,12 @@ function syncSoundButtons() {
 if (params.get('debug') === '1') {
   window.__moonbase = {
     run: () => run,
-    /** Jump ahead; cards are answered with `pick(card)` (default: the first option). */
-    skip(days, pick = (c) => c.options[0].id) {
+    /** Jump ahead; cards are answered with `pick(card)` (default: the first option that is not disabled). */
+    skip(days, pick = (c) => (c.options.find((o) => !o.disabled) || c.options[0]).id) {
       const s = run.state;
       const end = Math.min(s.cfg.missionDays, s.t + days);
       while (run && s.t < end - 1e-6 && !s.ended) {
-        if (s.pendingCard) chooseOption(s, pick(s.pendingCard));
+        if (s.pendingCard && !chooseOption(s, pick(s.pendingCard))) break; // never spin on a card nobody can answer
         tick(s, Math.min(0.05, end - s.t));
       }
     },
@@ -300,7 +300,9 @@ function startMission(id, { training = null } = {}) {
   block('brief', true);
   const date = new Date(state.timeline.startMs).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   showBriefing(doc, state.cfg, date, () => block('brief', false));
-  history.replaceState(null, '', `?storm=${id}${UNLOCK_ALL ? '&all=1' : ''}`);
+  // Keep ?seed and ?debug, so a reload replays the same mission.
+  const keep = ['seed', 'debug'].filter((k) => params.has(k)).map((k) => `&${k}=${encodeURIComponent(params.get(k))}`).join('');
+  history.replaceState(null, '', `?storm=${id}${UNLOCK_ALL ? '&all=1' : ''}${keep}`);
 }
 
 function stopRun() {
@@ -505,7 +507,7 @@ const actions = {
     if (!s || run.blockers.size) return;
     if (!callEarthReady(s)) {
       const left = Math.ceil(s.callEarth.readyAt - s.t);
-      toast(`${icon('dish')}<span>Mission Control is busy. Try again in ${left} ${left === 1 ? 'day' : 'days'}.</span>`);
+      toast(`${icon('dish')}<span>You can call Earth again in ${left} ${left === 1 ? 'day' : 'days'}. Each call counts!</span>`);
       return;
     }
     const advice = callEarth(s);

@@ -241,7 +241,7 @@ export function showCall(advice, { roundTripSeconds, cooldownDays, actionLabel }
       <p class="a-text"></p>
       <div class="a-why">${icon('info')}<span><b>Why?</b> <span class="a-reason"></span></span></div>
       <div class="row"></div>
-      <p class="source">Mission Control can take your next call in ${cooldownDays} days.</p>
+      <p class="source">Game rule: you can call Earth again in ${cooldownDays} days. So choose your calls well.</p>
     </div>`;
   const sheet = openSheet(html, { className: 'call-sheet', onClose });
   const pulse = sheet.el.querySelector('.pulse');
@@ -251,6 +251,7 @@ export function showCall(advice, { roundTripSeconds, cooldownDays, actionLabel }
   const start = performance.now();
   let raf = 0;
   const frame = (now) => {
+    if (!sheet.el.isConnected) return; // closed with the X while the signal was on its way
     const k = Math.min(1, (now - start) / total);
     const wire = link.clientWidth - 132;
     const pos = k < 0.5 ? k * 2 : 2 - k * 2;
