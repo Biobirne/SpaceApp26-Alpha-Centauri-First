@@ -12,8 +12,8 @@ Every sprite, icon, sound or font needs a row here before it is merged. No SI-ge
 | File | Author / source | License | Link |
 |------|-----------------|---------|------|
 | `assets/fonts/lexend-latin-wght-normal.woff2` | Lexend by Bonnie Shaver-Troup, Thomas Jockin et al. (Latin subset of the variable font, from the `@fontsource-variable/lexend@5.2.8` package) | SIL Open Font License 1.1 (`assets/fonts/OFL.txt`) | https://github.com/googlefonts/lexend |
-| Icons and crewmate avatar (inline SVG in `src/ui/icons.js`) | Placeholder, **SI-assisted code** (written by Claude Code). Drawn in code, no image files and no watermark; to be replaced by team art | MIT (this repo) | |
-| Placeholder Moon base, Earth, Sun and sky (drawn in code, `src/scene/MoonScene.js`) | Placeholder, **SI-assisted code** (written by Claude Code). Drawn in code, no image files and no watermark; to be replaced by team art | MIT (this repo) | |
+| Icons and crewmate avatar (inline SVG in `src/ui/icons.js`) | **SI-assisted code** (written by Claude Code). Drawn in code, no image files and no watermark | MIT (this repo) | |
+| Moon base, Earth, Sun and sky (drawn in code, `src/scene/MoonScene.js`) | **SI-assisted code** (written by Claude Code). Drawn in code, no image files and no watermark. Team art can replace it via `assets/art/manifest.json` | MIT (this repo) | |
 | Sound effects (synthesized live in `src/audio/sfx.js`, no audio files) | Made for this project with SI-assisted code (Claude Code). Not SI-generated audio | MIT (this repo) | |
 | Read-aloud voice | The player's own device (browser `speechSynthesis`), nothing shipped | – | |
 | Phaser 3.90.0 (loaded from cdnjs, not in the repo) | Phaser Studio | MIT | https://phaser.io |

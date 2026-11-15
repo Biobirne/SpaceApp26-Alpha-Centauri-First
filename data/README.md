@@ -39,7 +39,7 @@ Six real storms. Each was picked because it teaches something different.
 | `sep2017.json` | Sep 2017, X9.3 flare | **1778×** | 2.4× | – | – | Same day, same storm: the Moon has no air and no magnetic field; Mars' thin atmosphere blocks most of it |
 | `oct2021.json` | Oct 2021, X1.0 flare | 42× | 2.1× | – | – | A medium storm, good for an easier level |
 | `feb2022.json` | Feb 2022, far side of the Sun | 1.7× | **2.9×** | – | 1.3× | An eruption we could not see from Earth hit Mars, and the Moon stayed calm |
-| `mar2024.json` | Mar 2024 | **935×** | 1.2× | 186× | 1.4× | A sharp blast aimed at the Earth–Moon side; Mars was not in its path |
+| `mar2024.json` | Mar 2024 | **935×** | 1.2× | 186× | 1.4× | A sharp blast at the Moon; Mars hardly felt it |
 | `may2024.json` | May 2024, X8.7 flare, Kp 9 | 278× | **15×** | 59× | 1.3× | The strongest storm on Earth in 20 years; every site felt it except the ISS |
 | `nov2025.json` | Nov 2025, X5.1 flare | – | – | **304×** | – | The newest storm in NASA's radiation archive (deep space only, so the game does not use it) |
 
@@ -49,7 +49,7 @@ The lessons the data teaches, every one of them measured:
 - **Earth's magnetic field protects the ISS.** It barely notices storms that hit the Moon hundreds of times harder.
 - **The Moon has no air and no magnetic field.** It takes the full blast, so a Moon base needs strong shielding.
 - **Mars' thin atmosphere helps a lot**, but not completely (15× in May 2024).
-- **Storms are aimed.** Where the eruption happens on the Sun decides who gets hit (Feb 2022 vs. Mar 2024).
+- **A storm does not hit every place.** Feb 2022 reached Mars and left the Moon calm; Mar 2024 did the opposite. The data shows that it happened, not why, so the game does not claim a reason.
 
 ### File format
 
@@ -77,7 +77,7 @@ The lessons the data teaches, every one of them measured:
 }
 ```
 
-`storms/index.json` lists all storms with their sites and peaks, so the game can pick one at random without loading every file.
+`storms/index.json` lists all storms with their sites and peaks, so the game can list them as levels without loading every file.
 
 ### Method and caveats
 - **Daily means.** Short orbital spikes are smoothed out, for example the ISS crossing the South Atlantic Anomaly several times a day.

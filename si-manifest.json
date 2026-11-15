@@ -1,9 +1,10 @@
 {
   "about": "Machine-readable record of Super Intelligence (SI) tool use in this repo, as the NASA Space Apps submission guide asks. Human-readable log: SI_USAGE.md. Rules and labels: SI_DISCLOSURE.md.",
-  "updated": "2026-11-14",
+  "updated": "2026-11-15",
   "tools": {
     "claude-code": { "name": "Claude Code", "model": "Claude Opus 5.5 and Claude Fable 5.2", "maker": "Anthropic", "kind": "large language model coding agent" },
-    "gemini": { "name": "Gemini", "maker": "Google", "kind": "large language model research assistant" }
+    "gemini": { "name": "Gemini", "maker": "Google", "kind": "large language model research assistant" },
+    "opencode": { "name": "OpenCode", "kind": "coding agent, model not recorded (see SI_USAGE.md)" }
   },
   "values": {
     "si": {
@@ -28,6 +29,7 @@
     { "path": "data/donki/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Unchanged NASA DONKI responses, downloaded by an SI tool. The values are NASA's, not SI-made." },
     { "path": "data/storms/*.json", "kind": "data", "si": "assisted", "tool": "claude-code", "notes": "Built from NASA DONKI and NASA OSDR RadLab data by tools/build_storm_library.py (SI-assisted script). Kid-facing summaries written with SI help." },
     { "path": "data/README.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "assets/art/README.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "assets/art/manifest.json", "kind": "data", "si": "assisted", "tool": "claude-code" },
     { "path": "src/ui/icons.js", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment", "notes": "SVG icons and the crewmate avatar are drawn by this code. No image files." },
     { "path": "src/scene/MoonScene.js", "kind": "code", "si": "assisted", "tool": "claude-code", "label": "header comment", "notes": "The Moon base, Earth, Sun and sky are drawn by this code. No image files." },

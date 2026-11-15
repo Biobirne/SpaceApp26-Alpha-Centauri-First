@@ -56,13 +56,13 @@ Only change files in your own module unless the task explicitly says otherwise.
 - **Data + content** (DONKI loader, snapshot, events JSON, learning texts, end screen facts): _TBD Saturday_
 
 ## Interfaces
-Current state (14 Nov, evening). Change it here when the team decides otherwise.
+Current state (15 Nov). Change it here when the team decides otherwise.
 - **Rules** (`src/rules/`, plain JS, no Phaser, no DOM, tested with `npm test`):
   - `createMission(stormDoc, { seed, config, script })` returns the whole game state. `config` comes from `configFor('easy' | 'normal' | 'hard')`; `script` holds the guided first leak.
   - `tick(state, dtDays)` advances it.
   - Player actions: `setShield`, `setShelter`, `setGrowLights`, `chooseOption`, `repairFor` / `completeRepair`, `buyUpgrade`, `callEarth` / `applyAdvice`.
   - Read-only helpers for the UI: `powerBreakdown`, `airBreakdown`, `doseNow`, `evaCost` (what a spacewalk costs now), `lifeLoop` (status of each life support step), `describeAdvice`, `explainSetup`, `summarize` (end screen: stars, badges, lessons).
-  - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `particles`, `radiation`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
+  - The rules never touch the screen. They push events into `state.outbox` (`crew`, `word`, `card`, `flare`, `forecast`, `particles`, `radiation`, `room`, `daylight`, `setback`, `warn`, `upgrade`, `end`).
 - **Controller** (`src/main.js`):
   - Runs the clock, calls `tick`, drains the outbox, and pauses on cards and sheets.
   - Hands the scene a plain `view` object every frame.
