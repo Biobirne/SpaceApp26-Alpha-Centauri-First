@@ -114,7 +114,18 @@ export function scienceMeaning(state) {
 export function showData(state, doc) {
   const tl = state.timeline;
   const today = currentDayIndex(state);
-  const moon = doc.radiation.moonOrbit;
+  const moon = doc.radiation?.moonOrbit;
+  // Not every storm in the library has a Moon measurement (Nov 2025 is deep space only).
+  // Never touch moon.* without this guard: it used to throw and freeze the mission.
+  if (!moon) {
+    const names = { moonOrbit: 'the Moon', deepSpace: 'deep space', marsSurface: 'Mars', iss: 'the space station' };
+    const where = Object.keys(doc.radiation || {}).map((k) => names[k] || k).join(', ') || 'no site';
+    const html = `
+      <h2>Real NASA data</h2>
+      <p>This storm has no radiation measurement near the Moon in our archive.</p>
+      <p class="source">It was measured at: ${esc(where)}. ${esc(doc.displayLabel)}: radiation from NASA OSDR RadLab, flares and particle storms from NASA DONKI.</p>`;
+    return openSheet(html);
+  }
   const vals = tl.days.map((d) => d.radiation.moonOrbit?.times ?? null);
   const max = Math.max(10, ...vals.filter((v, i) => v != null && i <= today));
   const W = 320;

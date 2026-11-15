@@ -25,7 +25,7 @@ export function showHelp(cfg, { onClose } = {}) {
     <ul class="hw-list">
       ${row('shield', 'power', 'Shield', `Blocks part of the radiation (Low ${block(cfg.dose.shieldBlock[1])}, Mid ${block(cfg.dose.shieldBlock[2])}, Max ${block(cfg.dose.shieldBlock[3])}), but uses power every day. It is a magnet shield: scientists are testing this idea, but no base has one yet.`)}
       ${row('shelter', 'dose', 'Shelter', `A small room with thick walls. It blocks ${block(cfg.dose.shelterBlock)} of the radiation, but the crew can’t do science in there.`)}
-      ${row('dish', 'air', 'Call Earth', `Mission Control looks at the real space weather and at your base. They tell you the most important thing to do now and why. The radio signal needs ${cfg.callEarth.roundTripSeconds} seconds there and back. Then they need ${cfg.callEarth.cooldownDays} days before the next call.`)}
+      ${row('dish', 'air', 'Call Earth', `Mission Control looks at the real space weather and at your base. They tell you the most important thing to do now and why. The radio signal really needs ${cfg.callEarth.roundTripSeconds} seconds to Earth and back. After a call you wait ${cfg.callEarth.cooldownDays} days for the next one. That wait is a game rule: it makes every call count.`)}
       ${row('air', 'air', 'The air loop', 'Air and water get cleaned and used again. The oxygen machine makes most of the oxygen from water, with power. Plants and algae help a little. Tap the air bar to see the loop.')}
       ${row('rocket', 'dose', 'Spacewalks', 'Cleaning the solar panels means going outside in a spacesuit. Out there the shield can’t help, so during a storm it costs radiation. Moon dust you bring back in can clog the air filter, unless you build suitports.')}
       ${row('fast', 'power', 'Time', `One day of the mission passes in ${cfg.secondsPerDay.normal} seconds. Calm days speed up by themselves, and the fast-forward button makes it even quicker. The game slows down when something happens.`)}
@@ -34,19 +34,19 @@ export function showHelp(cfg, { onClose } = {}) {
     <h3>Want to know more?</h3>
     <ul class="hw-list">
       ${row('info', 'air', 'Tap anything', 'Tap a building to see what it does, how it works for real and what it is built from. Tap a bar to see where your power and air go.')}
-      ${row('star', 'power', 'Easy, Normal, Hard', 'Pick how hard the mission is on the start screen. Easy has fewer problems and a bigger battery. Hard has more problems and less help.')}
+      ${row('star', 'power', 'Easy, Normal, Hard', 'Pick how hard the mission is on the start screen. Easy has fewer problems and a bigger battery. Hard has more problems and less help. Want a real challenge? Get 3 stars on Hard, or 3 stars without calling Earth.')}
     </ul>
 
     <h3>What is real?</h3>
     <ul class="hw-list">
       ${row('check', 'science', 'Real', 'The storms really happened. Flares, particle storms and radiation levels come from NASA measurements (DONKI and RadLab archives, not live). Day and night follow the real dates. The radio delay is real too.')}
-      ${row('star', 'power', 'Made up for the game', 'The magnet shield, the exact costs, science points, stars and how fast time runs.')}
+      ${row('star', 'power', 'Made up for the game', 'The magnet shield, the exact costs, science points, stars, how fast time runs and the wait between calls to Earth.')}
       ${row('shelter', 'dose', 'What real bases plan', 'Thick walls of Moon soil or water, a storm shelter, and a space weather team on Earth that warns the crew.')}
     </ul>
 
     <details class="hw-grown">
       <summary>For grown-ups</summary>
-      <p>Made for the NASA Space Apps Challenge 2026 (“Build a Junior Astronaut Mission Trainer”) by team Alpha Centauri First. Kids aged 7–12 learn that every choice on a Moon base is a trade-off: power against protection, safety against science. The space weather is real NASA data from six historical storms (2017–2025). The game is open source (MIT), needs no login and stores nothing but progress on this device. Not made or endorsed by NASA.</p>
+      <p>Made for the NASA Space Apps Challenge 2026 (“Build a Junior Astronaut Mission Trainer”) by team Alpha Centauri First. Kids aged 7–12 learn that every choice on a Moon base is a trade-off: power against protection, safety against science. The space weather is real NASA data from five historical storms (2017–2024). Call Earth can set the shield and the shelter for the player: that is the safety net for younger kids. Random problems (leaks, dust, filters) come a little later when a mission goes badly; the NASA data never changes. The game is open source (MIT), needs no login and stores nothing but progress on this device. Not made or endorsed by NASA.</p>
     </details>
     <div class="row"><button type="button" class="btn primary hw-ok">${icon('check')}Got it</button></div>`;
   const sheet = openSheet(html, { className: 'help-sheet', onClose });

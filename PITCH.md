@@ -8,10 +8,12 @@ Time budget: **90 seconds planned, 2 minutes hard limit.** QR code on the last s
 ## The pitch in one sentence
 Kids aged 7–12 run a Moon base for 30 days through a **real solar storm measured by NASA**, and every choice costs something: power against protection, safety against science.
 
+**Tagline:** "Simple enough for a 7-year-old. One tap deep for everyone else."
+
 ## Our 3 main selling points (focus on these)
 
 ### 1. A real storm, not invented numbers
-- **What:** six real solar storms from 2017 to 2025 are the levels. Every flare, particle storm and radiation value comes from NASA, replayed day by day.
+- **What:** five real solar storms from 2017 to 2024 are the Moon levels. Every flare, particle storm and radiation value comes from NASA, replayed day by day. A sixth storm (Nov 2025) is in our archive but not in the game: it was measured in deep space only.
 - **Proof in the game:** the radiation chip shows "278× normal" on 14 May 2024. That is what NASA's LRO spacecraft measured near the Moon (1528 µGy/h against 5.5 on a calm day). Tap "Data" to see the real chart.
 - **Why it matters:** the challenge asks for "real NASA open data, rather than invented statistics" and names DONKI and OSDR. We use both: DONKI for flares and particle storms, OSDR RadLab for the radiation.
 
@@ -42,7 +44,27 @@ Kids aged 7–12 run a Moon base for 30 days through a **real solar storm measur
   - Easy, Normal and Hard. An intro where kids place each building themselves.
   - Badges and stars, with no streaks and no pressure.
 - **Works for everyone, right away:** runs in any phone browser. No install, no login, no personal data, a small download. The game plays without internet data from NASA, so venue Wi-Fi can't break it.
-- **The same storm on the Moon, on Mars and on the space station:** in May 2024, Mars had 15× its normal radiation and the space station about 1×, measured by NASA instruments on the same days.
+- **The same storm on the Moon, on Mars and on the space station:** in the May 2024 storm, the Moon peaked at 278× (14 May), Mars at 15× (20 May), and the space station stayed near 1×. Each is measured by NASA instruments; peaks can fall on different days.
+- **A safe floor and a real ceiling:** Easy is built for a 7-year-old; Hard, 3 stars, badges and the data layer are for older kids and adults. Same game, two depths.
+
+## If the jury asks: "Isn't the game too easy?" (backup slide 6)
+
+**Short answer:** On Easy, yes, on purpose. And we measured it.
+
+| Difficulty | Oct 2021 | May 2024 | Mar 2024 | Sep 2017 | Feb 2022 |
+|------------|----------|----------|----------|----------|----------|
+| Easy | 3 stars | 3 stars | 3 stars | 2 stars | 3 stars |
+| Normal | 3 | 3 | 2 | 2 | 3 |
+| Hard | 3 | 2 | 2 | 2 | 3 |
+
+*Autopilot simulation (`node tools/autopilot_sim.mjs`): a player who never thinks. It calls Earth whenever it can, does what Mission Control says and fixes every repair at once. 5 seeds per cell, same stars each time. On Easy: no empty battery, no lost room.*
+
+- **Why Easy is easy on purpose:** a 7-year-old should not learn "I failed". They should learn the steps, the words and the cause and effect: the shield costs power, the shelter stops science, a spacewalk costs dose. No mission ends below 1 star, and every mission ends with a debrief and a tip, never "you lost".
+- **Help is not enough for the top score:** even with perfect help, the big storms (Mar 2024, Sep 2017, and May 2024 on Hard) stop at 2 stars. The third star needs your own timing: when to leave the shelter, when to save the battery.
+- **The challenge is optional and visible:** 3 stars on Hard, all badges, or the "Solo commander" badge (3 stars without calling Earth). The end screen says how often Mission Control helped.
+- **The contrast is the product:** a relaxed round is a few minutes, no stress. Reading and understanding every sheet (real units, instruments, sources, facts) takes much longer. Same game, two depths.
+- **Real words, real instruments:** it teaches the words (solar flare, particle storm, radiation, micrometeoroid, CO₂ scrubber, spacewalk, magnetic field, atmosphere, magnet shield) and names real instruments and research (LRO CRaTER, Curiosity RAD, CERN SR2S, NASA NIAC).
+- **One-liner:** "Easy is easy so a 7-year-old can learn without failing. The third star is hard so an older kid does not get bored. The same game holds both."
 
 ## What mattered to us ✏️
 From our own rules (`AGENTS.md`, `RESEARCH.md`). Put this in our own words, and add one personal sentence each.
@@ -60,17 +82,19 @@ About 210 spoken words. Read slowly; pauses are marked with "/".
 | 0:00–0:12 | **1. Hook:** the May 2024 radiation chart, the Moon bar towering | "On the 14th of May 2024, a real solar storm hit the Moon. / NASA measured 278 times the normal radiation. / Imagine you are in charge of a Moon base that day. What do you do?" |
 | 0:12–0:22 | **2. The problem** (one line of text) | "Space content for kids is often posters and facts, or far too complex. Kids never feel the trade-offs that real missions face." |
 | 0:22–0:47 | **3. The game:** a short silent screen recording or 2 screenshots | "So we built Moon Base Commander. Kids aged 7 to 12 run a Moon base for 30 days, through a real storm from NASA's archive. / Raise the shield? It costs power, and at night the battery runs dry. Hide in the shelter? Safe, but no science gets done. Need help? Call Earth, and wait the real 2.6 seconds for the answer." |
-| 0:47–1:17 | **4. Three points**, one line each | "Three things make it special. / One: real data. Six real storms, from NASA DONKI and OSDR. No invented numbers. / Two: every choice costs something, and Sam, the crewmate, explains why. No game over, just lessons. / Three: honest science, one tap deep. Kids see simple numbers. Tap one, and you find the real unit and the source." |
+| 0:47–1:17 | **4. Three points**, one line each | "Three things make it special. / One: real data. Five real Moon storms, from NASA DONKI and OSDR. No invented numbers. / Two: every choice costs something, and Sam, the crewmate, explains why. No game over, just lessons. / Three: honest science, one tap deep. Kids see simple numbers. Tap one, and you find the real unit and the source." |
 | 1:17–1:30 | **5. QR code** + the game's link | "One rule came first for us: if kids don't learn, nothing else counts. / It runs on any phone. No install, no login. Scan the code and survive the storm yourself. Thank you!" |
 
 ✏️ If we pitch in German, translate the script but keep the numbers.
+Backup slide 6 ("Isn't it too easy?") is for the difficulty question only. Do not spend the 90 seconds on it.
 
-## Slides (5, little text)
+## Slides (5 + 1 backup, little text)
 1. **Hook:** the real radiation chart of May 2024 (the in-game "Data" sheet or a clean chart from `data/storms/may2024.json`), with "278× normal radiation near the Moon, 14 May 2024" and "Data: NASA OSDR RadLab, LRO CRaTER".
 2. **Problem:** one sentence, e.g. "Kids learn space facts. They never feel space trade-offs."
 3. **The game:** a phone frame with gameplay. A storm day with the shield buttons and their costs, plus the storm fort mini-game.
-4. **Three points:** Real storm · Every choice costs · One tap deep. One icon or screenshot each.
+4. **Three points:** Real storm · Every choice costs · One tap deep. One icon or screenshot each. For "one tap deep", two screenshots side by side work best: the simple bars on the left ("how a 7-year-old plays"), the Data or Shield sheet on the right ("one tap later: the real version"). Caption: "Every number is a door."
 5. **QR code:** "Play now, on your phone", the URL https://biobirne.github.io/SpaceApp26-Alpha-Centauri-First/ and the team name. Leave it up during questions.
+6. **Backup, "Isn't it too easy?":** the autopilot table (help alone gets 3 stars on most Easy storms, but only 2 on the big ones), the 1-star floor and the two depths. Show only if asked.
 
 No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, they need a visible watermark. Screenshots of our own game are fine.
 
@@ -84,9 +108,10 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 ## Questions the jury might ask (short answers)
 | Question | Answer |
 |----------|--------|
-| Is the data live? | No. These are archived NASA measurements from six real storms, and the game says so. NASA's radiation archive ends in November 2025. A live month from DONKI is possible (the API works from the browser), but we did not build it. |
+| Isn't it too easy? | On Easy, yes — on purpose. A 7-year-old should learn the steps and the words, not "I failed". The challenge is optional: 3 stars on Hard, all badges, or 3 stars without calling Earth. A simulated player who only follows Mission Control gets 3 stars on most Easy storms, but only 2 on the big ones. See "If the jury asks..." and backup slide 6. |
+| Is the data live? | No. These are archived NASA measurements from five real storms, and the game says so. NASA's radiation archive ends in November 2025. A live month from DONKI is possible (the API works from the browser), but we did not build it. |
 | Do magnet shields exist? | Not on any base yet. Scientists are testing the idea (CERN's SR2S project, NASA NIAC studies). The game calls it test tech, and the shield sheet says so with sources. Real protection today is mass: water, Moon soil and a shelter. That is what the storm fort mini-game teaches. |
-| Where are food and Mars? | Plants and algae are part of the life support loop. Food has no extra bar, because the challenge itself advises 2–3 core resources. Mars is in the data (same storm, Mars vs. Moon) and is planned as the end goal. |
+| Where are food and Mars? | Plants and algae are part of the life support loop. Food has no extra bar, because the challenge itself advises 2–3 core resources. Mars is in the data: the end screen compares the same storm on the Moon, on Mars and on the space station. The game itself stays on the Moon, so it can do one place well. |
 | How do you know kids learn? | Five learning goals (`RESEARCH.md`, section 0). Kids learn by doing, and the game explains each step, without a quiz. ✏️ Add what our playtests showed. |
 | Did you use SI? | Yes, for code and research, and it is all disclosed (`SI_USAGE.md`, `si-manifest.json`). The ideas and decisions are ours. No SI-generated images in the game. |
 | Why the Moon? | It has no air and no magnetic field. In September 2017, radiation there reached about 1800× normal. And kids can see the Moon from home. |
@@ -100,7 +125,8 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 | 2.6 s radio round trip Earth–Moon | `GAME_DESIGN.md`, "Real vs. game rules" |
 | 98 % water recycling on the space station | `GAME_DESIGN.md`, NASA 2023 |
 | NASA career limit 600 mSv | `src/ui/numbers.js` (NASA-STD-3001) |
-| Six storms, 2017–2025 | `data/storms/` |
+| Five storms in the game, 2017–2024 (a sixth, Nov 2025, is in `data/storms/` but not played) | `data/storms/`, `src/progress.js` |
+| Autopilot table on backup slide 6 | `node tools/autopilot_sim.mjs` |
 
 ## Still to do before the pitch ✏️
 - [ ] Fill in the ✏️ parts in our own words.

@@ -2,7 +2,7 @@
 // The mission simulation. Plain JS: no Phaser, no DOM. The controller calls tick() with
 // elapsed game days and drains state.outbox to update the screen.
 
-import { CONFIG, ROOM_IDS, SHIELD_LABELS } from './config.js';
+import { ROOM_IDS, SHIELD_LABELS, configFor } from './config.js';
 import { CREWMATE_NAME, ROOMS, GLOSSARY, CHATTER, BADGES, LESSONS, UPGRADES } from './content.js';
 import { buildTimeline, moonTimesNormal, flareScore, peakDay } from './storm.js';
 import { isDaylight, sunElevation, earthLitFraction } from './sky.js';
@@ -19,8 +19,9 @@ const batteryPct = (state) => Math.round((state.power / state.capacity) * 100);
  * @param script Optional scripted problems for guided first steps, e.g. [{ t: 0.7, kind: 'leak', roomId: 'hab' }].
  *   Random problems then start only after the script is done.
  */
-export function createMission(stormDoc, { seed = 1, config = CONFIG, script = [] } = {}) {
-  const cfg = config;
+export function createMission(stormDoc, { seed = 1, config = null, script = [] } = {}) {
+  // Always work on a private copy: callers and tests may tune state.cfg without touching CONFIG.
+  const cfg = config ?? configFor('normal');
   const timeline = buildTimeline(stormDoc, cfg.missionDays);
   const rng = createRng(seed);
   const state = {
@@ -79,7 +80,24 @@ export function createMission(stormDoc, { seed = 1, config = CONFIG, script = []
     learn(state, 'lunarNight');
     emit(state, 'crew', { mood: 'calm', text: 'It’s lunar night right now, so the solar panels make no power. Save your battery!' });
   }
+  // A calm Moon can still be a lesson: the real storm hit somewhere else.
+  const aim = aimLesson(state, storm);
+  if (aim) emit(state, 'crew', { mood: 'calm', text: aim });
   return state;
+}
+
+/** "This storm missed the Moon" for a storm whose peak is clearly somewhere else. */
+function aimLesson(state, firstStorm) {
+  if (firstStorm != null) return null;
+  const moon = peakDay(state.timeline, 'moonOrbit');
+  const other = ['marsSurface', 'iss', 'deepSpace']
+    .map((site) => ({ site, peak: peakDay(state.timeline, site) }))
+    .filter((x) => x.peak)
+    .sort((a, b) => b.peak.times - a.peak.times)[0];
+  if (!other || other.peak.times < 2) return null;
+  if (moon && other.peak.times < moon.times * 1.5) return null;
+  const name = { marsSurface: 'Mars', iss: 'the space station', deepSpace: 'deep space' }[other.site];
+  return `This storm misses the Moon. NASA measured it at ${name} instead (${fmtTimes(other.peak.times)} normal). A storm does not hit every place!`;
 }
 
 function shuffle(arr, rng) {
@@ -963,7 +981,10 @@ export function shieldOptions(state) {
   const inShelter = (state.sheltered || state.forcedShelter) && state.rooms.shelter.status !== 'lost';
   return SHIELD_LABELS.map((label, level) => {
     let through = 1 - c.shieldBlock[level];
-    if (inShelter) through *= 1 - c.shelterBlock;
+    if (inShelter) {
+      through *= 1 - c.shelterBlock;
+      if (state.fort) through *= c.fortFactor;
+    }
     if (state.upgrades.walls) through *= c.wallsFactor;
     return {
       level, label, current: level === state.shield,
@@ -1068,7 +1089,13 @@ export function summarize(state) {
   const cfg = state.cfg;
   const tl = state.timeline;
   const moon = peakDay(tl, 'moonOrbit');
-  const sameDay = (site) => (moon ? tl.days[moon.index].radiation[site]?.times ?? null : null);
+  // Each place is compared at its own peak within the storm, with the date. The peaks can fall on
+  // different days (May 2024: Moon 14 May, Mars 20 May), so "same day" would hide the Mars peak.
+  const SITE_LABELS = { deepSpace: 'Deep space', marsSurface: 'On Mars', iss: 'Space station' };
+  const comparisons = ['deepSpace', 'marsSurface', 'iss']
+    .map((site) => ({ site, peak: peakDay(tl, site) }))
+    .filter((x) => x.peak)
+    .map(({ site, peak }) => ({ site, label: SITE_LABELS[site], times: peak.times, iso: peak.iso }));
   const mars = peakDay(tl, 'marsSurface');
   if (mars) learn(state, 'atmosphere');
   const blockedPct = state.stats.totalDose + state.stats.blockedDose > 0
@@ -1100,6 +1127,7 @@ export function summarize(state) {
     builder: upgrades >= 1,
     science: state.science >= target,
     hardHero: cfg.difficulty === 'hard' && stars >= 2,
+    solo: calls === 0 && stars === 3,
   };
   const badges = Object.keys(BADGES).filter((k) => earned[k]);
   // Praise the effort or the strategy the kid actually used.
@@ -1118,6 +1146,7 @@ export function summarize(state) {
     praise,
     lessons,
     difficulty: cfg.difficulty || 'normal',
+    calls,
     stormTitle: tl.title,
     displayLabel: tl.displayLabel,
     stars,
@@ -1131,8 +1160,7 @@ export function summarize(state) {
     setbacks: state.stats.setbacks,
     words: state.words.map((k) => ({ key: k, ...GLOSSARY[k] })),
     moonPeak: moon ? { iso: moon.iso, times: moon.times } : null,
-    sameDay: moon ? { mars: sameDay('marsSurface'), iss: sameDay('iss'), deepSpace: sameDay('deepSpace') } : null,
-    marsPeak: mars ? { iso: mars.iso, times: mars.times } : null,
+    comparisons,
     tip,
     shieldLabel: SHIELD_LABELS[state.shield],
     blockWords: BLOCK_WORDS,

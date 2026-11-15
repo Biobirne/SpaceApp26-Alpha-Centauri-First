@@ -102,6 +102,7 @@ export const BADGES = {
   builder: { title: 'Builder', text: 'Build an upgrade.' },
   science: { title: 'Science star', text: 'Reach the science goal.' },
   hardHero: { title: 'Hard-mode hero', text: 'Get 2 stars or more on Hard.' },
+  solo: { title: 'Solo commander', text: 'Get 3 stars without calling Earth.' },
 };
 
 /** Easter eggs: true facts when a kid taps Earth or the Sun. */
