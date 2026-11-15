@@ -34,6 +34,21 @@ Facts about the Moon to make the game more real, or to use as fun facts. He stre
 
 Team members playing themselves: name, device, build, what you noticed. Priority: **P1** = fix before the demo, **P2** = should fix, **P3** = nice to have.
 
+### Florian (15 Nov, ~11:30): docs check
+Read every doc against the code and against each other.
+
+- **Out of date:** `GAME_DESIGN.md` still described repairs as taps, had no training, no calm-day speed-up, 7 of 9 badges, a pulsing Call button and a quoted cooldown text that the game never had, and listed mentor rounds 2 and 3 as open. `RESEARCH.md` said "nothing in the game is changed yet" and listed the shelter step and the mini-games as open.
+- **Not honest enough:** `GAME_DESIGN.md` spoke of a live DONKI month "once unlocked" (not built); `data/README.md` still said storms are "aimed" (no source, already removed from the game); `CREDITS.md` called the graphics placeholders "to be replaced by team art" on submission day.
+- **Small things:** "storm fort" next to "storm wall", Node 18 next to Node 20, `?intro=` missing in the README, the `forecast` event missing in `AGENTS.md`, OpenCode missing in `si-manifest.json`.
+
+**Status: done** (branch `docs/consistency`, docs only, no game code).
+
+**Open, needs the team:**
+- `AGENTS.md` "Module ownership" still says "TBD Saturday" three times.
+- `PITCH.md` still has its ✏️ parts, and says "two mentor rounds" while the other docs count rounds 1 to 3.
+- `SI_USAGE.md`: the OpenCode line has no model name and is dated 14 Nov after a 15 Nov line.
+- `data/README.md` lists Mars Trek and OSDR fact cards as "not bundled yet". Nobody plans them any more: keep as a source list or remove.
+
 ### Enpirus (15 Nov)
 - The shield dome floated above the hills or cut into them; module feet stuck out.
 - Upgrades worked in the rules, but nothing on screen showed what they do.

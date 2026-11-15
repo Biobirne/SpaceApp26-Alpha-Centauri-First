@@ -37,10 +37,11 @@ Useful URL options:
 | `?all=1` | Unlocks every storm (for judges) |
 | `?storm=may2024` | Starts a storm directly |
 | `?seed=5` | Makes the random problems repeatable |
+| `?intro=1` | Runs the training. `?intro=dust`, `leak`, `sealed`, `filter`, `storm`, `fort` or `night` jumps to one lesson |
 | `?debug=1` | Adds `window.__moonbase.skip(days)` to jump ahead in playtests |
 
 ## Tests
-The game rules are plain JavaScript with no Phaser and no DOM, so Node can test them (Node 18 or newer):
+The game rules are plain JavaScript with no Phaser and no DOM, so Node can test them (Node 20 or newer):
 
 ```sh
 npm test
@@ -55,7 +56,7 @@ npm test
 | [FEEDBACK.md](FEEDBACK.md) | Feedback from mentors, playtests and SI review, with our decisions |
 | [PITCH.md](PITCH.md) | The final pitch: our 3 main selling points, a 90-second script, slides and jury questions |
 | [data/README.md](data/README.md) | The NASA data, how the storm library was built, and the wording rules (archived, not live) |
-| [assets/art/README.md](assets/art/README.md) | How the team's art replaces the placeholder drawings |
+| [assets/art/README.md](assets/art/README.md) | How team art can replace the drawings made in code |
 | [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |
 | [SI_USAGE.md](SI_USAGE.md), [SI_DISCLOSURE.md](SI_DISCLOSURE.md), [si-manifest.json](si-manifest.json) | Where SI tools (Super Intelligence, the Space Apps term) were used, and how it is labelled |
 

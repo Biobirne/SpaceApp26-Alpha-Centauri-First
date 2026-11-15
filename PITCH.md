@@ -91,7 +91,7 @@ Backup slide 6 ("Isn't it too easy?") is for the difficulty question only. Do no
 ## Slides (5 + 1 backup, little text)
 1. **Hook:** the real radiation chart of May 2024 (the in-game "Data" sheet or a clean chart from `data/storms/may2024.json`), with "278× normal radiation near the Moon, 14 May 2024" and "Data: NASA OSDR RadLab, LRO CRaTER".
 2. **Problem:** one sentence, e.g. "Kids learn space facts. They never feel space trade-offs."
-3. **The game:** a phone frame with gameplay. A storm day with the shield buttons and their costs, plus the storm fort mini-game.
+3. **The game:** a phone frame with gameplay. A storm day with the shield buttons and their costs, plus the storm wall mini-game.
 4. **Three points:** Real storm · Every choice costs · One tap deep. One icon or screenshot each. For "one tap deep", two screenshots side by side work best: the simple bars on the left ("how a 7-year-old plays"), the Data or Shield sheet on the right ("one tap later: the real version"). Caption: "Every number is a door."
 5. **QR code:** "Play now, on your phone", the URL https://biobirne.github.io/SpaceApp26-Alpha-Centauri-First/ and the team name. Leave it up during questions.
 6. **Backup, "Isn't it too easy?":** the autopilot table (help alone gets 3 stars on most Easy storms, but only 2 on the big ones), the 1-star floor and the two depths. Show only if asked.
@@ -110,7 +110,7 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 |----------|--------|
 | Isn't it too easy? | On Easy, yes — on purpose. A 7-year-old should learn the steps and the words, not "I failed". The challenge is optional: 3 stars on Hard, all badges, or 3 stars without calling Earth. A simulated player who only follows Mission Control gets 3 stars on most Easy storms, but only 2 on the big ones. See "If the jury asks..." and backup slide 6. |
 | Is the data live? | No. These are archived NASA measurements from five real storms, and the game says so. NASA's radiation archive ends in November 2025. A live month from DONKI is possible (the API works from the browser), but we did not build it. |
-| Do magnet shields exist? | Not on any base yet. Scientists are testing the idea (CERN's SR2S project, NASA NIAC studies). The game calls it test tech, and the shield sheet says so with sources. Real protection today is mass: water, Moon soil and a shelter. That is what the storm fort mini-game teaches. |
+| Do magnet shields exist? | Not on any base yet. Scientists are testing the idea (CERN's SR2S project, NASA NIAC studies). The game calls it test tech, and the shield sheet says so with sources. Real protection today is mass: water, Moon soil and a shelter. That is what the storm wall mini-game teaches. |
 | Where are food and Mars? | Plants and algae are part of the life support loop. Food has no extra bar, because the challenge itself advises 2–3 core resources. Mars is in the data: the end screen compares the same storm on the Moon, on Mars and on the space station. The game itself stays on the Moon, so it can do one place well. |
 | How do you know kids learn? | Five learning goals (`RESEARCH.md`, section 0). Kids learn by doing, and the game explains each step, without a quiz. ✏️ Add what our playtests showed. |
 | Did you use SI? | Yes, for code and research, and it is all disclosed (`SI_USAGE.md`, `si-manifest.json`). The ideas and decisions are ours. No SI-generated images in the game. |

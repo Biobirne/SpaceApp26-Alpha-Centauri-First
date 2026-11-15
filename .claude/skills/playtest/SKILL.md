@@ -18,7 +18,7 @@ It works like `python -m http.server` but turns off caching, so a reload always 
 
 Useful URLs: `?storm=may2024` starts a storm directly, `?all=1` unlocks every storm, `?seed=5` makes random events repeatable, and `?debug=1` exposes `window.__moonbase.skip(days, pick)` to jump ahead (cards are answered with `pick(card)`, by default the first option). Progress lives in `localStorage` (`moonbase.progress.v1`): a fresh browser profile shows the guided first steps again.
 
-More test entry points: `?intro=1` runs the intro (training), and `?intro=dust`, `leak`, `filter`, `storm` or `night` jumps to one lesson. `minigame.html?game=dust` or `?game=fort` opens one mini-game on its own.
+More test entry points: `?intro=1` runs the intro (training), and `?intro=dust`, `leak`, `sealed`, `filter`, `storm`, `fort` or `night` jumps to one lesson. `minigame.html?game=dust`, `fort`, `leak`, `filter` or `reopen` opens one mini-game on its own.
 
 ## 2. Look at it (Playwright MCP)
 Use the `mcp__plugin_playwright_playwright__*` tools. If Playwright is unavailable, fall back to Claude in Chrome.

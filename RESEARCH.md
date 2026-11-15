@@ -5,7 +5,7 @@ Research by Claude Code (SI), 14 Nov 2026, in answer to the playtest feedback in
 2. Real Moon science for the mechanics
 3. Tools and skills
 
-Nothing in the game is changed yet. Evidence quality is marked: **read** means the source was opened, **abstract/secondary** means a summary or a write-up by someone else. Section 8 lists what could not be verified.
+This file is the research as of 14 Nov. Words like "today" describe the game on that day. What was built since then is in `GAME_DESIGN.md` ("Build status") and `FEEDBACK.md`. Evidence quality is marked: **read** means the source was opened, **abstract/secondary** means a summary or a write-up by someone else. Section 8 lists what could not be verified.
 
 ## 0. Teaching comes first
 
@@ -32,15 +32,15 @@ Nothing in the game is changed yet. Evidence quality is marked: **read** means t
 
 **Teaching test before the demo:** let 2 people who have never seen the game play one mission silently. Afterwards ask the 5 goals as "why" questions. Anything they can't answer is a P1 bug.
 
-**Status on `main` after PR #13** (mentor round 1):
+**Status on `main`** (15 Nov):
 - Done:
   - tapping a building or the power, air or dose bar explains it ("Right now" breakdown)
   - lessons from mistakes
   - difficulty levels
+  - the **shelter** is taught: in the training and as a guided step in the first mission (`src/ui/guide.js`)
+  - every mini-game has its own action (dust, leak, filter, storm wall, reopening a room)
 - Still open:
-  - The guided first steps still never show the **shelter** (`src/ui/guide.js`).
-  - Cause tags still don't fly to the bars as numbers change.
-  - The mini-games are still all the same.
+  - Cause tags don't fly to the bars as numbers change.
 - Content fixed (mentor round 2): plants and algae are shown as *helpers* in the life support loop, and the oxygen machine (electrolysis) as the main oxygen source.
 - **Build phase (mentor M7):** "tap a free spot" is close to the "switch on the base" idea in point 9 below. It works as long as it stays short and the storm still comes early.
 
@@ -196,7 +196,6 @@ Earlier research (14 Nov) for art without a drawer: real NASA images for the sky
   - the GDC talks on Into the Breach, Reigns and Portal
 - **No controlled study on gating for children** and none on mini-game variety. Those points are judgement calls.
 - **Science facts read only as summaries:**
-  - the tea-leaf story
   - the June 2026 Zvezda update
   - the 100 kW reactor goal
   - the Chang'E-4 dose
@@ -204,6 +203,7 @@ Earlier research (14 Nov) for art without a drawer: real NASA images for the sky
   - NOAA timings
 
   Open the source before quoting any of them in the game.
+  The tea-leaf story was opened afterwards (UPI, 20 Oct 2020, and TASS) and is used in the leak mini-game.
 - **Facts that remain uncertain:**
   - The micrometeoroid puncture rate for a Moon habitat was not found.
   - The regolith thickness needed differs between sources, so the game should avoid giving a number.
