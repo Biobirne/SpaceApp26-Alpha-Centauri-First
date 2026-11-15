@@ -9,8 +9,8 @@ const KEY = 'moonbase.progress.v1';
  * misses the Moon (the aim lesson).
  *
  * Nov 2025 stays in `data/storms/` but is NOT a Moon level: there is no `moonOrbit` radiation
- * measurement for that window, only deep space. It is kept for the planned deep-space / Mars
- * mission (GAME_DESIGN.md, "Rocket to Mars").
+ * measurement for that window, only deep space. The game stays on the Moon (team decision,
+ * 15 Nov), so that storm is not used.
  */
 export const LEVEL_ORDER = ['oct2021', 'may2024', 'mar2024', 'sep2017', 'feb2022'];
 

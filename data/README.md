@@ -41,7 +41,7 @@ Six real storms. Each was picked because it teaches something different.
 | `feb2022.json` | Feb 2022, far side of the Sun | 1.7× | **2.9×** | – | 1.3× | An eruption we could not see from Earth hit Mars, and the Moon stayed calm |
 | `mar2024.json` | Mar 2024 | **935×** | 1.2× | 186× | 1.4× | A sharp blast aimed at the Earth–Moon side; Mars was not in its path |
 | `may2024.json` | May 2024, X8.7 flare, Kp 9 | 278× | **15×** | 59× | 1.3× | The strongest storm on Earth in 20 years; every site felt it except the ISS |
-| `nov2025.json` | Nov 2025, X5.1 flare | – | – | **304×** | – | The newest storm in NASA's radiation archive (deep space only; not a Moon level yet) |
+| `nov2025.json` | Nov 2025, X5.1 flare | – | – | **304×** | – | The newest storm in NASA's radiation archive (deep space only, so the game does not use it) |
 
 The numbers are the peak daily mean compared with that site's normal level in the same month. "–" means no spacecraft data for that site in that window.
 
