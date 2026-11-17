@@ -5,6 +5,8 @@ Draft by Claude Code (SI) from our own docs (`GAME_DESIGN.md`, `RESEARCH.md`, `F
 
 Time budget: **90 seconds planned, 2 minutes hard limit.** QR code on the last slide.
 
+**Final version (15 Nov, after the mentor round):** the deck is `pitch/index.html`, the one slide for the judges is `pitch/team19-moon-base-commander.pptx` (we are team 19), and the script and jury questions are in "Final deck and script" and "Jury questions in depth" below. They replace the older slide plan and script in this file.
+
 ## The pitch in one sentence
 Kids aged 7–12 run a Moon base for 30 days through a **real solar storm measured by NASA**, and every choice costs something: power against protection, safety against science.
 
@@ -115,6 +117,72 @@ No NASA logos on any slide (Space Apps rule). If a slide uses SI-made images, th
 | How do you know kids learn? | Five learning goals (`RESEARCH.md`, section 0). Kids learn by doing, and the game explains each step, without a quiz. ✏️ Add what our playtests showed. |
 | Did you use SI? | Yes, for code and research, and it is all disclosed (`SI_USAGE.md`, `si-manifest.json`). The ideas and decisions are ours. No SI-generated images in the game. |
 | Why the Moon? | It has no air and no magnetic field. In September 2017, radiation there reached about 1800× normal. And kids can see the Moon from home. |
+
+## Final deck and script
+**Our pitch in one line: "One game for every kid: low floor, high ceiling, wide walls."** The idea comes from Seymour Papert and Mitchel Resnick (MIT Media Lab, Scratch) and is already in `GAME_DESIGN.md`. Said out loud: "A 7-year-old can't lose, and a 12-year-old can't run out of things to learn."
+
+**Running the deck:** `python3 tools/serve.py 8000`, then open http://localhost:8000/pitch/ on the laptop.
+- One click per slide: left click, →, Space or PageDown. Back: right click or ←. F: full screen. R: replay the slide's demo.
+- The demos start by themselves. The Apollo 13 slide runs the real mini-game.
+
+**The 7 slides and what we say** (about 90 seconds; Florian 1–3, Cornelius 4–7):
+
+| # | Slide | Say |
+|---|-------|-----|
+| 1 | Title, "One game for every kid: low floor, high ceiling, wide walls" | "We're Alpha Centauri First, and this is Moon Base Commander, a mission trainer for kids aged 7 to 12." |
+| 2 | Problem: 7 vs. 12 | "But 7 and 12 are worlds apart. A 7-year-old is still learning to read. A 12-year-old wants the real data. Most learning games pick one, and lose the other. We built one game for both." |
+| 3 | Real storm, 278× | "It starts with something real. On 14 May 2024, radiation near the Moon hit 278 times normal, measured by NASA. Every level is a real storm like this, replayed day by day." |
+| 4 | Low floor: Call Earth demo | "Low floor: anyone can start, nobody loses. No game over. Sam reads aloud and explains every mistake. Stuck? Call Earth, and wait 2.6 seconds, the real speed of light." |
+| 5 | Wide walls: Apollo 13 mini-game | "Wide walls: there's so much to explore. Kids build their own base and fix it with their hands. Like Apollo 13: the square filter that didn't fit the round hole. Kids build the same fix." |
+| 6 | High ceiling: one tap to the real data | "High ceiling: every number is a door. One tap, and you see the real NASA measurement. And three stars are hard: just following Mission Control isn't enough." |
+| 7 | One game for every kid | "Low floor, high ceiling, wide walls. A 7-year-old can't lose, and a 12-year-old can't run out of things to learn. Free, on any phone. Thank you." |
+
+If we run over 90 seconds, cut slide 5 first. ✏️ The kid feedback goes on slide 7 as a quote once we have it (a hidden line is ready in `pitch/index.html`).
+
+## Jury questions in depth
+Short spoken answers. Every fact is checked against the code or `data/README.md`.
+
+### NASA data
+| Question | Answer |
+|----------|--------|
+| How exactly do you use NASA data? | Two NASA sources. **OSDR RadLab** gives the real radiation, measured every day by spacecraft: LRO's CRaTER at the Moon, Curiosity's RAD on Mars, DosTel on the space station. **DONKI** from NASA's CCMC gives the space weather: every solar flare and particle storm with its exact time. A script (`tools/build_storm_library.py`) downloads both, and the game replays them day by day. |
+| What does the data change in the game? | The radiation each day *is* the danger level: the crew's dose depends on that day's measured value and on the shield and shelter. DONKI's flares and particle storms become the events: the first X-class flare and every new record flare bring a decision card, and particle storms bring a warning. Day and night on the Moon are calculated for the real dates too. |
+| What does 278× mean? | On 14 May 2024, CRaTER measured 1,528 microgray per hour near the Moon. A calm day there is about 5.5. That is 278 times normal. Kids see "278×", and one tap shows the real unit and the instrument. |
+| How do you define "normal"? | The quiet level of that month: the 25th percentile of the daily means in the 30-day window. We only compare a site with itself, because the instruments measure in different materials, so absolute values are not directly comparable between places. |
+| Is it live? | No, and the game says so: "Archived NASA measurements". RadLab can't be called from a browser, and its archive ends in November 2025. DONKI can be fetched live from the browser, so a live month is a clear next step, but we did not build it. |
+| Why these five storms? | Each teaches something different. September 2017 hit the Moon with about 1800× while Mars barely noticed. February 2022 hit Mars and missed the Moon. May 2024 was the strongest storm on Earth in 20 years. |
+| Moon orbit or Moon surface? | CRaTER flies in orbit. On the surface it is about half, because the Moon blocks half the sky. The data sheet in the game says so. |
+| Are Mars and the ISS just decoration? | No, they are a lesson: the same storm in three places. 278× at the Moon, 15× on Mars, about 1× on the space station. Earth's magnetic field protects the ISS, Mars has a thin atmosphere, the Moon has neither. |
+
+### Learning and kids
+| Question | Answer |
+|----------|--------|
+| How do you know kids learn? | Five learning goals, such as "Thick walls protect you, so the crew hides in the shelter" (`RESEARCH.md`, section 0). The game checks through actions, not a quiz: does the kid go to the shelter on the second storm without being told? ✏️ Add the kid feedback once we have it. Don't claim kid tests we haven't done. |
+| Isn't it too easy if you can't lose? | Easy is easy on purpose, so a 7-year-old learns instead of failing. But three stars are hard: a simulated player who only follows Mission Control gets just two stars on the big storms (`tools/autopilot_sim.mjs`). |
+| Why "low floor, high ceiling, wide walls"? | It is a learning-design principle from Seymour Papert and Mitchel Resnick at the MIT Media Lab, the idea behind Scratch. Kids aged 7 and 12 are very different, so one game has to work for both. |
+| What about kids who can't read yet? | Sam's lines are read aloud with the device's own voice, there are pictures, and every new word gets a kid definition the first time. |
+
+### Science and realism
+| Question | Answer |
+|----------|--------|
+| Is the 2.6 seconds real? | Yes. The Moon is about 384,000 km away, so radio needs about 1.3 seconds each way. |
+| Moon dust? | Sharp and sticky, bad for machines and lungs. In the game it covers the solar panels; cleaning them means a spacewalk without the shield, and dust carried inside can clog the air filter. |
+| Why the Moon and not Mars? | The Moon has no air and no magnetic field, so it takes the full blast. NASA is going back with Artemis, and kids can see the Moon from their window. Mars stays in the game through the comparison. |
+| Backup story for the Apollo veteran | Apollo 11: on 5 July 1969, a simulation supervisor set off a 1201 computer alarm in a practice landing, and Mission Control aborted, which was the wrong call. On the real landing the alarms came again, and they knew: "We're go on that alarm." Learning by failing safely. Sources: Smithsonian Air & Space, "Troubleshooting 101 (1201 actually, and 1202 too)"; Monash University, "Koos control" (2019). |
+
+### Technology
+| Question | Answer |
+|----------|--------|
+| How is it built? | A static website: plain JavaScript, Phaser 3 for the Moon scene, no backend. It runs on GitHub Pages, on any phone or laptop. |
+| Privacy? | No login, no accounts, no tracking. Progress is saved only in the browser on the device. |
+| How do you know the rules are right? | The rules are separate from the graphics and covered by automatic tests (`npm test`). An autopilot simulation plays every storm to check the difficulty. |
+
+### Why, and what next
+| Question | Answer |
+|----------|--------|
+| Why did you build this? | Space is the strongest motivation kids have for science, and most space-learning tools are quizzes or videos. We wanted kids to make decisions with real stakes and learn from what happens. |
+| What's next? | ✏️ Only say what we really plan. Ideas: a live month from DONKI, a teacher guide for classrooms, more languages starting with German. |
+| Impact? | Free, no install, no login, any phone: any classroom can use it tomorrow. |
 
 ## Fact check (numbers in this pitch)
 | Number | Where it comes from |

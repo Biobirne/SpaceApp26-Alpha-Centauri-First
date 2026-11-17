@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- SI disclosure: written with the SI tool Claude Code and reviewed by the team. See SI_USAGE.md and si-manifest.json. -->
+  <!-- The pitch deck. Runs from the laptop, offline: python3 tools/serve.py 8000, then http://localhost:8000/pitch/
+       One click per slide: left click, →, PageDown or Space. Back: right click, ←, PageUp. F: full screen. R: replay.
+       The demos start by themselves. The Apollo 13 slide runs the real mini-game; numbers come from the game's data.
+       Apollo 11 simulation story: Smithsonian Air & Space, "Troubleshooting 101 (1201 actually, and 1202 too)";
+       Monash University, "Koos control: The man who made the Apollo 11 Moon landing possible" (2019). -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moon Base Commander pitch</title>
+  <link rel="icon" href="data:,">
+  <style>
+    @font-face { font-family: 'Lexend'; src: url(../assets/fonts/lexend-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: block; }
+    :root {
+      --sky: #03070d; --holo: #8ff3ff; --holo-edge: rgb(143 243 255 / 0.22); --text: #eafcff; --text-2: #a9c4cc;
+      --power: #ffc24a; --air: #6fe6f7; --dose: #cc95ff; --science: #94ec72; --earth: #69a8ff; --alert: #ff7f61; --mars: #ff9a6b; --regolith: #cfc7b5;
+      --amber: #ffb340; --dsky-green: #7dffa0;
+      --font: 'Lexend', system-ui, sans-serif;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--sky); color: var(--text); font-family: var(--font); overflow: hidden; }
+    body { cursor: default; }
+
+    /* A fixed 1920×1080 stage, centred and scaled to whatever screen we get. */
+    .stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; background: var(--sky); overflow: hidden; }
+
+    /* Background that drifts a little with every slide: the "camera" moves through space. */
+    .stars, .stars2 { position: absolute; inset: -200px; transition: transform 1400ms var(--ease); }
+    .stars { background:
+      radial-gradient(1.6px 1.6px at 12% 18%, #fff9 50%, transparent 51%), radial-gradient(1px 1px at 33% 72%, #fff7 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 58% 12%, #fff8 50%, transparent 51%), radial-gradient(1px 1px at 81% 40%, #fff6 50%, transparent 51%),
+      radial-gradient(1px 1px at 91% 83%, #fff7 50%, transparent 51%), radial-gradient(1.6px 1.6px at 6% 88%, #fff6 50%, transparent 51%),
+      radial-gradient(1px 1px at 46% 46%, #fff5 50%, transparent 51%), radial-gradient(1px 1px at 70% 64%, #fff6 50%, transparent 51%); }
+    .stars2 { background:
+      radial-gradient(1px 1px at 22% 38%, #fff4 50%, transparent 51%), radial-gradient(1px 1px at 64% 28%, #fff4 50%, transparent 51%),
+      radial-gradient(1px 1px at 76% 78%, #fff3 50%, transparent 51%), radial-gradient(1px 1px at 38% 90%, #fff3 50%, transparent 51%),
+      radial-gradient(1px 1px at 88% 12%, #fff4 50%, transparent 51%), radial-gradient(1px 1px at 4% 52%, #fff3 50%, transparent 51%); }
+    .horizon { position: absolute; left: -10%; right: -10%; bottom: -1180px; height: 1400px; border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 0%, #4a463e 0%, #24221e 22%, #0d0c0b 40%); box-shadow: 0 -2px 60px rgb(207 199 181 / 0.12);
+      transition: transform 1400ms var(--ease); }
+
+    /* Slide change: the old slide drifts forward and blurs away, the new one comes into focus. */
+    .slide { position: absolute; inset: 0; padding: 110px 140px; opacity: 0; visibility: hidden; filter: blur(10px); transform: scale(0.96);
+      transition: opacity 650ms var(--ease), transform 900ms var(--ease), filter 650ms var(--ease), visibility 0s 900ms; }
+    .slide.on { opacity: 1; visibility: visible; filter: none; transform: none; transition: opacity 650ms var(--ease) 150ms, transform 900ms var(--ease) 150ms, filter 650ms var(--ease) 150ms; }
+    .slide.gone { transform: scale(1.06); }
+    .slide.gone.back { transform: scale(0.94); }
+
+    h1, h2, p { margin: 0; }
+    h1 { font-size: 132px; line-height: 1; font-weight: 700; letter-spacing: -0.03em; }
+    h2 { font-size: 72px; line-height: 1.08; font-weight: 650; letter-spacing: -0.02em; }
+    .src { position: absolute; left: 140px; right: 220px; bottom: 56px; font-size: 22px; color: var(--text-2); opacity: 0.8; }
+    .src b { color: var(--text); font-weight: 500; }
+    .later { opacity: 0; transform: translateY(16px); transition: opacity 600ms var(--ease), transform 600ms var(--ease); }
+    .later.in { opacity: 1; transform: none; }
+
+    .phone { position: relative; width: 438px; height: 892px; padding: 24px; border-radius: 64px; background: #0c1116;
+      box-shadow: 0 0 0 2px #2b3740, 0 0 0 10px #10171d, 0 40px 120px rgb(0 0 0 / 0.6), 0 0 80px rgb(143 243 255 / 0.08); }
+    .phone > img { display: block; width: 390px; height: 844px; border-radius: 42px; }
+
+    /* 1 title */
+    .s-title { display: grid; grid-template-columns: 1fr 470px; gap: 120px; align-items: center; }
+    .s-title h1 { max-width: 9ch; }
+    .tagline { font-size: 50px; line-height: 1.25; margin-top: 44px; max-width: 26ch; color: var(--holo); font-weight: 500; }
+    .team { margin-top: 90px; font-size: 25px; white-space: nowrap; line-height: 1.6; color: var(--text-2); }
+    .team b { color: var(--text); font-weight: 600; }
+
+    /* The three ideas of the design, one colour each (Papert and Resnick, MIT Media Lab) */
+    .pillar { display: inline-block; font-size: 30px; font-weight: 650; padding: 8px 24px; border-radius: 999px; color: var(--c); box-shadow: inset 0 0 0 2px var(--c); margin-bottom: 24px; }
+    .low { --c: var(--science); } .wide { --c: var(--power); } .high { --c: var(--dose); }
+
+    /* 2 the problem: two ages, worlds apart */
+    .s-gap { display: grid; align-content: start; }
+    .ages { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; margin-top: 80px; }
+    .age b { display: block; font-size: 280px; line-height: 0.85; font-weight: 700; letter-spacing: -0.05em; color: var(--c); }
+    .age b small { font-size: 48px; letter-spacing: 0; font-weight: 600; color: var(--text-2); margin-left: 16px; }
+    .age span { display: block; font-size: 46px; line-height: 1.25; margin-top: 30px; max-width: 16ch; }
+    .gapline { margin-top: 80px; font-size: 52px; line-height: 1.2; font-weight: 650; color: var(--holo); }
+
+    /* 6 high ceiling: one tap from simple to real */
+    .shot { position: absolute; top: 300px; transform: scale(0.66); transform-origin: top left; }
+    .shot.a { left: 140px; } .shot.b { left: 640px; }
+    .tap { position: absolute; left: 445px; top: 540px; width: 180px; text-align: center; font-size: 28px; font-weight: 600; color: var(--holo); }
+    .tap svg { display: block; margin: 10px auto 0; }
+    .deep { position: absolute; left: 1040px; right: 140px; top: 360px; display: grid; gap: 40px; }
+    .deep p { font-size: 36px; line-height: 1.35; color: var(--text-2); }
+    .deep p b { display: block; color: var(--text); font-weight: 650; font-size: 40px; margin-bottom: 6px; }
+
+    /* 7 close: the three ideas */
+    .three { margin-top: 60px; display: grid; }
+    .three p { display: grid; grid-template-columns: 330px 1fr; gap: 40px; align-items: center; padding: 26px 0; border-bottom: 1px solid rgb(143 243 255 / 0.12); }
+    .three p .pillar { margin: 0; justify-self: start; }
+    .three p b { font-size: 46px; font-weight: 600; line-height: 1.25; }
+    .quote { margin-top: 36px; font-size: 34px; font-style: italic; color: var(--text); }
+    .walls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
+    .walls span { padding: 18px 24px; border-radius: 18px; font-size: 29px; line-height: 1.3; background: rgb(255 194 74 / 0.07); box-shadow: inset 0 0 0 2px rgb(255 194 74 / 0.25); }
+
+    /* (old) Apollo 11 simulation display, kept for Q&A */
+    .s-sim { display: grid; justify-items: center; align-content: start; text-align: center; }
+    .s-sim .punch { margin-top: 34px; font-size: 60px; line-height: 1.15; font-weight: 650; }
+    .s-sim .punch span { color: var(--holo); }
+    .dsky { width: 660px; margin-top: 56px; text-align: left; padding: 40px 44px 34px; border-radius: 22px;
+      background: linear-gradient(160deg, #3a3d40, #232527 70%); box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.08), inset 0 -3px 0 rgb(0 0 0 / 0.4), 0 40px 100px rgb(0 0 0 / 0.55); }
+    .lamps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .lamp { padding: 14px 0; border-radius: 8px; text-align: center; font-size: 22px; font-weight: 600; letter-spacing: 0.06em; color: #6d6a5f; background: #4a4a44; box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.3); transition: background 300ms, color 300ms, box-shadow 300ms; }
+    .dsky.alarm .lamp.prog { background: var(--amber); color: #3b2300; box-shadow: 0 0 40px rgb(255 179 64 / 0.7); animation: lamp 1.2s ease-in-out infinite; }
+    .dsky.go .lamp.prog { animation: none; background: #4a4a44; color: #6d6a5f; box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.3); }
+    .dsky.alarm .lamp.comp { background: #e9f2e2; color: #2a3326; }
+    @keyframes lamp { 50% { background: #9a6a22; box-shadow: 0 0 10px rgb(255 179 64 / 0.3); } }
+    .screen { margin-top: 26px; padding: 24px 28px 20px; border-radius: 12px; background: #0b100c; box-shadow: inset 0 4px 20px rgb(0 0 0 / 0.8); }
+    .screen small { display: block; font-size: 22px; color: #4c7a58; }
+    .code { font-size: 150px; line-height: 1; font-weight: 700; color: var(--dsky-green); letter-spacing: 0.04em; font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 30px rgb(125 255 160 / 0.5); min-height: 1em; }
+    .dsky-cap { margin-top: 30px; font-size: 38px; line-height: 1.3; color: var(--text-2); min-height: 1.3em; }
+    .dsky-cap b { color: var(--text); font-weight: 600; }
+
+    /* 3 the solution: real storms are the scenario */
+    .s-hook { display: grid; grid-template-columns: 1fr 640px; column-gap: 90px; align-content: start; }
+    .s-hook h2 { grid-column: 1 / -1; font-size: 68px; }
+    .when { margin-top: 50px; font-size: 32px; color: var(--text-2); }
+    .big { display: flex; align-items: center; gap: 40px; margin-top: 4px; }
+    .big .n { font-size: 220px; line-height: 0.9; font-weight: 700; color: var(--dose); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; text-shadow: 0 0 60px rgb(204 149 255 / 0.35); }
+    .big .u { font-size: 36px; line-height: 1.3; color: var(--text-2); max-width: 14ch; }
+    .chart { display: flex; align-items: flex-end; gap: 9px; height: 200px; margin-top: 30px; }
+    .chart i { flex: 1; min-height: 4px; border-radius: 4px 4px 0 0; background: rgb(204 149 255 / 0.35); height: 0; transition: height 1000ms var(--ease); }
+    .chart i.peak { background: var(--dose); box-shadow: 0 0 30px rgb(204 149 255 / 0.6); }
+    .axis { display: flex; justify-content: space-between; margin-top: 12px; font-size: 22px; color: var(--text-2); }
+    .nasa { margin-top: 70px; display: grid; gap: 20px; align-content: start; }
+    .nasa p { display: grid; grid-template-columns: 170px 1fr; column-gap: 22px; align-items: center; padding: 16px 26px; border-radius: 20px;
+      background: rgb(143 243 255 / 0.05); box-shadow: inset 0 0 0 2px rgb(143 243 255 / 0.12); }
+    .nasa p > b { grid-row: span 2; font-size: 52px; font-weight: 700; letter-spacing: -0.02em; color: var(--c); font-variant-numeric: tabular-nums; }
+    .nasa p > span { font-size: 34px; font-weight: 650; }
+    .nasa p > small { font-size: 26px; line-height: 1.3; color: var(--text-2); }
+
+    /* 4 life on the Moon: the loop and the costs */
+    .s-life { display: grid; grid-template-columns: 640px 1fr; column-gap: 110px; align-content: start; }
+    .s-life h2 { grid-column: 1 / -1; }
+    .ring { position: relative; width: 600px; height: 600px; margin-top: 60px; }
+    .ring svg { position: absolute; inset: 0; overflow: visible; }
+    .ring .node { position: absolute; width: 240px; margin-left: -120px; text-align: center; padding: 10px 0; background: var(--sky); border-radius: 16px; }
+    .ring .node b { display: block; font-size: 30px; font-weight: 650; }
+    .ring .node span { display: block; font-size: 22px; line-height: 1.3; color: var(--text-2); margin-top: 2px; }
+    .ring .mid { position: absolute; left: 50%; top: 50%; width: 260px; margin: -54px 0 0 -130px; text-align: center; font-size: 27px; line-height: 1.3; color: var(--text-2); }
+    .ring .mid b { display: block; white-space: nowrap; font-size: 48px; color: var(--air); font-weight: 700; line-height: 1.05; }
+    .orbit { transform-origin: 300px 300px; animation: spin 8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .costs { margin-top: 70px; display: grid; gap: 30px; align-content: start; }
+    .cost { padding: 22px 32px; border-radius: 22px; background: rgb(143 243 255 / 0.05); box-shadow: inset 5px 0 0 var(--c); }
+    .cost b { display: block; font-size: 34px; font-weight: 650; color: var(--c); }
+    .cost span { display: block; font-size: 29px; line-height: 1.38; margin-top: 6px; }
+    .cost span i { font-style: normal; color: var(--text-2); }
+    .deeper { font-size: 26px; line-height: 1.4; color: var(--text-2); margin-top: 4px; }
+    .deeper b { color: var(--text); font-weight: 600; }
+
+    /* 5 Call Earth: the radio signal across the whole screen */
+    .s-call h2, .pillwrap { text-align: center; }
+    .s-call .pillar { margin-bottom: 14px; }
+    .sig { position: relative; height: 300px; margin: 20px 40px 0; }
+    .body { position: absolute; top: 50%; width: 270px; height: 270px; margin-top: -135px; }
+    .disc { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; }
+    .disc svg { display: block; width: 100%; height: 100%; }
+    .moon .disc { box-shadow: 0 0 60px 6px rgb(232 225 208 / 0.16); }
+    .earth .disc { box-shadow: 0 0 0 4px rgb(124 192 255 / 0.28), 0 0 80px 14px rgb(90 166 255 / 0.42); }
+    .body > span { position: absolute; left: 0; right: 0; bottom: -64px; text-align: center; font-size: 30px; font-weight: 600; color: var(--text-2); }
+    .moon { left: 0; } .earth { right: 0; }
+    .earth .disc { animation: bob 7s ease-in-out infinite; }
+    .clouds { animation: drift 16s ease-in-out infinite alternate; }
+    @keyframes bob { 50% { transform: translateY(-6px); } }
+    @keyframes drift { to { transform: translateX(0.08px); } }
+    .base { animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: 0.35; } }
+    .wire { position: absolute; left: 300px; right: 300px; top: 50%; height: 4px; margin-top: -2px;
+      background: repeating-linear-gradient(90deg, rgb(143 243 255 / 0.45) 0 14px, transparent 14px 28px); }
+    .pulse { position: absolute; top: 50%; left: 300px; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: var(--air);
+      box-shadow: 0 0 40px 10px var(--air); opacity: 0; }
+    .sigtime { text-align: center; margin-top: 26px; font-size: 104px; line-height: 1; font-weight: 700; color: var(--air); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; text-shadow: 0 0 60px rgb(111 230 247 / 0.35); }
+    .sigtime small { font-size: 48px; color: var(--text-2); margin-left: 10px; font-weight: 500; }
+    .sigstate { text-align: center; font-size: 30px; color: var(--text-2); margin-top: 8px; min-height: 1.3em; }
+    .answer { position: absolute; left: 50%; top: 800px; width: 1440px; margin-left: -720px; padding: 30px 44px; border-radius: 28px;
+      background: rgb(3 15 23 / 0.94); box-shadow: inset 0 0 0 2px var(--holo-edge), 0 30px 80px rgb(0 0 0 / 0.5); }
+    .answer p { font-size: 40px; font-weight: 600; line-height: 1.3; }
+    .answer .why { font-size: 30px; font-weight: 400; color: var(--text-2); margin-top: 14px; }
+    .answer .why b { color: var(--air); }
+    .answer .rt { font-size: 26px; font-weight: 400; color: var(--text-2); margin-top: 16px; }
+
+    /* 6 safe failure: the real mini-game, big in the middle, then the true story takes over */
+    .s-apollo h2 { position: relative; z-index: 2; }
+    .game { position: absolute; left: 50%; top: 300px; width: 390px; height: 844px; margin-left: -195px; border-radius: 34px; overflow: hidden; transform: scale(0.9); transform-origin: top center;
+      box-shadow: 0 0 0 2px #2b3740, 0 40px 120px rgb(0 0 0 / 0.6);
+      transition: transform 900ms var(--ease), opacity 900ms var(--ease), filter 900ms var(--ease); }
+    .game iframe { display: block; width: 390px; height: 844px; border: 0; background: var(--sky); }
+    .game .shield { position: absolute; inset: 0; }
+    .s-apollo.story .game { transform: translateX(-560px) scale(0.8); opacity: 0.4; filter: saturate(0.5); }
+    .story-card { position: absolute; left: 760px; top: 330px; width: 1020px; opacity: 0; transform: scale(0.92) translateY(24px);
+      transition: opacity 800ms var(--ease) 250ms, transform 800ms var(--ease) 250ms; }
+    .s-apollo.story .story-card { opacity: 1; transform: none; }
+    .story-card .tag { font-size: 32px; font-weight: 650; color: var(--science); }
+    .story-card p.q { font-size: 52px; line-height: 1.22; font-weight: 600; margin-top: 16px; }
+    .story-card p.so { font-size: 31px; line-height: 1.45; color: var(--text-2); margin-top: 26px; max-width: 46ch; }
+    .nolose { margin-top: 44px; padding: 28px 36px; border-radius: 24px; background: rgb(148 236 114 / 0.08); box-shadow: inset 0 0 0 2px rgb(148 236 114 / 0.3); font-size: 31px; line-height: 1.42; }
+    .nolose b { color: var(--science); }
+
+    /* 7 close */
+    .s-close { display: grid; align-content: start; }
+    .s-close h2 { font-size: 84px; }
+    .vs { margin-top: 50px; display: grid; }
+    .vs p { display: grid; grid-template-columns: 400px 1fr; gap: 50px; margin: 0; padding: 22px 0; border-bottom: 1px solid rgb(143 243 255 / 0.12); align-items: baseline; }
+    .vs-h { font-size: 26px; color: var(--text-2); padding-top: 0 !important; }
+    .vs-h span:last-child { color: var(--holo); font-weight: 600; }
+    .vs-r span { font-size: 40px; color: var(--text-2); text-decoration: line-through; text-decoration-color: rgb(255 127 97 / 0.6); text-decoration-thickness: 3px; }
+    .vs-r b { font-size: 46px; font-weight: 600; line-height: 1.3; }
+    .closing { margin-top: 40px; font-size: 32px; line-height: 1.4; color: var(--text); }
+    .closing span { color: var(--holo); }
+    .teamline { margin-top: 12px; font-size: 24px; color: var(--text-2); }
+
+    .count { position: absolute; right: 56px; bottom: 50px; font-size: 20px; color: var(--text-2); opacity: 0.5; font-variant-numeric: tabular-nums; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .slide.on, .later, .chart i, .game, .story-card, .stars, .stars2, .horizon { transition: none !important; }
+      .orbit, .lamp, .earth .disc, .clouds, .base { animation: none !important; }
+    }
+
+    /* PDF for the online submission: every slide in its final state, one page each. */
+    @media print {
+      @page { size: 1920px 1080px; margin: 0; }
+      html, body { overflow: visible; height: auto; display: block; }
+      .stage { position: static; transform: none !important; height: auto; overflow: visible; background: none; }
+      .stars, .stars2, .horizon, .count, .pulse { display: none; }
+      .slide { position: relative; opacity: 1; visibility: visible; filter: none; transform: none; height: 1080px; break-after: page; background: var(--sky); transition: none; }
+      .later { opacity: 1; transform: none; }
+      .s-apollo .game { transform: translateX(-560px) scale(0.8); opacity: 0.4; }
+      .s-apollo .story-card { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <div class="stars2" id="stars2"></div>
+    <div class="stars" id="stars"></div>
+    <div class="horizon" id="horizon"></div>
+
+    <!-- 1 title -->
+    <section class="slide s-title">
+      <div>
+        <h1>Moon Base Commander</h1>
+        <p class="tagline">One game for every kid: low floor, high ceiling, wide walls.</p>
+        <p class="team"><b>Team Alpha Centauri First:</b> Florian Musil, Cornelius Baumann, Stephan Schuhmertl<br>
+          <b>Challenge:</b> Build a Junior Astronaut Mission Trainer<br>NASA Space Apps Challenge 2026, Vienna</p>
+      </div>
+      <div class="phone"><img src="media/storm-day.png" alt="The game on 14 May 2024: radiation 278 times normal, shield buttons with their power cost"></div>
+    </section>
+
+    <!-- 2 the problem -->
+    <section class="slide s-gap" data-run="gap">
+      <h2>Kids aged 7 to 12 are worlds apart.</h2>
+      <div class="ages">
+        <p class="age later" data-at="300" style="--c: var(--science)"><b>7<small>years old</small></b><span>still learning to read</span></p>
+        <p class="age later" data-at="1100" style="--c: var(--dose)"><b>12<small>years old</small></b><span>wants the real data</span></p>
+      </div>
+      <p class="gapline later" data-at="2400">Most learning games pick one, and lose the other.</p>
+    </section>
+
+    <!-- 3 the solution: the scenario is real -->
+    <section class="slide s-hook" data-run="hook">
+      <h2>Every level is a real storm, measured by NASA.</h2>
+      <div>
+        <p class="when">14 May 2024, a solar storm hits the Moon</p>
+        <div class="big"><span class="n" id="hookN">1×</span><span class="u">the normal radiation near the Moon</span></div>
+        <div class="chart" id="chart" role="img" aria-label="Radiation near the Moon, every day of May 2024"></div>
+        <div class="axis"><span>1 May</span><span>14 May</span><span>30 May</span></div>
+      </div>
+      <div class="nasa" id="nasa"></div>
+      <p class="src">Data: <b>NASA OSDR RadLab</b> and <b>NASA DONKI</b>. Five real storms, 2017 to 2024, archived.</p>
+    </section>
+
+
+    <!-- 5 Call Earth -->
+    <section class="slide s-call" data-run="call">
+      <p class="pillwrap"><span class="pillar low">Low floor</span></p>
+      <h2>Nobody gets stuck. Nobody loses.</h2>
+      <div class="sig">
+        <div class="body moon">
+          <div class="disc"><svg viewBox="-1 -1 2 2" aria-hidden="true">
+            <defs>
+              <radialGradient id="mBase" cx="-0.4" cy="-0.4" r="1.7" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#f4efe3"/><stop offset="0.45" stop-color="#cdc6b6"/><stop offset="0.85" stop-color="#8d8677"/><stop offset="1" stop-color="#625d52"/>
+              </radialGradient>
+              <radialGradient id="mGlow" r="1.25" gradientUnits="userSpaceOnUse">
+                <stop offset="0.76" stop-color="#e8e1d0" stop-opacity="0.25"/><stop offset="1" stop-color="#e8e1d0" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="night" cx="-0.55" cy="-0.5" r="1.9" gradientUnits="userSpaceOnUse">
+                <stop offset="0.42" stop-color="#01040a" stop-opacity="0"/><stop offset="1" stop-color="#01040a" stop-opacity="0.88"/>
+              </radialGradient>
+              <filter id="mSoft" x="-0.2" y="-0.2" width="1.4" height="1.4"><feGaussianBlur stdDeviation="0.035"/></filter>
+              <clipPath id="mClip"><circle r="1"/></clipPath>
+            </defs>
+            <g>
+              <circle r="1" fill="url(#mBase)"/>
+              <!-- the dark seas of the near side, roughly where they really are -->
+              <g fill="#5f5a50" opacity="0.6" filter="url(#mSoft)">
+                <ellipse cx="-0.6" cy="-0.02" rx="0.28" ry="0.46"/>
+                <ellipse cx="-0.3" cy="-0.42" rx="0.29" ry="0.24"/>
+                <ellipse cx="0.12" cy="-0.42" rx="0.17" ry="0.16"/>
+                <ellipse cx="0.3" cy="-0.1" rx="0.23" ry="0.17"/>
+                <ellipse cx="0.68" cy="-0.3" rx="0.12" ry="0.1"/>
+                <ellipse cx="0.55" cy="0.16" rx="0.11" ry="0.17"/>
+                <ellipse cx="-0.16" cy="0.34" rx="0.21" ry="0.14"/>
+                <ellipse cx="-0.05" cy="-0.73" rx="0.45" ry="0.06"/>
+              </g>
+              <!-- craters: Copernicus, Kepler, Tycho with its bright rays, and a few small ones -->
+              <g fill="none" stroke="#f6f1e6" stroke-opacity="0.45" stroke-width="0.012">
+                <circle cx="-0.3" cy="-0.1" r="0.05"/><circle cx="-0.52" cy="-0.12" r="0.03"/><circle cx="0.3" cy="0.5" r="0.06"/>
+                <circle cx="0.62" cy="0.55" r="0.05"/><circle cx="-0.4" cy="0.62" r="0.045"/><circle cx="0.05" cy="0.15" r="0.035"/>
+              </g>
+              <g stroke="#fbf8f0" stroke-opacity="0.18" stroke-width="0.012">
+                <line x1="-0.12" y1="0.72" x2="-0.5" y2="0.25"/><line x1="-0.12" y1="0.72" x2="0.25" y2="0.3"/>
+                <line x1="-0.12" y1="0.72" x2="-0.12" y2="0.2"/><line x1="-0.12" y1="0.72" x2="0.35" y2="0.82"/>
+              </g>
+              <circle cx="-0.12" cy="0.72" r="0.04" fill="#fffaf0" opacity="0.85"/>
+              <circle r="1" fill="url(#night)"/>
+            </g>
+            <!-- our base: Sea of Tranquility, near the Apollo 11 landing site -->
+            <circle class="base" cx="0.3" cy="-0.1" r="0.035" fill="#8ff3ff" style="filter: drop-shadow(0 0 0.06px #8ff3ff)"/>
+          </svg></div>
+          <span>Moon base</span>
+        </div>
+        <div class="wire"></div>
+        <div class="pulse" id="pulse"></div>
+        <div class="body earth">
+          <div class="disc"><svg viewBox="-1 -1 2 2" aria-hidden="true">
+            <defs>
+              <radialGradient id="eOcean" cx="-0.4" cy="-0.4" r="1.6" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#7cc4ff"/><stop offset="0.4" stop-color="#2f7ae0"/><stop offset="0.8" stop-color="#174ea6"/><stop offset="1" stop-color="#0b2a66"/>
+              </radialGradient>
+              <radialGradient id="eGlow" r="1.25" gradientUnits="userSpaceOnUse">
+                <stop offset="0.76" stop-color="#7cc0ff" stop-opacity="0.75"/><stop offset="0.84" stop-color="#5aa6ff" stop-opacity="0.3"/><stop offset="1" stop-color="#5aa6ff" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="eHaze" r="1" gradientUnits="userSpaceOnUse">
+                <stop offset="0.82" stop-color="#bfe3ff" stop-opacity="0"/><stop offset="1" stop-color="#bfe3ff" stop-opacity="0.55"/>
+              </radialGradient>
+              <filter id="eSoft" x="-0.2" y="-0.2" width="1.4" height="1.4"><feGaussianBlur stdDeviation="0.012"/></filter>
+              <filter id="eCloud" x="-0.3" y="-0.3" width="1.6" height="1.6"><feGaussianBlur stdDeviation="0.03"/></filter>
+              <clipPath id="eClip"><circle r="1"/></clipPath>
+            </defs>
+            <g>
+              <circle r="1" fill="url(#eOcean)"/>
+              <!-- the Atlantic side, same shapes as the Earth in the game's sky -->
+              <g filter="url(#eSoft)">
+                <polygon fill="#4f9f5c" points="-0.82,-0.3 -0.7,-0.52 -0.5,-0.66 -0.3,-0.6 -0.28,-0.42 -0.42,-0.3 -0.5,-0.12 -0.66,-0.14"/>
+                <polygon fill="#3f9a5a" points="-0.74,0.02 -0.52,-0.04 -0.36,0.14 -0.38,0.36 -0.5,0.6 -0.58,0.74 -0.64,0.5 -0.7,0.26"/>
+                <polygon fill="#5bab6a" points="0,-0.5 0.06,-0.68 0.2,-0.78 0.4,-0.74 0.52,-0.58 0.4,-0.46 0.2,-0.44"/>
+                <polygon fill="#4aa565" points="-0.08,-0.32 0.08,-0.38 0.3,-0.38 0.46,-0.2 0.54,0 0.4,0.1 0.36,0.36 0.24,0.6 0.12,0.58 0.08,0.28 -0.1,0.12 -0.2,-0.1"/>
+                <polygon fill="#d8c382" points="-0.04,-0.28 0.1,-0.33 0.28,-0.32 0.4,-0.18 0.3,-0.08 0.08,-0.06 -0.1,-0.12"/>
+                <polygon fill="#8a7a4e" opacity="0.5" points="0.18,-0.3 0.3,-0.3 0.36,-0.2 0.26,-0.14 0.16,-0.18"/>
+              </g>
+              <ellipse cx="0" cy="-0.92" rx="0.32" ry="0.1" fill="#f4f9ff" opacity="0.95"/>
+              <ellipse cx="0.05" cy="0.94" rx="0.24" ry="0.08" fill="#f4f9ff" opacity="0.9"/>
+              <g class="clouds" fill="#f2f8ff" opacity="0.82" filter="url(#eCloud)">
+                <ellipse cx="-0.3" cy="-0.3" rx="0.31" ry="0.06"/><ellipse cx="-0.12" cy="0.34" rx="0.25" ry="0.05"/>
+                <ellipse cx="0.3" cy="-0.56" rx="0.2" ry="0.045"/><ellipse cx="0.42" cy="0.26" rx="0.18" ry="0.045"/>
+                <ellipse cx="-0.52" cy="0.12" rx="0.15" ry="0.04"/><ellipse cx="0.1" cy="0.02" rx="0.14" ry="0.035"/>
+                <ellipse cx="0.66" cy="-0.1" rx="0.12" ry="0.04"/><ellipse cx="-0.2" cy="0.66" rx="0.2" ry="0.04"/>
+              </g>
+              <circle r="1" fill="url(#eHaze)"/>
+              <circle r="1" fill="url(#night)"/>
+            </g>
+            <circle r="1" fill="none" stroke="#b8deff" stroke-opacity="0.45" stroke-width="0.015"/>
+          </svg></div>
+          <span>Mission Control</span>
+        </div>
+      </div>
+      <p class="sigtime" id="sigT">0.0<small>s</small></p>
+      <p class="sigstate" id="sigS">&nbsp;</p>
+      <div class="answer later" id="answer">
+        <p>“Send the crew to the shelter and set the shield to Mid.”</p>
+        <p class="why"><b>Why?</b> Radiation near the Moon is 278× normal right now.</p>
+      </div>
+    </section>
+
+    <!-- 6 safe failure -->
+    <section class="slide s-apollo" data-run="apollo">
+      <span class="pillar wide">Wide walls</span>
+      <h2>So much to build, fix and explore.</h2>
+      <div class="game"><iframe id="apollo" title="The air filter mini-game" tabindex="-1"></iframe><div class="shield"></div></div>
+      <div class="story-card">
+        <p class="tag">This really happened.</p>
+        <p class="q">Apollo 13, 1970: the square air filters did not fit the round holes.</p>
+        <p class="so">Kids build the same fix from bags, cardboard and tape.</p>
+        <div class="walls"><span>Build your own Moon base</span><span>5 repairs, each a true story</span><span>Air and water in a closed loop</span><span>The same storm on Mars</span></div>
+      </div>
+    </section>
+
+    <!-- 6 high ceiling -->
+    <section class="slide s-deep" data-run="deep">
+      <span class="pillar high">High ceiling</span>
+      <h2>Every number is a door.</h2>
+      <div class="shot a"><div class="phone"><img src="media/storm-day.png" alt="The simple game screen: radiation 278 times normal"></div></div>
+      <p class="tap later" data-at="700">one tap<svg width="120" height="30" viewBox="0 0 120 30" aria-hidden="true"><path d="M4 15h104M94 4l14 11-14 11" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></p>
+      <div class="shot b"><div class="phone later" data-at="1100"><img src="media/data-sheet.png" alt="The data sheet: the real NASA measurement, units and instrument"></div></div>
+      <div class="deep">
+        <p class="later" data-at="1900"><b>The real measurement</b>1528 µGy/h, from LRO’s CRaTER instrument</p>
+        <p class="later" data-at="2600"><b>Three stars are hard</b>Just following Mission Control gets two on the big storms</p>
+      </div>
+    </section>
+
+    <!-- 7 close -->
+    <section class="slide s-close" data-run="close">
+      <h2>One game for every kid.</h2>
+      <div class="three">
+        <p class="later" data-at="300"><span class="pillar low">Low floor</span><b>A 7-year-old can’t lose.</b></p>
+        <p class="later" data-at="800"><span class="pillar wide">Wide walls</span><b>Real NASA storms, true repairs, your own base.</b></p>
+        <p class="later" data-at="1300"><span class="pillar high">High ceiling</span><b>A 12-year-old can’t run out of things to learn.</b></p>
+      </div>
+      <!-- Kid quote goes here once we have it: remove "hidden" and fill in. -->
+      <p class="quote" hidden>“…” (kid, 9)</p>
+      <p class="closing later" data-at="1900">Free, on any phone, no login. <span>biobirne.github.io/SpaceApp26-Alpha-Centauri-First</span></p>
+      <p class="teamline">Team Alpha Centauri First: Florian Musil, Cornelius Baumann, Stephan Schuhmertl</p>
+    </section>
+
+    <div class="count" id="count"></div>
+  </main>
+
+  <script type="module">
+    import { createSfx } from '../src/audio/sfx.js';
+    import { CONFIG } from '../src/rules/config.js';
+
+    const stage = document.getElementById('stage');
+    const slides = [...document.querySelectorAll('.slide')];
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sfx = createSfx({ enabled: true });
+    let cur = -1;
+    let runId = 0; // bumps on every slide change, so a demo that is still running stops
+
+    // Centre the 1920×1080 stage and scale it to fit any screen (laptop, projector, mirrored display).
+    const fit = () => { stage.style.transform = `translate(-50%, -50%) scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`; };
+    addEventListener('resize', fit); fit();
+
+    /** Waits; resolves false if the presenter already moved on. */
+    const wait = (ms, id) => new Promise((r) => setTimeout(() => r(id === runId), reduced ? Math.min(ms, 50) : ms));
+    const live = (id) => id === runId;
+    /** Shows each `.later` element of a slide after its data-at delay (ms). */
+    const stagger = (s, id) => s.querySelectorAll('.later').forEach((el) => {
+      wait(+el.dataset.at || 0, id).then((ok) => ok && el.classList.add('in'));
+    });
+
+    // --- real data from the game's own storm file
+    const storm = await (await fetch('../data/storms/may2024.json')).json();
+    const R = storm.radiation;
+    const moon = R.moonOrbit;
+    const chart = document.getElementById('chart');
+    chart.innerHTML = moon.daily.map((d) => `<i class="${d[0] === moon.peakDay ? 'peak' : ''}" data-h="${Math.max(1.5, d[1] / moon.peak * 100)}"></i>`).join('');
+    const fmtDay = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+    const times = (x) => (x < 10 ? x.toFixed(1) : Math.round(x)) + '×';
+    const sw = storm.spaceWeather;
+    const xClass = (c) => (c[0] === 'X' ? parseFloat(c.slice(1)) : -1);
+    const topFlare = sw.flares.reduce((a, f) => (xClass(f.class) > xClass(a.class) ? f : a));
+    // The NASA sources, each with the number it gives the game. The same storm, measured in three places.
+    document.getElementById('nasa').innerHTML = [
+      ['var(--dose)', times(moon.peakTimesNormal), 'LRO CRaTER', 'Moon'],
+      ['var(--mars)', times(R.marsSurface.peakTimesNormal), 'Curiosity RAD', 'Mars'],
+      ['var(--earth)', times(R.iss.peakTimesNormal), 'ISS DosTel', 'Space station'],
+      ['var(--power)', topFlare.class, 'DONKI', `Biggest of ${sw.flares.length} flares`],
+    ].map(([c, n, t, s], i) => `<p class="later" data-at="${2300 + i * 450}" style="--c:${c}"><b>${n}</b><span>${t}</span><small>${s}</small></p>`).join('');
+
+    const hookN = document.getElementById('hookN');
+    const pulse = document.getElementById('pulse');
+    const sigT = document.getElementById('sigT');
+    const sigS = document.getElementById('sigS');
+    const apollo = document.getElementById('apollo');
+    const dsky = document.getElementById('dsky');
+    const code = document.getElementById('code');
+    const dskyCap = document.getElementById('dskyCap');
+    const RT = CONFIG.callEarth.roundTripSeconds; // the game's own number: 2.6 s
+
+    const frame = (fn) => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => { fn(); r(); })));
+
+    // Each demo runs by itself when its slide opens. One click always goes to the next slide.
+    const runs = {
+      async sim(s, id) {
+        dsky.className = 'dsky';
+        code.innerHTML = '&nbsp;';
+        dskyCap.innerHTML = '&nbsp;';
+        stagger(s, id);
+        if (!await wait(900, id)) return;
+        dsky.classList.add('alarm'); code.textContent = '1201';
+        dskyCap.innerHTML = '<b>Simulator, July 1969:</b> a trainer sets off an alarm.';
+        sfx.warn?.();
+        if (!await wait(2000, id)) return;
+        dskyCap.innerHTML = '<b>Simulator:</b> “Abort!” <span style="color:var(--alert)">Wrong call.</span>';
+        if (!await wait(1700, id)) return;
+        code.textContent = '1202';
+        dskyCap.innerHTML = '<b>Real landing:</b> the alarm again.';
+        sfx.warn?.();
+        if (!await wait(2200, id)) return;
+        dsky.classList.add('go');
+        dskyCap.innerHTML = '<b>Mission Control:</b> <span style="color:var(--dsky-green)">“We’re go on that alarm.”</span>';
+      },
+      async hook(s, id) {
+        hookN.textContent = '1×';
+        s.querySelectorAll('.chart i').forEach((i) => { i.style.height = '0'; });
+        stagger(s, id);
+        await frame(() => s.querySelectorAll('.chart i').forEach((i) => { i.style.height = `${i.dataset.h}%`; }));
+        const to = Math.round(moon.peakTimesNormal), t0 = performance.now(), ms = reduced ? 1 : 1700;
+        await new Promise((done) => {
+          const f = (now) => {
+            if (!live(id)) return done();
+            const k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+            hookN.textContent = `${Math.max(1, Math.round(1 + (to - 1) * e))}×`;
+            if (k < 1) requestAnimationFrame(f); else done();
+          };
+          requestAnimationFrame(f);
+        });
+      },
+      gap: stagger,
+      deep: stagger,
+      close: stagger,
+      async call(s, id) {
+        pulse.style.opacity = '0';
+        sigT.innerHTML = '0.0<small>s</small>';
+        sigS.innerHTML = '&nbsp;';
+        if (!await wait(900, id)) return;
+        const wire = s.querySelector('.wire');
+        const left = wire.offsetLeft, len = wire.offsetWidth;
+        const t0 = performance.now();
+        await new Promise((done) => {
+          const f = (now) => {
+            if (!live(id)) return done();
+            const sec = Math.min(RT, (now - t0) / 1000), k = sec / RT;
+            const pos = k < 0.5 ? k * 2 : 2 - k * 2;
+            const c = k < 0.5 ? 'var(--air)' : 'var(--power)';
+            pulse.style.opacity = '1';
+            pulse.style.left = `${left + pos * len}px`;
+            pulse.style.background = c;
+            pulse.style.boxShadow = `0 0 40px 10px ${c}`;
+            sigT.innerHTML = `${sec.toFixed(1)}<small>s</small>`;
+            sigS.textContent = k < 0.5 ? 'Radio signal on its way to Earth…' : 'Answer coming back…';
+            if (k < 1) requestAnimationFrame(f); else done();
+          };
+          requestAnimationFrame(f);
+        });
+        if (!live(id)) return;
+        pulse.style.opacity = '0';
+        sigS.textContent = 'Mission Control answers:';
+        sfx.radio?.();
+        s.querySelector('#answer').classList.add('in');
+      },
+      async apollo(s, id) {
+        s.classList.remove('story');
+        const loaded = new Promise((r) => apollo.addEventListener('load', r, { once: true }));
+        apollo.src = `../minigame.html?game=filter&t=${Date.now()}`;
+        await loaded;
+        const d = apollo.contentDocument;
+        const tap = (sel) => d.querySelector(sel)?.click();
+        if (!await wait(1200, id)) return;
+        tap('.ft-old');
+        for (const part of ['bag', 'card', 'tape']) {
+          if (!await wait(700, id)) return;
+          tap(`.ft-part[data-id="${part}"]`);
+        }
+        if (!await wait(800, id)) return;
+        tap('.ft-new');
+        if (!await wait(1400, id)) return;
+        s.classList.add('story');
+      },
+    };
+
+    function show(n) {
+      n = Math.max(0, Math.min(slides.length - 1, n));
+      if (n === cur) return;
+      const back = n < cur;
+      runId++;
+      slides.forEach((s, i) => {
+        s.classList.toggle('on', i === n);
+        s.classList.toggle('gone', i !== n);
+        s.classList.toggle('back', back);
+      });
+      cur = n;
+      // The camera drifts through space: near stars move more than far ones, and the Moon rises at the end.
+      document.getElementById('stars').style.transform = `translateX(${-n * 60}px)`;
+      document.getElementById('stars2').style.transform = `translateX(${-n * 25}px)`;
+      document.getElementById('horizon').style.transform = `translateY(${n === slides.length - 1 ? -120 : n * 8}px)`;
+      const s = slides[n];
+      s.querySelectorAll('.later').forEach((el) => el.classList.remove('in'));
+      runs[s.dataset.run]?.(s, runId);
+      document.getElementById('count').textContent = `${n + 1} / ${slides.length}`;
+      history.replaceState(null, '', `#${n + 1}`);
+    }
+    const next = () => show(cur + 1);
+    const prev = () => show(cur - 1);
+    const replay = () => { const n = cur; cur = -1; show(n); };
+
+    // The game in the frame may grab the focus. Keys pressed there still drive the deck.
+    function onKey(e) {
+      if (['ArrowRight', 'PageDown', ' ', 'Enter', 'ArrowDown'].includes(e.key)) { e.preventDefault(); next(); }
+      else if (['ArrowLeft', 'PageUp', 'ArrowUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+      else if (e.key === 'f') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+      else if (e.key === 'r') replay();
+      else if (e.key === 'Home') show(0);
+    }
+    addEventListener('keydown', onKey);
+    apollo.addEventListener('load', () => apollo.contentWindow.addEventListener('keydown', (e) => { e.preventDefault(); onKey(e); }, true));
+    addEventListener('blur', () => setTimeout(() => window.focus(), 0));
+    // Left click: next. Right click: back.
+    addEventListener('mousedown', (e) => { if (e.button === 0) next(); else if (e.button === 2) prev(); });
+    addEventListener('contextmenu', (e) => e.preventDefault());
+
+    show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+  </script>
+</body>
+</html>
