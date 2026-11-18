@@ -97,6 +97,16 @@ python tools/build_storm_library.py   # rebuilds storms/*.json (standard library
 - Radiation: NASA Open Science Data Repository, RadLab, <https://visualization.osdr.nasa.gov/radlab/>. Instruments: DosTel (DLR) on the ISS, BioSentinel BPD (NASA Ames), LRO CRaTER (NASA/Boston University), Curiosity MSL-RAD (NASA/JPL, SwRI).
 - Mars imagery (if used): NASA Mars Trek, <https://trek.nasa.gov/mars/>, Viking MDIM 2.1 mosaic (NASA/USGS).
 
+CCMC asks for this acknowledgement, and this is the one we mean:
+
+> We acknowledge the Community Coordinated Modeling Center (CCMC) at Goddard Space Flight Center for the use of the DONKI, <https://ccmc.gsfc.nasa.gov/tools/DONKI/>.
+
+Terms that come with the data:
+
+- **DONKI has no open license.** CCMC's disclaimer applies ("prototyping quality and in research context"; use does not imply NASA endorsement or grant a license). It travels with the data; the full quotes are in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md#space-weather--donki-nasa-ccmc).
+- **OSDR data carry a per-study license** (the studies behind the storm library show `CC0-1.0` or no license field) and OSDR asks for a bibliographic citation. The exact `queryUrl` in each storm file is what to cite from.
+- NASA has not reviewed, approved or endorsed this project, and no NASA logo or insignia is used. The complete list of notices is in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+
 ## SI note
 
 The numbers in `/data` are NASA's (DONKI and OSDR RadLab). SI tools (Claude Code) downloaded the snapshots, wrote the build script and helped write the kid-facing storm texts. JSON files cannot hold comments, so this is recorded in `si-manifest.json` and `SI_USAGE.md`. See `SI_DISCLOSURE.md`.
