@@ -46,6 +46,7 @@ SI_USAGE.md        log of SI tool usage (required for submission)
 SI_DISCLOSURE.md   how SI use is labelled (watermarks, text, metadata)
 si-manifest.json   machine-readable SI metadata for files
 CREDITS.md         asset + data sources and licenses
+THIRD_PARTY_NOTICES.md  third-party license texts, notices and NASA data terms
 LICENSE            MIT
 ```
 

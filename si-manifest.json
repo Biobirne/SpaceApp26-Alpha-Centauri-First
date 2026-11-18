@@ -1,6 +1,6 @@
 {
   "about": "Machine-readable record of Super Intelligence (SI) tool use in this repo, as the NASA Space Apps submission guide asks. Human-readable log: SI_USAGE.md. Rules and labels: SI_DISCLOSURE.md.",
-  "updated": "2026-11-15",
+  "updated": "2026-11-18",
   "tools": {
     "claude-code": { "name": "Claude Code", "model": "Claude Opus 5.5 and Claude Fable 5.2", "maker": "Anthropic", "kind": "large language model coding agent" },
     "gemini": { "name": "Gemini", "maker": "Google", "kind": "large language model research assistant" },
@@ -37,6 +37,7 @@
     { "path": "GAME_DESIGN.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Written down from the team's discussion. The game idea is the team's." },
     { "path": "README.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "CREDITS.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
+    { "path": "THIRD_PARTY_NOTICES.md", "kind": "docs", "si": "assisted", "tool": "opencode", "notes": "Licensing pass: collects third-party license texts, the NASA data terms and the non-affiliation disclaimer." },
     { "path": "SI_USAGE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "SI_DISCLOSURE.md", "kind": "docs", "si": "assisted", "tool": "claude-code" },
     { "path": "FEEDBACK.md", "kind": "docs", "si": "assisted", "tool": "claude-code", "notes": "Feedback from mentors and the team, with our decisions; written down with SI help. The Automatic SI review section is an SI playtest by Claude Code." },

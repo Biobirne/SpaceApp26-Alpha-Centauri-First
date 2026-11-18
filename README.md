@@ -58,7 +58,18 @@ npm test
 | [data/README.md](data/README.md) | The NASA data, how the storm library was built, and the wording rules (archived, not live) |
 | [assets/art/README.md](assets/art/README.md) | How team art can replace the drawings made in code |
 | [CREDITS.md](CREDITS.md) | Every data source, font and asset, with its license |
+| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | Phaser, the Lexend font, the development tooling and NASA data terms, with the required notices |
 | [SI_USAGE.md](SI_USAGE.md), [SI_DISCLOSURE.md](SI_DISCLOSURE.md), [si-manifest.json](si-manifest.json) | Where SI tools (Super Intelligence, the Space Apps term) were used, and how it is labelled |
 
 ## License
 MIT, see [LICENSE](LICENSE). The NASA data stays NASA's; see [CREDITS.md](CREDITS.md).
+
+Third-party components keep their own terms: Phaser (MIT), the Lexend font
+(SIL OFL 1.1), the agent-skill collections used during development
+(Apache-2.0), and the NASA datasets. Their notices, license texts and the
+NASA data terms are collected in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+This is a Space Apps 2026 project. It is not affiliated with, endorsed by or
+reviewed by NASA, and it uses no NASA logos or insignia. The working title has
+no connection to the 2002 game "MoonBase Commander" or its publisher; see
+[Trademarks](THIRD_PARTY_NOTICES.md#trademarks).
